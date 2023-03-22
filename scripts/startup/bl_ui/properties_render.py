@@ -138,6 +138,8 @@ class RENDER_PT_eevee_ambient_occlusion(RenderButtonsPanel, Panel):
         col.prop(props, "gtao_distance")
         col.prop(props, "gtao_factor")
         col.prop(props, "gtao_quality")
+
+        col.use_property_split = False
         col.prop(props, "use_gtao_bent_normals")
         col.prop(props, "use_gtao_bounce")
 
@@ -250,12 +252,24 @@ class RENDER_PT_eevee_depth_of_field(RenderButtonsPanel, Panel):
         col.prop(props, "bokeh_threshold")
         col.prop(props, "bokeh_neighbor_max")
         col.prop(props, "bokeh_denoise_fac")
+        col.use_property_split = False
         col.prop(props, "use_bokeh_high_quality_slight_defocus")
-        col.prop(props, "use_bokeh_jittered")
 
-        col = layout.column()
-        col.active = props.use_bokeh_jittered
-        col.prop(props, "bokeh_overblur")
+        split = col.split(factor=.4)
+        split.use_property_split=False
+        split.prop(props, "use_bokeh_jittered")
+
+        split.alignment = 'LEFT'
+        if props.use_bokeh_jittered:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
+
+        if props.use_bokeh_jittered:
+            row = col.row()
+            row.use_property_split = True
+            row.separator()
+            row.prop(props, "bokeh_overblur")
 
 
 class RENDER_PT_eevee_next_depth_of_field(RenderButtonsPanel, Panel):
@@ -340,6 +354,10 @@ class RENDER_PT_eevee_volumetric(RenderButtonsPanel, Panel):
         col.prop(props, "volumetric_samples")
         col.prop(props, "volumetric_sample_distribution", text="Distribution")
 
+        col = layout.column()
+        col.use_property_split = False
+        col.prop(props, "use_volumetric_blending", text = "Viewport Volumetric Blending") # bfa - volumetric rendering patch from LordLoki
+
 
 class RENDER_PT_eevee_volumetric_lighting(RenderButtonsPanel, Panel):
     bl_label = "Volumetric Lighting"
@@ -420,7 +438,7 @@ class RENDER_PT_eevee_screen_space_reflections(RenderButtonsPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
 
         scene = context.scene
         props = scene.eevee
@@ -429,6 +447,7 @@ class RENDER_PT_eevee_screen_space_reflections(RenderButtonsPanel, Panel):
         col.active = props.use_ssr
         col.prop(props, "use_ssr_refraction", text="Refraction")
         col.prop(props, "use_ssr_halfres")
+        col.use_property_split = True
         col.prop(props, "ssr_quality")
         col.prop(props, "ssr_max_roughness")
         col.prop(props, "ssr_thickness")
@@ -455,9 +474,10 @@ class RENDER_PT_eevee_shadows(RenderButtonsPanel, Panel):
         col = layout.column()
         col.prop(props, "shadow_cube_size", text="Cube Size")
         col.prop(props, "shadow_cascade_size", text="Cascade Size")
+        col.prop(props, "light_threshold")
+        col.use_property_split = False
         col.prop(props, "use_shadow_high_bitdepth")
         col.prop(props, "use_soft_shadows")
-        col.prop(props, "light_threshold")
 
 
 class RENDER_PT_eevee_next_shadows(RenderButtonsPanel, Panel):
@@ -507,6 +527,7 @@ class RENDER_PT_eevee_sampling(RenderButtonsPanel, Panel):
         col.prop(props, "taa_samples", text="Viewport")
 
         col = layout.column()
+        col.use_property_split = False
         col.prop(props, "use_taa_reprojection")
 
 
@@ -560,8 +581,10 @@ class RENDER_PT_eevee_indirect_lighting(RenderButtonsPanel, Panel):
         if cache_info:
             col.label(text=cache_info)
 
+        col.use_property_split = False
         col.prop(props, "gi_auto_bake")
 
+        col.use_property_split = True
         col.prop(props, "gi_diffuse_bounces")
         col.prop(props, "gi_cubemap_resolution")
         col.prop(props, "gi_visibility_resolution", text="Diffuse Occlusion")
@@ -615,15 +638,38 @@ class RENDER_PT_eevee_film(RenderButtonsPanel, Panel):
 
         col = layout.column()
         col.prop(rd, "filter_size")
-        col.prop(rd, "film_transparent", text="Transparent")
 
-        col = layout.column(align=False, heading="Overscan")
-        row = col.row(align=True)
-        sub = row.row(align=True)
-        sub.prop(props, "use_overscan", text="")
-        sub = sub.row(align=True)
-        sub.active = props.use_overscan
-        sub.prop(props, "overscan_size", text="")
+        col = layout.column()
+        split = col.split(factor = 0.35)
+        row = split.row()
+        row.use_property_split = False
+        row.prop(props, "use_overscan", text="Overscan")
+        row = split.row(align = True)
+        if props.use_overscan:
+            row.use_property_split = False
+            row.prop(props, "overscan_size", text="")
+        else:
+            row.label(icon='DISCLOSURE_TRI_RIGHT')
+
+class RENDER_PT_eevee_next_film(RenderButtonsPanel, Panel):
+    bl_label = "Film"
+    bl_options = {'DEFAULT_CLOSED'}
+    COMPAT_ENGINES = {'BLENDER_EEVEE_NEXT'}
+
+    @classmethod
+    def poll(cls, context):
+        return (context.engine in cls.COMPAT_ENGINES)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+
+        scene = context.scene
+        rd = scene.render
+        props = scene.eevee
+
+        col = layout.column()
+        col.prop(rd, "filter_size")
 
 
 class RENDER_PT_eevee_next_film(RenderButtonsPanel, Panel):
@@ -686,11 +732,12 @@ class RENDER_PT_eevee_performance(RenderButtonsPanel, Panel):
         scene = context.scene
         rd = scene.render
 
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False  # No animation.
 
-        layout.prop(rd, "use_high_quality_normals")
-
+        row = layout.row()
+        row.prop(rd, "use_high_quality_normals")
+        row.prop_decorator(rd, "use_high_quality_normals")
 
 class RENDER_PT_gpencil(RenderButtonsPanel, Panel):
     bl_label = "Grease Pencil"
@@ -736,18 +783,18 @@ class RENDER_PT_opengl_sampling(RenderButtonsPanel, Panel):
         col.prop(props, "viewport_aa", text="Viewport")
 
 
-class RENDER_PT_opengl_film(RenderButtonsPanel, Panel):
-    bl_label = "Film"
-    bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {'BLENDER_WORKBENCH', 'BLENDER_WORKBENCH_NEXT'}
+#class RENDER_PT_opengl_film(RenderButtonsPanel, Panel):
+#    bl_label = "Film"
+#    bl_options = {'DEFAULT_CLOSED'}
+#    COMPAT_ENGINES = {'BLENDER_WORKBENCH', 'BLENDER_WORKBENCH_NEXT'}
 
-    def draw(self, context):
-        layout = self.layout
-        layout.use_property_split = True
-        layout.use_property_decorate = False  # No animation.
+#    def draw(self, context):
+#        layout = self.layout
+#        layout.use_property_split = True
+#        layout.use_property_decorate = False  # No animation.
 
-        rd = context.scene.render
-        layout.prop(rd, "film_transparent", text="Transparent")
+#        rd = context.scene.render
+#        layout.prop(rd, "film_transparent", text="Transparent")
 
 
 class RENDER_PT_opengl_lighting(RenderButtonsPanel, Panel):
@@ -914,7 +961,7 @@ classes = (
     RENDER_PT_opengl_lighting,
     RENDER_PT_opengl_color,
     RENDER_PT_opengl_options,
-    RENDER_PT_opengl_film,
+    #RENDER_PT_opengl_film,
     RENDER_PT_color_management,
     RENDER_PT_color_management_curves,
     RENDER_PT_simplify,

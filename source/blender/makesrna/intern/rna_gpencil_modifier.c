@@ -72,17 +72,17 @@ const EnumPropertyItem rna_enum_object_greasepencil_modifier_type_items[] = {
      "Generate dot-dash styled strokes"},
     {eGpencilModifierType_Envelope,
      "GP_ENVELOPE",
-     ICON_MOD_ENVELOPE,
+     ICON_ENVELOPE_MODIFIER,
      "Envelope",
      "Create an envelope shape"},
     {eGpencilModifierType_Length,
      "GP_LENGTH",
-     ICON_MOD_LENGTH,
+     ICON_SPLINE_LENGTH,
      "Length",
      "Extend or shrink strokes"},
     {eGpencilModifierType_Lineart,
      "GP_LINEART",
-     ICON_MOD_LINEART,
+     ICON_LINEART_OBJECT,
      "Line Art",
      "Generate line art strokes from selected source"},
     {eGpencilModifierType_Mirror,
@@ -97,9 +97,9 @@ const EnumPropertyItem rna_enum_object_greasepencil_modifier_type_items[] = {
      "Produce multiple strokes along one stroke"},
     {eGpencilModifierType_Outline,
      "GP_OUTLINE",
-     ICON_MOD_OUTLINE,
+     ICON_OUTLINE,
      "Outline",
-     "Convert stroke to perimeter"},
+     "Requires a active camera in the scene\nConvert stroke to perimeter"},
     {eGpencilModifierType_Simplify,
      "GP_SIMPLIFY",
      ICON_MOD_SIMPLIFY,
@@ -2203,7 +2203,7 @@ static void rna_def_modifier_gpenciloutline(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "OutlineGpencilModifier", "GpencilModifier");
   RNA_def_struct_ui_text(srna, "Outline Modifier", "Outline of Strokes modifier from camera view");
   RNA_def_struct_sdna(srna, "OutlineGpencilModifierData");
-  RNA_def_struct_ui_icon(srna, ICON_MOD_OUTLINE);
+  RNA_def_struct_ui_icon(srna, ICON_OUTLINE);
 
   RNA_define_lib_overridable(true);
 
@@ -2447,17 +2447,17 @@ static void rna_def_modifier_gpencilbuild(BlenderRNA *brna)
   static EnumPropertyItem prop_gpencil_build_mode_items[] = {
       {GP_BUILD_MODE_SEQUENTIAL,
        "SEQUENTIAL",
-       0,
+       ICON_PARTICLE_POINT,
        "Sequential",
        "Strokes appear/disappear one after the other, but only a single one changes at a time"},
       {GP_BUILD_MODE_CONCURRENT,
        "CONCURRENT",
-       0,
+       ICON_PARTICLE_TIP,
        "Concurrent",
        "Multiple strokes appear/disappear at once"},
       {GP_BUILD_MODE_ADDITIVE,
        "ADDITIVE",
-       0,
+       ICON_PARTICLE_PATH,
        "Additive",
        "Builds only new strokes (assuming 'additive' drawing)"},
       {0, NULL, 0, NULL, NULL},
@@ -3581,7 +3581,7 @@ static void rna_def_modifier_gpencillineart(BlenderRNA *brna)
   RNA_def_struct_ui_text(
       srna, "Line Art Modifier", "Generate line art strokes from selected source");
   RNA_def_struct_sdna(srna, "LineartGpencilModifierData");
-  RNA_def_struct_ui_icon(srna, ICON_MOD_LINEART);
+  RNA_def_struct_ui_icon(srna, ICON_LINEART_OBJECT);
 
   RNA_define_lib_overridable(true);
 
@@ -4022,7 +4022,7 @@ static void rna_def_modifier_gpencillength(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "LengthGpencilModifier", "GpencilModifier");
   RNA_def_struct_ui_text(srna, "Length Modifier", "Stretch or shrink strokes");
   RNA_def_struct_sdna(srna, "LengthGpencilModifierData");
-  RNA_def_struct_ui_icon(srna, ICON_MOD_LENGTH);
+  RNA_def_struct_ui_icon(srna, ICON_SPLINE_LENGTH);
 
   RNA_define_lib_overridable(true);
 
@@ -4519,7 +4519,7 @@ static void rna_def_modifier_gpencilenvelope(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "EnvelopeGpencilModifier", "GpencilModifier");
   RNA_def_struct_ui_text(srna, "Envelope Modifier", "Envelope stroke effect modifier");
   RNA_def_struct_sdna(srna, "EnvelopeGpencilModifierData");
-  RNA_def_struct_ui_icon(srna, ICON_MOD_ENVELOPE);
+  RNA_def_struct_ui_icon(srna, ICON_ENVELOPE_MODIFIER);
 
   RNA_define_lib_overridable(true);
 

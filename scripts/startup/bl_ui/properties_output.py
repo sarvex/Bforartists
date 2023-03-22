@@ -105,19 +105,34 @@ class RENDER_PT_format(RenderOutputButtonsPanel, Panel):
         rd = context.scene.render
 
         col = layout.column(align=True)
-        col.prop(rd, "resolution_x", text="Resolution X")
+        col.label(text = "Resolution")
+        row = col.row()
+        row.separator()
+        col = row.column(align=True)
+        col.prop(rd, "resolution_x", text="X")
         col.prop(rd, "resolution_y", text="Y")
-        col.prop(rd, "resolution_percentage", text="%")
+        col.prop(rd, "resolution_percentage", text="Percent %")
 
         col = layout.column(align=True)
-        col.prop(rd, "pixel_aspect_x", text="Aspect X")
+        col.label(text = "Aspect")
+        row = col.row()
+        row.separator()
+        col = row.column(align=True)
+        col.prop(rd, "pixel_aspect_x", text="X")
         col.prop(rd, "pixel_aspect_y", text="Y")
 
-        col = layout.column(align=True)
-        col.prop(rd, "use_border")
-        sub = col.column(align=True)
-        sub.active = rd.use_border
-        sub.prop(rd, "use_crop_to_border")
+
+        split = layout.split(factor=.4)
+        split.use_property_split=False
+        split.prop(rd, "use_border")
+
+        split.alignment = 'LEFT'
+        if rd.use_border:
+            split.use_property_split = False
+            split.prop(rd, "use_crop_to_border")
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
+
 
         col = layout.column(heading="Frame Rate")
         self.draw_framerate(col, rd)
@@ -140,7 +155,11 @@ class RENDER_PT_frame_range(RenderOutputButtonsPanel, Panel):
         scene = context.scene
 
         col = layout.column(align=True)
-        col.prop(scene, "frame_start", text="Frame Start")
+        col.label(text = "Frame")
+        row = col.row()
+        row.separator()
+        col = row.column(align=True)
+        col.prop(scene, "frame_start", text="Start")
         col.prop(scene, "frame_end", text="End")
         col.prop(scene, "frame_step", text="Step")
 
@@ -184,9 +203,15 @@ class RENDER_PT_post_processing(RenderOutputButtonsPanel, Panel):
 
         rd = context.scene.render
 
-        col = layout.column(heading="Pipeline")
-        col.prop(rd, "use_compositing")
-        col.prop(rd, "use_sequencer")
+        col = layout.column(align = True)
+        col.label(text = "Pipeline")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_compositing")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_sequencer")
 
         layout.prop(rd, "dither_intensity", text="Dither", slider=True)
 
@@ -203,7 +228,7 @@ class RENDER_PT_stamp(RenderOutputButtonsPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False  # No animation.
 
         rd = context.scene.render
@@ -211,22 +236,49 @@ class RENDER_PT_stamp(RenderOutputButtonsPanel, Panel):
         if rd.use_sequencer:
             layout.prop(rd, "metadata_input")
 
-        col = layout.column(heading="Include")
-        col.prop(rd, "use_stamp_date", text="Date")
-        col.prop(rd, "use_stamp_time", text="Time")
-        col.prop(rd, "use_stamp_render_time", text="Render Time")
-        col.prop(rd, "use_stamp_frame", text="Frame")
-        col.prop(rd, "use_stamp_frame_range", text="Frame Range")
-        col.prop(rd, "use_stamp_memory", text="Memory")
-        col.prop(rd, "use_stamp_hostname", text="Hostname")
-        col.prop(rd, "use_stamp_camera", text="Camera")
-        col.prop(rd, "use_stamp_lens", text="Lens")
-        col.prop(rd, "use_stamp_scene", text="Scene")
-        col.prop(rd, "use_stamp_marker", text="Marker")
-        col.prop(rd, "use_stamp_filename", text="Filename")
+        col = layout.column(align = True)
+        col.label(text = "Include")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_date", text="Date")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_time", text="Time")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_render_time", text="Render Time")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_frame", text="Frame")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_frame_range", text="Frame Range")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_memory", text="Memory")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_hostname", text="Hostname")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_camera", text="Camera")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_lens", text="Lens")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_scene", text="Scene")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_marker", text="Marker")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_stamp_filename", text="Filename")
 
         if rd.use_sequencer:
-            col.prop(rd, "use_stamp_sequencer_strip", text="Strip Name")
+            row = col.row()
+            row.separator()
+            row.prop(rd, "use_stamp_sequencer_strip", text="Strip Name")
 
 
 class RENDER_PT_stamp_note(RenderOutputButtonsPanel, Panel):
@@ -282,7 +334,11 @@ class RENDER_PT_stamp_burn(RenderOutputButtonsPanel, Panel):
         col.prop(rd, "stamp_font_size", text="Font Size")
         col.column().prop(rd, "stamp_foreground", slider=True)
         col.column().prop(rd, "stamp_background", slider=True)
-        col.prop(rd, "use_stamp_labels", text="Include Labels")
+        row = layout.row()
+        row.active = rd.use_stamp
+        row.use_property_split = False
+        row.prop(rd, "use_stamp_labels", text="Include Labels")
+        row.prop_decorator(rd, "use_stamp_labels")
 
 
 class RENDER_PT_output(RenderOutputButtonsPanel, Panel):
@@ -301,21 +357,52 @@ class RENDER_PT_output(RenderOutputButtonsPanel, Panel):
 
         rd = context.scene.render
         image_settings = rd.image_settings
+        is_eevee = context.scene.render.engine == 'BLENDER_EEVEE'
+        is_workbench = context.scene.render.engine == 'BLENDER_WORKBENCH'
 
         layout.prop(rd, "filepath", text="")
 
-        layout.use_property_split = True
-
-        col = layout.column(heading="Saving")
-        col.prop(rd, "use_file_extension")
-        col.prop(rd, "use_render_cache")
-
         layout.template_image_settings(image_settings, color_management=False)
 
+        if is_eevee or is_workbench:
+            row = layout.row()
+            row.prop(rd, "film_transparent", text="Transparent")
+            row.prop_decorator(rd, "film_transparent")
+
+
+# Options subpanel for the output panel
+class RENDER_PT_output_options(RenderOutputButtonsPanel, Panel):
+    bl_label = "Options"
+    COMPAT_ENGINES = {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_WORKBENCH'}
+    bl_parent_id = "RENDER_PT_output"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = False
+        layout.use_property_decorate = False  # No animation.
+
+        rd = context.scene.render
+        image_settings = rd.image_settings
+
+        col = layout.column(align = True)
+        col.label(text = "Saving")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_file_extension")
+        row = col.row()
+        row.separator()
+        row.prop(rd, "use_render_cache")
+
         if not rd.is_movie_format:
-            col = layout.column(heading="Image Sequence")
-            col.prop(rd, "use_overwrite")
-            col.prop(rd, "use_placeholder")
+            col = layout.column(align = True)
+            col.label(text = "Image Sequence")
+            row = col.row()
+            row.separator()
+            row.prop(rd, "use_overwrite")
+            row = col.row()
+            row.separator()
+            row.prop(rd, "use_placeholder")
 
 
 class RENDER_PT_output_views(RenderOutputButtonsPanel, Panel):
@@ -358,10 +445,11 @@ class RENDER_PT_output_color_management(RenderOutputButtonsPanel, Panel):
         image_settings = scene.render.image_settings
 
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False  # No animation.
 
         layout.row().prop(image_settings, "color_management", text=" ", expand=True)
+        layout.use_property_split = True
 
         flow = layout.grid_flow(row_major=True, columns=0, even_columns=False, even_rows=False, align=True)
 
@@ -410,6 +498,7 @@ class RENDER_PT_encoding(RenderOutputButtonsPanel, Panel):
         ffmpeg = rd.ffmpeg
 
         layout.prop(rd.ffmpeg, "format")
+        layout.use_property_split = False
         layout.prop(ffmpeg, "use_autosplit")
 
 
@@ -455,7 +544,9 @@ class RENDER_PT_encoding_video(RenderOutputButtonsPanel, Panel):
             return
 
         if ffmpeg.codec == 'DNXHD':
+            layout.use_property_split = False
             layout.prop(ffmpeg, "use_lossless_output")
+            layout.use_property_split = True
 
         # Output quality
         use_crf = needs_codec and ffmpeg.codec in {
@@ -472,11 +563,15 @@ class RENDER_PT_encoding_video(RenderOutputButtonsPanel, Panel):
         # I-frames
         layout.prop(ffmpeg, "gopsize")
         # B-Frames
-        row = layout.row(align=True, heading="Max B-frames")
-        row.prop(ffmpeg, "use_max_b_frames", text="")
-        sub = row.row(align=True)
-        sub.active = ffmpeg.use_max_b_frames
-        sub.prop(ffmpeg, "max_b_frames", text="")
+        split = layout.split( factor = 0.39)
+        col = split.column()
+        col.use_property_split = False
+        col.prop(ffmpeg, "use_max_b_frames", text = "Max B_Frames")
+        col = split.column()
+        if ffmpeg.use_max_b_frames:
+            col.prop(ffmpeg, "max_b_frames", text="")
+        else:
+            col.label(icon='DISCLOSURE_TRI_RIGHT')
 
         if not use_crf or ffmpeg.constant_rate_factor == 'NONE':
             col = layout.column()
@@ -601,6 +696,7 @@ classes = (
     RENDER_PT_time_stretching,
     RENDER_PT_stereoscopy,
     RENDER_PT_output,
+    RENDER_PT_output_options,
     RENDER_PT_output_views,
     RENDER_PT_output_color_management,
     RENDER_PT_encoding,

@@ -394,7 +394,7 @@ static void wm_link_append_properties_common(wmOperatorType *ot, bool is_link)
   /* better not save _any_ settings for this operator */
   /* properties */
   prop = RNA_def_boolean(
-      ot->srna, "link", is_link, "Link", "Link the objects or data-blocks rather than appending");
+      ot->srna, "link", is_link, "Link", "Link the objects or data rather than appending");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE | PROP_HIDDEN);
 
   prop = RNA_def_boolean(

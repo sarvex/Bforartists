@@ -651,7 +651,7 @@ void WM_exit(bContext *C)
 {
   WM_exit_ex(C, true);
 
-  printf("\nBlender quit\n");
+  printf("\nBforartists quit\n");
 
 #ifdef WIN32
   /* ask user to press a key when in debug mode */

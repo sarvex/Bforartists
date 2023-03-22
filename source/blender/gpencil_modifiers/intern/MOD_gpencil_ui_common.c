@@ -289,9 +289,10 @@ static void gpencil_modifier_ops_extra_draw(bContext *C, uiLayout *layout, void 
   }
 }
 
+/* bfa - Grease pencil modifiers - put apply into the header #2185 */
 static void gpencil_modifier_panel_header(const bContext *UNUSED(C), Panel *panel)
 {
-  uiLayout *row, *sub;
+  uiLayout *row, *sub, *op_row;
   uiLayout *layout = panel->layout;
 
   PointerRNA *ptr = UI_panel_custom_data_get(panel);
@@ -326,14 +327,18 @@ static void gpencil_modifier_panel_header(const bContext *UNUSED(C), Panel *pane
   uiItemR(row, ptr, "show_viewport", 0, "", ICON_NONE);
   uiItemR(row, ptr, "show_render", 0, "", ICON_NONE);
 
+  /* bfa - apply modifer button */
+  op_row = uiLayoutRow(layout, true);
+  if (!(mti->flags & eGpencilModifierTypeFlag_NoApply)) {
+    uiItemO(op_row, "", ICON_CHECKMARK, "OBJECT_OT_gpencil_modifier_apply");
+  }
+
   /* Extra operators. */
   // row = uiLayoutRow(layout, true);
-  uiItemMenuF(row, "", ICON_DOWNARROW_HLT, gpencil_modifier_ops_extra_draw, md);
+  uiItemMenuF(op_row, "", ICON_DOWNARROW_HLT, gpencil_modifier_ops_extra_draw, md);
 
   /* Remove button. */
-  sub = uiLayoutRow(row, false);
-  uiLayoutSetEmboss(sub, UI_EMBOSS_NONE);
-  uiItemO(sub, "", ICON_X, "OBJECT_OT_gpencil_modifier_remove");
+  uiItemO(op_row, "", ICON_X, "OBJECT_OT_gpencil_modifier_remove");
 
   /* Extra padding. */
   uiItemS(layout);

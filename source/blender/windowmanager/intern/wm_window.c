@@ -466,14 +466,14 @@ void wm_window_title(wmWindowManager *wm, wmWindow *win)
       char str[sizeof(((Main *)NULL)->filepath) + 24];
       BLI_snprintf(str,
                    sizeof(str),
-                   "Blender%s [%s%s]",
+                   "Bforartists%s [%s%s]",
                    wm->file_saved ? "" : "*",
                    blendfile_path,
                    G_MAIN->recovered ? " (Recovered)" : "");
       GHOST_SetTitle(win->ghostwin, str);
     }
     else {
-      GHOST_SetTitle(win->ghostwin, "Blender");
+      GHOST_SetTitle(win->ghostwin, "Bforartists");
     }
 
     /* Informs GHOST of unsaved changes, to set window modified visual indicator (macOS)
@@ -762,7 +762,7 @@ static void wm_window_ghostwindow_ensure(wmWindowManager *wm, wmWindow *win, boo
       win->cursor = WM_CURSOR_DEFAULT;
     }
 
-    wm_window_ghostwindow_add(wm, "Blender", win, is_dialog);
+    wm_window_ghostwindow_add(wm, "Bforartists", win, is_dialog);
   }
 
   if (win->ghostwin != NULL) {

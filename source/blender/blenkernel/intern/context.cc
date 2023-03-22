@@ -920,6 +920,16 @@ SpaceTopBar *CTX_wm_space_topbar(const bContext *C)
   return nullptr;
 }
 
+// bfa - toolbar editor
+SpaceToolbar *CTX_wm_space_toolbar(const bContext *C)
+{
+  ScrArea *area = CTX_wm_area(C);
+  if (area && area->spacetype == SPACE_TOOLBAR) {
+    return static_cast<SpaceToolbar*>(area->spacedata.first);
+  }
+  return nullptr;
+}
+
 SpaceSpreadsheet *CTX_wm_space_spreadsheet(const bContext *C)
 {
   ScrArea *area = CTX_wm_area(C);

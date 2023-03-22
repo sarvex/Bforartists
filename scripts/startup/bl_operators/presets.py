@@ -287,7 +287,7 @@ class AddPresetRender(AddPresetBase, Operator):
 
 
 class AddPresetCamera(AddPresetBase, Operator):
-    """Add or remove a Camera Preset"""
+    """Add Camera Preset\nAdd or remove a Camera Preset"""
     bl_idname = "camera.preset_add"
     bl_label = "Add Camera Preset"
     preset_menu = "CAMERA_PT_presets"
@@ -318,7 +318,7 @@ class AddPresetCamera(AddPresetBase, Operator):
 
 
 class AddPresetCameraSafeAreas(AddPresetBase, Operator):
-    """Add or remove a Safe Areas Preset"""
+    """Add Safe Area Preset\nAdd or remove a Safe Areas Preset"""
     bl_idname = "camera.safe_areas_preset_add"
     bl_label = "Add Safe Area Preset"
     preset_menu = "CAMERA_PT_safe_areas_presets"
@@ -338,7 +338,7 @@ class AddPresetCameraSafeAreas(AddPresetBase, Operator):
 
 
 class AddPresetCloth(AddPresetBase, Operator):
-    """Add or remove a Cloth Preset"""
+    """Add Cloth Preset\nAdd or remove a Cloth Preset"""
     bl_idname = "cloth.preset_add"
     bl_label = "Add Cloth Preset"
     preset_menu = "CLOTH_PT_presets"
@@ -366,7 +366,7 @@ class AddPresetCloth(AddPresetBase, Operator):
 
 
 class AddPresetFluid(AddPresetBase, Operator):
-    """Add or remove a Fluid Preset"""
+    """Add Fluid Preset\nAdd or remove a Fluid Preset"""
     bl_idname = "fluid.preset_add"
     bl_label = "Add Fluid Preset"
     preset_menu = "FLUID_PT_presets"
@@ -384,7 +384,7 @@ class AddPresetFluid(AddPresetBase, Operator):
 
 
 class AddPresetHairDynamics(AddPresetBase, Operator):
-    """Add or remove a Hair Dynamics Preset"""
+    """Add Hair Dynamics Preset\nAdd or remove a Hair Dynamics Preset"""
     bl_idname = "particle.hair_dynamics_preset_add"
     bl_label = "Add Hair Dynamics Preset"
     preset_menu = "PARTICLE_PT_hair_dynamics_presets"
@@ -414,7 +414,7 @@ class AddPresetHairDynamics(AddPresetBase, Operator):
 
 
 class AddPresetTrackingCamera(AddPresetBase, Operator):
-    """Add or remove a Tracking Camera Intrinsics Preset"""
+    """Add Camera Preset\nAdd or remove a Tracking Camera Intrinsics Preset"""
     bl_idname = "clip.camera_preset_add"
     bl_label = "Add Camera Preset"
     preset_menu = "CLIP_PT_camera_presets"
@@ -448,7 +448,7 @@ class AddPresetTrackingCamera(AddPresetBase, Operator):
 
 
 class AddPresetTrackingTrackColor(AddPresetBase, Operator):
-    """Add or remove a Clip Track Color Preset"""
+    """Add Track Color Preset\nAdd or remove a Clip Track Color Preset"""
     bl_idname = "clip.track_color_preset_add"
     bl_label = "Add Track Color Preset"
     preset_menu = "CLIP_PT_track_color_presets"
@@ -466,7 +466,7 @@ class AddPresetTrackingTrackColor(AddPresetBase, Operator):
 
 
 class AddPresetTrackingSettings(AddPresetBase, Operator):
-    """Add or remove a motion tracking settings preset"""
+    """Add Tracking Settings Preset\nAdd or remove a motion tracking settings preset"""
     bl_idname = "clip.tracking_settings_preset_add"
     bl_label = "Add Tracking Settings Preset"
     preset_menu = "CLIP_PT_tracking_settings_presets"
@@ -496,7 +496,7 @@ class AddPresetTrackingSettings(AddPresetBase, Operator):
 
 
 class AddPresetNodeColor(AddPresetBase, Operator):
-    """Add or remove a Node Color Preset"""
+    """Add Node Color Preset\nAdd or remove a Node Color Preset"""
     bl_idname = "node.node_color_preset_add"
     bl_label = "Add Node Color Preset"
     preset_menu = "NODE_PT_node_color_presets"
@@ -522,7 +522,7 @@ class AddPresetInterfaceTheme(AddPresetBase, Operator):
 
 
 class AddPresetKeyconfig(AddPresetBase, Operator):
-    """Add or remove a Key-config Preset"""
+    """Add Keyconfig Preset\nAdd or remove a Key-config Preset"""
     bl_idname = "wm.keyconfig_preset_add"
     bl_label = "Add Keyconfig Preset"
     preset_menu = "USERPREF_MT_keyconfigs"
@@ -545,7 +545,7 @@ class AddPresetKeyconfig(AddPresetBase, Operator):
 
 
 class AddPresetOperator(AddPresetBase, Operator):
-    """Add or remove an Operator Preset"""
+    """Operator Preset\nAdd or remove an Operator Preset"""
     bl_idname = "wm.operator_preset_add"
     bl_label = "Operator Preset"
     preset_menu = "WM_MT_operator_presets"

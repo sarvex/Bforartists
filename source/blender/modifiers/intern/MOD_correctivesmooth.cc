@@ -786,8 +786,20 @@ static void panel_draw(const bContext * /*C*/, Panel *panel)
 
   modifier_vgroup_ui(layout, ptr, &ob_ptr, "vertex_group", "invert_vertex_group", nullptr);
 
-  uiItemR(layout, ptr, "use_only_smooth", 0, nullptr, ICON_NONE);
-  uiItemR(layout, ptr, "use_pin_boundary", 0, nullptr, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_only_smooth", 0, nullptr, ICON_NONE);
+  // uiItemR(layout, ptr, "use_pin_boundary", 0, nullptr, ICON_NONE);
+
+  uiLayout *row;
+  row = uiLayoutRow(layout, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_only_smooth", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_only_smooth", 0); /*bfa - decorator*/
+  row = uiLayoutRow(layout, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_pin_boundary", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_pin_boundary", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   uiItemR(layout, ptr, "rest_source", 0, nullptr, ICON_NONE);
   if (RNA_enum_get(ptr, "rest_source") == MOD_CORRECTIVESMOOTH_RESTSOURCE_BIND) {

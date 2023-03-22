@@ -302,7 +302,7 @@ void TEXT_OT_new(wmOperatorType *ot)
   /* identifiers */
   ot->name = "New Text";
   ot->idname = "TEXT_OT_new";
-  ot->description = "Create a new text data-block";
+  ot->description = "Create a new text file"; /*bfa - text file, not text data block*/
 
   /* api callbacks */
   ot->exec = text_new_exec;
@@ -402,7 +402,7 @@ void TEXT_OT_open(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Open Text";
   ot->idname = "TEXT_OT_open";
-  ot->description = "Open a new text data-block";
+  ot->description = "Open a new text file"; /*bfa - text file, not text data block*/
 
   /* api callbacks */
   ot->exec = text_open_exec;
@@ -481,7 +481,7 @@ void TEXT_OT_reload(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Reload";
   ot->idname = "TEXT_OT_reload";
-  ot->description = "Reload active text data-block from its file";
+  ot->description = "Reload active text file"; /* bfa - text file, not text data block*/
 
   /* api callbacks */
   ot->exec = text_reload_exec;
@@ -530,9 +530,9 @@ static int text_unlink_exec(bContext *C, wmOperator *UNUSED(op))
 void TEXT_OT_unlink(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Unlink";
+  ot->name = "Remove"; /*bfa - remove, not unlink*/
   ot->idname = "TEXT_OT_unlink";
-  ot->description = "Unlink active text data-block";
+  ot->description = "Remove active text";
 
   /* api callbacks */
   ot->exec = text_unlink_exec;
@@ -668,7 +668,7 @@ void TEXT_OT_save(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Save";
   ot->idname = "TEXT_OT_save";
-  ot->description = "Save active text data-block";
+  ot->description = "Save active text file"; /*bfa - text file. not text data block*/
 
   /* api callbacks */
   ot->exec = text_save_exec;
@@ -2344,9 +2344,9 @@ void TEXT_OT_jump(wmOperatorType *ot)
   PropertyRNA *prop;
 
   /* identifiers */
-  ot->name = "Jump";
+  ot->name = "Go To Line"; /*bfa - go to line, not jump*/
   ot->idname = "TEXT_OT_jump";
-  ot->description = "Jump cursor to line";
+  ot->description = "Go to a specific line number";
 
   /* api callbacks */
   ot->invoke = text_jump_invoke;
@@ -2354,7 +2354,7 @@ void TEXT_OT_jump(wmOperatorType *ot)
   ot->poll = text_edit_poll;
 
   /* properties */
-  prop = RNA_def_int(ot->srna, "line", 1, 1, INT_MAX, "Line", "Line number to jump to", 1, 10000);
+  prop = RNA_def_int(ot->srna, "line", 1, 1, INT_MAX, "Line", "Line number to go to", 1, 10000);
   RNA_def_property_translation_context(prop, BLT_I18NCONTEXT_ID_TEXT);
 }
 
@@ -3946,7 +3946,7 @@ void TEXT_OT_to_3d_object(wmOperatorType *ot)
   /* identifiers */
   ot->name = "To 3D Object";
   ot->idname = "TEXT_OT_to_3d_object";
-  ot->description = "Create 3D text object from active text data-block";
+  ot->description = "Create 3D text object from active text data";
 
   /* api callbacks */
   ot->exec = text_to_3d_object_exec;

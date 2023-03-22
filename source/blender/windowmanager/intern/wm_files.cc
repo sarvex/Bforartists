@@ -2570,7 +2570,7 @@ static void read_homefile_props(wmOperatorType *ot)
 void WM_OT_read_homefile(wmOperatorType *ot)
 {
   PropertyRNA *prop;
-  ot->name = "Reload Start-Up File";
+  ot->name = "File New"; /*bfa - file new, not reload startup file*/
   ot->idname = "WM_OT_read_homefile";
   ot->description = "Open the default file (doesn't save the current file)";
 
@@ -2913,7 +2913,7 @@ void WM_OT_open_mainfile(wmOperatorType *ot)
 {
   ot->name = "Open";
   ot->idname = "WM_OT_open_mainfile";
-  ot->description = "Open a Blender file";
+  ot->description = "Open a *blend file";
   ot->get_description = wm_open_mainfile_description;
 
   ot->invoke = wm_open_mainfile_invoke;
@@ -3296,7 +3296,10 @@ void WM_OT_save_as_mainfile(wmOperatorType *ot)
 
   ot->name = "Save As";
   ot->idname = "WM_OT_save_as_mainfile";
-  ot->description = "Save the current file in the desired location";
+  ot->description =
+      "Save As saves the current file in the desired location"
+      "\nIncremental Save saves an already saved file with incremental file name. 001, 002, 003 "
+      "etc";
 
   ot->invoke = wm_save_as_mainfile_invoke;
   ot->exec = wm_save_as_mainfile_exec;
@@ -3363,9 +3366,9 @@ static int wm_save_mainfile_invoke(bContext *C, wmOperator *op, const wmEvent * 
 
 void WM_OT_save_mainfile(wmOperatorType *ot)
 {
-  ot->name = "Save Blender File";
+  ot->name = "Save Blend File";
   ot->idname = "WM_OT_save_mainfile";
-  ot->description = "Save the current Blender file";
+  ot->description = "Save the current Blend file";
 
   ot->invoke = wm_save_mainfile_invoke;
   ot->exec = wm_save_as_mainfile_exec;
@@ -3698,24 +3701,63 @@ static void wm_block_file_close_save(bContext *C, void *arg_block, void *arg_dat
 
 static void wm_block_file_close_cancel_button(uiBlock *block, wmGenericCallback *post_action)
 {
-  uiBut *but = uiDefIconTextBut(
-      block, UI_BTYPE_BUT, 0, 0, IFACE_("Cancel"), 0, 0, 0, UI_UNIT_Y, 0, 0, 0, 0, 0, "");
+  uiBut *but = uiDefIconTextBut(block,
+                                UI_BTYPE_BUT,
+                                0,
+                                0,
+                                IFACE_("Cancel"),
+                                0,
+                                0,
+                                0,
+                                UI_UNIT_Y * 1.5,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                ""); /* bfa - made the buttons higher. UI_UNIT_Y * 1.5 */
   UI_but_func_set(but, wm_block_file_close_cancel, block, post_action);
   UI_but_drawflag_disable(but, UI_BUT_TEXT_LEFT);
 }
 
 static void wm_block_file_close_discard_button(uiBlock *block, wmGenericCallback *post_action)
 {
-  uiBut *but = uiDefIconTextBut(
-      block, UI_BTYPE_BUT, 0, 0, IFACE_("Don't Save"), 0, 0, 0, UI_UNIT_Y, 0, 0, 0, 0, 0, "");
+  uiBut *but = uiDefIconTextBut(block,
+                                UI_BTYPE_BUT,
+                                0,
+                                0,
+                                IFACE_("Don't Save"),
+                                0,
+                                0,
+                                0,
+                                UI_UNIT_Y * 1.5,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                ""); /* bfa - made the buttons higher. UI_UNIT_Y * 1.5 */
   UI_but_func_set(but, wm_block_file_close_discard, block, post_action);
   UI_but_drawflag_disable(but, UI_BUT_TEXT_LEFT);
 }
 
 static void wm_block_file_close_save_button(uiBlock *block, wmGenericCallback *post_action)
 {
-  uiBut *but = uiDefIconTextBut(
-      block, UI_BTYPE_BUT, 0, 0, IFACE_("Save"), 0, 0, 0, UI_UNIT_Y, 0, 0, 0, 0, 0, "");
+  uiBut *but = uiDefIconTextBut(block,
+                                UI_BTYPE_BUT,
+                                0,
+                                0,
+                                IFACE_("Save"),
+                                0,
+                                0,
+                                0,
+                                UI_UNIT_Y * 1.5,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                ""); /* bfa - made the buttons higher. UI_UNIT_Y * 1.5 */
   UI_but_func_set(but, wm_block_file_close_save, block, post_action);
   UI_but_drawflag_disable(but, UI_BUT_TEXT_LEFT);
   UI_but_flag_enable(but, UI_BUT_ACTIVE_DEFAULT);

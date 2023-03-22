@@ -47,10 +47,13 @@
 #include "DEG_depsgraph_build.h"
 
 #include "UI_interface.h"
+#include "UI_resources.h" /*bfa - we need the ui resources for the icons*/
 #include "UI_view2d.h"
 
 #include "nla_intern.h"  /* own include */
 #include "nla_private.h" /* FIXME: maybe this shouldn't be included? */
+
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 
 /* -------------------------------------------------------------------- */
 /** \name Public Utilities
@@ -164,6 +167,27 @@ static int nlaedit_enable_tweakmode_exec(bContext *C, wmOperator *op)
   /* done */
   return OPERATOR_FINISHED;
 }
+/*bfa - description*/
+static char *nla_ot_tweakmode_enter_get_description(bContext *UNUSED(C),
+                                                    wmOperatorType *UNUSED(ot),
+                                                    PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "isolate_action")) {
+    return BLI_strdup(
+        "Enter tweak mode to edit the keyframes of just the selected action strip of this "
+        "object\nSwitch to Dope Sheet editor to edit the keyframes\nWhen done switch back to NLA "
+        "editor and leave tweak mode");
+  }
+  if (RNA_boolean_get(ptr, "use_upper_stack_evaluation")) {
+    return BLI_strdup(
+        "Enter tweak (Full Stack) mode to edit the keyframes of the action strips of this object"
+        "\nAllows you to insert keyframes and preserve the pose that you visually keyed while "
+        "upper strips are evaluating"
+        "\nSwitch to Dope Sheet editor to edit the keyframes "
+        "\nWhen done switch back to NLA editor and leave tweak mode");
+  }
+  return NULL;
+}
 
 void NLA_OT_tweakmode_enter(wmOperatorType *ot)
 {
@@ -173,10 +197,13 @@ void NLA_OT_tweakmode_enter(wmOperatorType *ot)
   ot->name = "Enter Tweak Mode";
   ot->idname = "NLA_OT_tweakmode_enter";
   ot->description =
-      "Enter tweaking mode for the action referenced by the active strip to edit its keyframes";
+      "Enter tweak mode to edit the keyframes of the action strips of this object\nSwitch to Dope "
+      "Sheet editor to edit the keyframes\nWhen done switch back to NLA editor and leave tweak "
+      "mode";
 
   /* api callbacks */
   ot->exec = nlaedit_enable_tweakmode_exec;
+  ot->get_description = nla_ot_tweakmode_enter_get_description;
   ot->poll = nlaop_poll_tweakmode_off;
 
   /* flags */
@@ -671,8 +698,8 @@ static int nlaedit_add_actionclip_exec(bContext *C, wmOperator *op)
      * the user knows what they're doing... */
     BKE_reportf(op->reports,
                 RPT_WARNING,
-                "Action '%s' does not specify what data-blocks it can be used on "
-                "(try setting the 'ID Root Type' setting from the data-blocks editor "
+                "Action '%s' does not specify what data it can be used on "
+                "(try setting the 'ID Root Type' setting from the data editor "
                 "for this action to avoid future problems)",
                 act->id.name + 2);
   }
@@ -2354,12 +2381,24 @@ void NLA_OT_clear_scale(wmOperatorType *ot)
 
 /* defines for snap keyframes tool */
 static const EnumPropertyItem prop_nlaedit_snap_types[] = {
-    {NLAEDIT_SNAP_CFRA, "CFRA", 0, "Selection to Current Frame", ""},
+    {NLAEDIT_SNAP_CFRA, "CFRA", ICON_SNAP_CURRENTFRAME, "Selection to Current Frame", ""},
     /* XXX as single entry? */
-    {NLAEDIT_SNAP_NEAREST_FRAME, "NEAREST_FRAME", 0, "Selection to Nearest Frame", ""},
+    {NLAEDIT_SNAP_NEAREST_FRAME,
+     "NEAREST_FRAME",
+     ICON_SNAP_NEARESTFRAME,
+     "Selection to Nearest Frame",
+     ""},
     /* XXX as single entry? */
-    {NLAEDIT_SNAP_NEAREST_SECOND, "NEAREST_SECOND", 0, "Selection to Nearest Second", ""},
-    {NLAEDIT_SNAP_NEAREST_MARKER, "NEAREST_MARKER", 0, "Selection to Nearest Marker", ""},
+    {NLAEDIT_SNAP_NEAREST_SECOND,
+     "NEAREST_SECOND",
+     ICON_SNAP_NEARESTSECOND,
+     "Selection to Nearest Second",
+     ""},
+    {NLAEDIT_SNAP_NEAREST_MARKER,
+     "NEAREST_MARKER",
+     ICON_SNAP_NEARESTMARKER,
+     "Selection to Nearest Marker",
+     ""},
     {0, NULL, 0, NULL, NULL},
 };
 

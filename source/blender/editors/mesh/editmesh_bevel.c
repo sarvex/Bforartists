@@ -930,15 +930,17 @@ static void edbm_bevel_ui(bContext *C, wmOperator *op)
   }
   uiItemR(layout, op->ptr, "material", 0, NULL, ICON_NONE);
 
+  uiLayoutSetPropSep(layout, false); /*bfa - checkboxes, don't split*/
   col = uiLayoutColumn(layout, true);
   uiItemR(col, op->ptr, "harden_normals", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "clamp_overlap", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "loop_slide", 0, NULL, ICON_NONE);
 
-  col = uiLayoutColumnWithHeading(layout, true, IFACE_("Mark"));
+  col = uiLayoutColumn(layout, true);
   uiLayoutSetActive(col, affect_type == BEVEL_AFFECT_EDGES);
-  uiItemR(col, op->ptr, "mark_seam", 0, IFACE_("Seams"), ICON_NONE);
-  uiItemR(col, op->ptr, "mark_sharp", 0, IFACE_("Sharp"), ICON_NONE);
+  uiItemR(col, op->ptr, "mark_seam", 0, IFACE_("Mark Seams"), ICON_NONE);
+  uiItemR(col, op->ptr, "mark_sharp", 0, IFACE_("Mark Sharp"), ICON_NONE);
+  uiLayoutSetPropSep(layout, true); /*bfa - checkboxes end. split again*/
 
   uiItemS(layout);
 
@@ -1048,7 +1050,11 @@ void MESH_OT_bevel(wmOperatorType *ot)
 
   /* identifiers */
   ot->name = "Bevel";
-  ot->description = "Cut into selected items at an angle to create bevel or chamfer";
+  ot->description =
+      "Cut into selected items at an angle to create bevel or chamfer\nVertex Bevel is a "
+      "separated tool, but has the "
+      "same functionality\nActivate the tool, then drag mouse until the geometry changes\nFiner "
+      "adjustments can be done in the Last operator panel then";
   ot->idname = "MESH_OT_bevel";
 
   /* api callbacks */
@@ -1091,7 +1097,8 @@ void MESH_OT_bevel(wmOperatorType *ot)
               1,
               SEGMENTS_HARD_MAX,
               "Segments",
-              "Segments for curved edge",
+              "Segments for curved edge determines how many segments the bevel geometry will "
+              "have\nFirst adjust the number of edges, then perform the Bevel operation",
               1,
               100);
 

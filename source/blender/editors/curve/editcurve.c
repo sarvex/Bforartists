@@ -60,6 +60,8 @@
 #include "RNA_define.h"
 #include "RNA_enum_types.h"
 
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
 void selectend_nurb(Object *obedit, enum eEndPoint_Types selfirst, bool doswap, bool selstatus);
 static void adduplicateflagNurb(
     Object *obedit, View3D *v3d, ListBase *newnurb, const uint8_t flag, const bool split);
@@ -3297,15 +3299,27 @@ static int hide_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *curve_ot_hide_get_description(bContext *UNUSED(C),
+                                           wmOperatorType *UNUSED(ot),
+                                           PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "unselected")) {
+    return BLI_strdup("Hide unselected control points");
+  }
+  return NULL;
+}
+
 void CURVE_OT_hide(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Hide Selected";
   ot->idname = "CURVE_OT_hide";
-  ot->description = "Hide (un)selected control points";
+  ot->description = "Hide selected control points";
 
   /* api callbacks */
   ot->exec = hide_exec;
+  ot->get_description = curve_ot_hide_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_editsurfcurve;
 
   /* flags */
@@ -3920,9 +3934,9 @@ static int set_spline_type_exec(bContext *C, wmOperator *op)
 void CURVE_OT_spline_type_set(wmOperatorType *ot)
 {
   static const EnumPropertyItem type_items[] = {
-      {CU_POLY, "POLY", 0, "Poly", ""},
-      {CU_BEZIER, "BEZIER", 0, "Bezier", ""},
-      {CU_NURBS, "NURBS", 0, "NURBS", ""},
+      {CU_POLY, "POLY", ICON_MESH_DATA, "Poly", ""},
+      {CU_BEZIER, "BEZIER", ICON_CURVE_DATA, "Bezier", ""},
+      {CU_NURBS, "NURBS", ICON_CURVE_DATA, "NURBS", ""},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -3986,17 +4000,17 @@ void CURVE_OT_handle_type_set(wmOperatorType *ot)
 {
   /* keep in sync with graphkeys_handle_type_items */
   static const EnumPropertyItem editcurve_handle_type_items[] = {
-      {HD_AUTO, "AUTOMATIC", 0, "Automatic", ""},
-      {HD_VECT, "VECTOR", 0, "Vector", ""},
-      {5, "ALIGNED", 0, "Aligned", ""},
-      {6, "FREE_ALIGN", 0, "Free", ""},
-      {3, "TOGGLE_FREE_ALIGN", 0, "Toggle Free/Align", ""},
+      {HD_AUTO, "AUTOMATIC", ICON_HANDLE_AUTO, "Automatic", ""},
+      {HD_VECT, "VECTOR", ICON_HANDLE_VECTOR, "Vector", ""},
+      {5, "ALIGNED", ICON_HANDLE_ALIGNED, "Aligned", ""},
+      {6, "FREE_ALIGN", ICON_HANDLE_FREE, "Free", ""},
+      {3, "TOGGLE_FREE_ALIGN", ICON_HANDLE_FREE, "Toggle Free/Align", ""},
       {0, NULL, 0, NULL, NULL},
   };
 
   /* identifiers */
   ot->name = "Set Handle Type";
-  ot->description = "Set type of handles for selected control points";
+  ot->description = "Set Handle Type\nSet type of handles for selected control points";
   ot->idname = "CURVE_OT_handle_type_set";
 
   /* api callbacks */

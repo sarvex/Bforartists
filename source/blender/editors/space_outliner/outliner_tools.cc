@@ -60,6 +60,8 @@
 #include "DEG_depsgraph.h"
 #include "DEG_depsgraph_build.h"
 
+#include "BLT_translation.h" /*bfa - required*/
+
 #include "ED_node.h"
 #include "ED_object.h"
 #include "ED_outliner.h"
@@ -67,6 +69,7 @@
 #include "ED_screen.h"
 #include "ED_sequencer.h"
 #include "ED_undo.h"
+#include "ED_util.h" /*bfa - required*/
 
 #include "WM_api.h"
 #include "WM_message.h"
@@ -529,18 +532,18 @@ enum eOutlinerLibOpSelectionSet {
 static const EnumPropertyItem prop_lib_op_selection_set[] = {
     {OUTLINER_LIB_SELECTIONSET_SELECTED,
      "SELECTED",
-     0,
+    ICON_LIBRARY_DATA_OVERRIDE,
      "Selected",
      "Apply the operation over selected data-blocks only"},
     {OUTLINER_LIB_LIB_SELECTIONSET_CONTENT,
      "CONTENT",
-     0,
+     ICON_LIBRARY_OBJECT,
      "Content",
      "Apply the operation over content of the selected items only (the data-blocks in their "
      "sub-tree)"},
     {OUTLINER_LIB_LIB_SELECTIONSET_SELECTED_AND_CONTENT,
      "SELECTED_AND_CONTENT",
-     0,
+    ICON_LIBRARY,
      "Selected & Content",
      "Apply the operation over selected data-blocks and all their dependencies"},
     {0, nullptr, 0, nullptr, nullptr},
@@ -616,12 +619,23 @@ static void outliner_do_libdata_operation_selection_set(bContext *C,
 /** \name Scene Menu Operator
  * \{ */
 
-enum eOutliner_PropSceneOps {
-  OL_SCENE_OP_DELETE = 1,
-};
+typedef enum eOutliner_PropSceneOps { /* bfa -  typedef enum*/
+                                      OL_SCENE_OP_DELETE = 1,
+                                      /* bfa - add scene outliner operators  */
+                                      OL_SCENE_OP_NEW = 2,
+                                      OL_SCENE_OP_COPY_SETTINGS = 3,
+                                      OL_SCENE_OP_COPY_LINKED = 4,
+                                      OL_SCENE_OP_COPY_FULL = 5
+} eOutliner_PropSceneOps;
 
 static const EnumPropertyItem prop_scene_op_types[] = {
-    {OL_SCENE_OP_DELETE, "DELETE", ICON_X, "Delete", ""},
+    /*bfa - replaced the ICON_X by ICON_DELETE*/
+    {OL_SCENE_OP_DELETE, "DELETE", ICON_DELETE, "Delete", ""},
+    /* bfa - add scene outliner operators  */
+    // {OL_SCENE_OP_NEW, "NEW", ICON_NEW, "New", ""},
+    {OL_SCENE_OP_COPY_SETTINGS, "COPY_SETTINGS", ICON_COPYDOWN, "Copy Settings", ""},
+    {OL_SCENE_OP_COPY_LINKED, "COPY_LINKED", ICON_LINKED, "Linked Copy", ""},
+    {OL_SCENE_OP_COPY_FULL, "COPY_FULL", ICON_DUPLICATE_ALL, "Full Copy", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -645,14 +659,41 @@ static bool outliner_do_scene_operation(
   return success;
 }
 
+/* bfa - add scene outliner operators  */
+/* based on ED_scene_add, but without the need of getting setting active scene */
+static Scene *scene_add_ex(Scene *scene_old, Main *bmain, bContext *C, eSceneCopyMethod method)
+{
+  Scene *scene_new;
+
+  if (method == SCE_COPY_NEW) {
+    scene_new = BKE_scene_add(bmain, DATA_("Scene"));
+  }
+  else { /* different kinds of copying */
+    /* We are going to deep-copy collections, objects and various object data, we need to have
+     * up-to-date obdata for that. */
+    if (method == SCE_COPY_FULL) {
+      ED_editors_flush_edits(bmain);
+    }
+
+    scene_new = BKE_scene_duplicate(bmain, scene_old, method);
+  }
+
+  WM_event_add_notifier(C, NC_SCENE | ND_SCENEBROWSE, scene_new);
+
+  return scene_new;
+}
+/*bfa end*/
 static bool scene_fn(bContext *C,
                      eOutliner_PropSceneOps event,
                      TreeElement * /*te*/,
                      TreeStoreElem *tselem)
 {
   Scene *scene = (Scene *)tselem->id;
+  /* bfa - add scene outliner operators  */
+  Main *bmain = CTX_data_main(C);
 
   if (event == OL_SCENE_OP_DELETE) {
+    /* bfa - add scene outliner operators  */
     if (ED_scene_delete(C, CTX_data_main(C), scene)) {
       WM_event_add_notifier(C, NC_SCENE | NA_REMOVED, scene);
     }
@@ -660,6 +701,20 @@ static bool scene_fn(bContext *C,
       return false;
     }
   }
+  /* bfa - add scene outliner operators  */
+  else if (event == OL_SCENE_OP_NEW) {
+    scene_add_ex(scene, bmain, C, SCE_COPY_NEW);
+  }
+  else if (event == OL_SCENE_OP_COPY_SETTINGS) {
+    scene_add_ex(scene, bmain, C, SCE_COPY_EMPTY);
+  }
+  else if (event == OL_SCENE_OP_COPY_LINKED) {
+    scene_add_ex(scene, bmain, C, SCE_COPY_LINK_COLLECTION);
+  }
+  else if (event == OL_SCENE_OP_COPY_FULL) {
+    scene_add_ex(scene, bmain, C, SCE_COPY_FULL);
+  }
+  /*bfa end*/
 
   return true;
 }
@@ -667,6 +722,9 @@ static bool scene_fn(bContext *C,
 static int outliner_scene_operation_exec(bContext *C, wmOperator *op)
 {
   SpaceOutliner *space_outliner = CTX_wm_space_outliner(C);
+  /* bfa - add scene outliner operators  */
+  Main *bmain = CTX_data_main(C);
+  Scene *scene = CTX_data_scene(C);
   const eOutliner_PropSceneOps event = (eOutliner_PropSceneOps)RNA_enum_get(op->ptr, "type");
 
   if (outliner_do_scene_operation(C, event, &space_outliner->tree, scene_fn) == false) {
@@ -677,6 +735,18 @@ static int outliner_scene_operation_exec(bContext *C, wmOperator *op)
     outliner_cleanup_tree(space_outliner);
     ED_undo_push(C, "Delete Scene(s)");
   }
+  /* bfa - add scene outliner operators  */
+  else if (ELEM(event,
+                OL_SCENE_OP_NEW,
+                OL_SCENE_OP_COPY_SETTINGS,
+                OL_SCENE_OP_COPY_LINKED,
+                OL_SCENE_OP_COPY_FULL)) {
+    DEG_id_tag_update(&scene->id, ID_RECALC_COPY_ON_WRITE);
+    DEG_relations_tag_update(bmain);
+    outliner_cleanup_tree(space_outliner);
+    WM_main_add_notifier(NC_SCENE | ND_LAYER, nullptr);
+  }
+  /*bfa end*/
   else {
     BLI_assert_unreachable();
     return OPERATOR_CANCELLED;
@@ -1712,18 +1782,18 @@ enum eOutlinerLibOverrideOpTypes {
 static const EnumPropertyItem prop_liboverride_op_types[] = {
     {OUTLINER_LIBOVERRIDE_OP_CREATE_HIERARCHY,
      "OVERRIDE_LIBRARY_CREATE_HIERARCHY",
-     0,
+     ICON_LIBRARY,
      "Make",
      "Create a local override of the selected linked data-blocks, and their hierarchy of "
      "dependencies"},
     {OUTLINER_LIBOVERRIDE_OP_RESET,
      "OVERRIDE_LIBRARY_RESET",
-     0,
+     ICON_RESET,
      "Reset",
      "Reset the selected local overrides to their linked references values"},
     {OUTLINER_LIBOVERRIDE_OP_CLEAR_SINGLE,
      "OVERRIDE_LIBRARY_CLEAR_SINGLE",
-     0,
+     ICON_CLEAR,
      "Clear",
      "Delete the selected local overrides and relink their usages to the linked data-blocks if "
      "possible, else reset them and mark them as non editable"},
@@ -1733,13 +1803,13 @@ static const EnumPropertyItem prop_liboverride_op_types[] = {
 static const EnumPropertyItem prop_liboverride_troubleshoot_op_types[] = {
     {OUTLINER_LIBOVERRIDE_OP_RESYNC_HIERARCHY,
      "OVERRIDE_LIBRARY_RESYNC_HIERARCHY",
-     0,
+     ICON_SYNC,
      "Resync",
      "Rebuild the selected local overrides from their linked references, as well as their "
      "hierarchies of dependencies"},
     {OUTLINER_LIBOVERRIDE_OP_RESYNC_HIERARCHY_ENFORCE,
      "OVERRIDE_LIBRARY_RESYNC_HIERARCHY_ENFORCE",
-     0,
+     ICON_SYNC,
      "Resync Enforce",
      "Rebuild the selected local overrides from their linked references, as well as their "
      "hierarchies of dependencies, enforcing these hierarchies to match the linked data (i.e. "
@@ -1747,7 +1817,7 @@ static const EnumPropertyItem prop_liboverride_troubleshoot_op_types[] = {
     RNA_ENUM_ITEM_SEPR,
     {OUTLINER_LIBOVERRIDE_OP_DELETE_HIERARCHY,
      "OVERRIDE_LIBRARY_DELETE_HIERARCHY",
-     0,
+     ICON_DELETE,
      "Delete",
      "Delete the selected local overrides (including their hierarchies of override dependencies) "
      "and relink their usages to the linked data-blocks"},
@@ -2562,13 +2632,13 @@ enum eOutlinerIdOpTypes {
 
 /* TODO: implement support for changing the ID-block used. */
 static const EnumPropertyItem prop_id_op_types[] = {
-    {OUTLINER_IDOP_UNLINK, "UNLINK", 0, "Unlink", ""},
-    {OUTLINER_IDOP_LOCAL, "LOCAL", 0, "Make Local", ""},
-    {OUTLINER_IDOP_SINGLE, "SINGLE", 0, "Make Single User", ""},
-    {OUTLINER_IDOP_DELETE, "DELETE", ICON_X, "Delete", ""},
+    {OUTLINER_IDOP_UNLINK, "UNLINK", ICON_UNLINKED, "Unlink", ""},
+    {OUTLINER_IDOP_LOCAL, "LOCAL", ICON_MAKE_LOCAL, "Make Local", ""},
+    {OUTLINER_IDOP_SINGLE, "SINGLE", ICON_MAKE_SINGLE_USER, "Make Single User", ""},
+    {OUTLINER_IDOP_DELETE, "DELETE", ICON_DELETE, "Delete", ""},
     {OUTLINER_IDOP_REMAP,
      "REMAP",
-     0,
+     ICON_USER,
      "Remap Users",
      "Make all users of selected data-blocks to use instead current (clicked) one"},
     RNA_ENUM_ITEM_SEPR,
@@ -2577,13 +2647,13 @@ static const EnumPropertyItem prop_id_op_types[] = {
     RNA_ENUM_ITEM_SEPR,
     {OUTLINER_IDOP_FAKE_ADD,
      "ADD_FAKE",
-     0,
+     ICON_FAKE_USER_ON,
      "Add Fake User",
-     "Ensure data-block gets saved even if it isn't in use (e.g. for motion and material "
+     "Ensure data gets saved even if it isn't in use (e.g. for motion and material "
      "libraries)"},
-    {OUTLINER_IDOP_FAKE_CLEAR, "CLEAR_FAKE", 0, "Clear Fake User", ""},
-    {OUTLINER_IDOP_RENAME, "RENAME", 0, "Rename", ""},
-    {OUTLINER_IDOP_SELECT_LINKED, "SELECT_LINKED", 0, "Select Linked", ""},
+    {OUTLINER_IDOP_FAKE_CLEAR, "CLEAR_FAKE", ICON_FAKE_USER_OFF, "Clear Fake User", ""},
+    {OUTLINER_IDOP_RENAME, "RENAME", ICON_RENAME, "Rename", ""},
+    {OUTLINER_IDOP_SELECT_LINKED, "SELECT_LINKED", ICON_LINKED, "Select Linked", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -2859,13 +2929,13 @@ enum eOutlinerLibOpTypes {
 static const EnumPropertyItem outliner_lib_op_type_items[] = {
     {OL_LIB_DELETE,
      "DELETE",
-     ICON_X,
+     ICON_DELETE,
      "Delete",
      "Delete this library and all its items.\n"
      "Warning: No undo"},
     {OL_LIB_RELOCATE,
      "RELOCATE",
-     0,
+     ICON_FILE_REFRESH,
      "Relocate",
      "Select a new path for this library, and reload all its data"},
     {OL_LIB_RELOAD, "RELOAD", ICON_FILE_REFRESH, "Reload", "Reload all data from this library"},
@@ -3001,8 +3071,8 @@ static int outliner_action_set_exec(bContext *C, wmOperator *op)
      * the user knows what they're doing. */
     BKE_reportf(op->reports,
                 RPT_WARNING,
-                "Action '%s' does not specify what data-blocks it can be used on "
-                "(try setting the 'ID Root Type' setting from the data-blocks editor "
+                "Action '%s' does not specify what data it can be used on "
+                "(try setting the 'ID Root Type' setting from the data editor "
                 "for this action to avoid future problems)",
                 act->id.name + 2);
   }
@@ -3072,13 +3142,13 @@ enum eOutliner_AnimDataOps {
 static const EnumPropertyItem prop_animdata_op_types[] = {
     {OUTLINER_ANIMOP_CLEAR_ADT,
      "CLEAR_ANIMDATA",
-     0,
+     ICON_CLEAR,
      "Clear Animation Data",
      "Remove this animation data container"},
-    {OUTLINER_ANIMOP_SET_ACT, "SET_ACT", 0, "Set Action", ""},
-    {OUTLINER_ANIMOP_CLEAR_ACT, "CLEAR_ACT", 0, "Unlink Action", ""},
-    {OUTLINER_ANIMOP_REFRESH_DRV, "REFRESH_DRIVERS", 0, "Refresh Drivers", ""},
-    {OUTLINER_ANIMOP_CLEAR_DRV, "CLEAR_DRIVERS", 0, "Clear Drivers", ""},
+    {OUTLINER_ANIMOP_SET_ACT, "SET_ACT", ICON_ACTION, "Set Action", ""},
+    {OUTLINER_ANIMOP_CLEAR_ACT, "CLEAR_ACT", ICON_CLEAR, "Unlink Action", ""},
+    {OUTLINER_ANIMOP_REFRESH_DRV, "REFRESH_DRIVERS", ICON_FILE_REFRESH, "Refresh Drivers", ""},
+    {OUTLINER_ANIMOP_CLEAR_DRV, "CLEAR_DRIVERS", ICON_CLEAR, "Clear Drivers", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -3173,7 +3243,7 @@ void OUTLINER_OT_animdata_operation(wmOperatorType *ot)
 static const EnumPropertyItem prop_constraint_op_types[] = {
     {OL_CONSTRAINTOP_ENABLE, "ENABLE", ICON_HIDE_OFF, "Enable", ""},
     {OL_CONSTRAINTOP_DISABLE, "DISABLE", ICON_HIDE_ON, "Disable", ""},
-    {OL_CONSTRAINTOP_DELETE, "DELETE", ICON_X, "Delete", ""},
+    {OL_CONSTRAINTOP_DELETE, "DELETE", ICON_DELETE, "Delete", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -3219,7 +3289,7 @@ void OUTLINER_OT_constraint_operation(wmOperatorType *ot)
 static const EnumPropertyItem prop_modifier_op_types[] = {
     {OL_MODIFIER_OP_TOGVIS, "TOGVIS", ICON_RESTRICT_VIEW_OFF, "Toggle Viewport Use", ""},
     {OL_MODIFIER_OP_TOGREN, "TOGREN", ICON_RESTRICT_RENDER_OFF, "Toggle Render Use", ""},
-    {OL_MODIFIER_OP_DELETE, "DELETE", ICON_X, "Delete", ""},
+    {OL_MODIFIER_OP_DELETE, "DELETE", ICON_DELETE, "Delete", ""},
     {0, nullptr, 0, nullptr, nullptr},
 };
 
@@ -3368,10 +3438,12 @@ static const EnumPropertyItem *outliner_data_op_sets_enum_item_fn(bContext *C,
   TreeStoreElem *tselem = TREESTORE(te);
 
   static const EnumPropertyItem optype_sel_and_hide[] = {
-      {OL_DOP_SELECT, "SELECT", 0, "Select", ""},
-      {OL_DOP_DESELECT, "DESELECT", 0, "Deselect", ""},
-      {OL_DOP_HIDE, "HIDE", 0, "Hide", ""},
-      {OL_DOP_UNHIDE, "UNHIDE", 0, "Unhide", ""},
+      /*bfa - need to use the OFF icon to display the ON icon. Blender code hiccup with dealing
+         with values instead of icon names at other locations ...*/
+      {OL_DOP_SELECT, "SELECT", ICON_RESTRICT_SELECT_OFF, "Select", ""},
+      {OL_DOP_DESELECT, "DESELECT", ICON_SELECT_NONE, "Deselect", ""},
+      {OL_DOP_HIDE, "HIDE", ICON_HIDE_ON, "Hide", ""},
+      {OL_DOP_UNHIDE, "UNHIDE", ICON_HIDE_OFF, "Unhide", ""},
       {0, nullptr, 0, nullptr, nullptr}};
 
   static const EnumPropertyItem optype_sel_linked[] = {
@@ -3422,8 +3494,8 @@ static int outliner_operator_menu(bContext *C, const char *opname)
 
     uiItemS(layout);
   }
-
-  uiItemMContents(layout, "OUTLINER_MT_context_menu");
+  /* bfa - only asset menu not whole context menu */
+  uiItemMContents(layout, "OUTLINER_MT_asset");
 
   UI_popup_menu_end(C, pup);
 

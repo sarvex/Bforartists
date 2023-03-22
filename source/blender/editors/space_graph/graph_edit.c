@@ -42,6 +42,7 @@
 #include "DEG_depsgraph_build.h"
 
 #include "UI_interface.h"
+#include "UI_resources.h" /*bfa - needed for the icons*/
 #include "UI_view2d.h"
 
 #include "ED_anim_api.h"
@@ -72,22 +73,22 @@ typedef enum eGraphKeys_InsertKey_Types {
 static const EnumPropertyItem prop_graphkeys_insertkey_types[] = {
     {GRAPHKEYS_INSERTKEY_ALL,
      "ALL",
-     0,
+     ICON_KEYFRAMES_INSERT,
      "All Channels",
      "Insert a keyframe on all visible and editable F-Curves using each curve's current value"},
     {GRAPHKEYS_INSERTKEY_SEL,
      "SEL",
-     0,
+     ICON_KEYFRAMES_INSERT,
      "Only Selected Channels",
      "Insert a keyframe on selected F-Curves using each curve's current value"},
     {GRAPHKEYS_INSERTKEY_ACTIVE | GRAPHKEYS_INSERTKEY_CURSOR,
      "CURSOR_ACTIVE",
-     0,
+     ICON_KEYFRAMES_INSERT,
      "Active Channels at Cursor",
      "Insert a keyframe for the active F-Curve at the cursor point"},
     {GRAPHKEYS_INSERTKEY_SEL | GRAPHKEYS_INSERTKEY_CURSOR,
      "CURSOR_SEL",
-     0,
+     ICON_KEYFRAMES_INSERT,
      "Selected Channels at Cursor",
      "Insert a keyframe for selected F-Curves at the cursor point"},
     {0, NULL, 0, NULL, NULL},
@@ -597,11 +598,12 @@ void GRAPH_OT_paste(wmOperatorType *ot)
   PropertyRNA *prop;
 
   /* Identifiers */
-  ot->name = "Paste Keyframes";
+  ot->name = "Paste Keyframes / Flipped";
   ot->idname = "GRAPH_OT_paste";
   ot->description =
-      "Paste keyframes from copy/paste buffer for the selected channels, starting on the current "
-      "frame";
+      "Paste Keyframes pastes keyframes into the selected channels, "
+      "starting on the current frame\nPaste Flipped pastes keyframes flipped into the selected "
+      "channels, starting on the current frame";
 
   /* API callbacks */
 
@@ -783,7 +785,7 @@ void GRAPH_OT_delete(wmOperatorType *ot)
   ot->description = "Remove all selected keyframes";
 
   /* API callbacks */
-  ot->invoke = WM_operator_confirm_or_exec;
+  /*ot->invoke = WM_operator_confirm_or_exec;*/ /*bfa - we don't confirm delete*/
   ot->exec = graphkeys_delete_exec;
   ot->poll = graphop_editable_keyframes_poll;
 
@@ -1537,7 +1539,8 @@ void GRAPH_OT_interpolation_type(wmOperatorType *ot)
   ot->name = "Set Keyframe Interpolation";
   ot->idname = "GRAPH_OT_interpolation_type";
   ot->description =
-      "Set interpolation mode for the F-Curve segments starting from the selected keyframes";
+      "Keyframe Interpolation\nSet interpolation mode for the F-Curve segments starting from the "
+      "selected keyframes";
 
   /* API callbacks */
   ot->invoke = WM_menu_invoke;
@@ -1613,7 +1616,7 @@ void GRAPH_OT_easing_type(wmOperatorType *ot)
   ot->name = "Set Keyframe Easing Type";
   ot->idname = "GRAPH_OT_easing_type";
   ot->description =
-      "Set easing type for the F-Curve segments starting from the selected keyframes";
+      "Easing Mode\nSet easing type for the F-Curve segments starting from the selected keyframes";
 
   /* API callbacks */
   ot->invoke = WM_menu_invoke;
@@ -1697,7 +1700,7 @@ void GRAPH_OT_handle_type(wmOperatorType *ot)
   /* Identifiers */
   ot->name = "Set Keyframe Handle Type";
   ot->idname = "GRAPH_OT_handle_type";
-  ot->description = "Set type of handle for selected keyframes";
+  ot->description = "Keyframe Handle Type\nSet type of handle for selected keyframes";
 
   /* API callbacks */
   ot->invoke = WM_menu_invoke;
@@ -2221,33 +2224,33 @@ void GRAPH_OT_snap_cursor_value(wmOperatorType *ot)
 static const EnumPropertyItem prop_graphkeys_snap_types[] = {
     {GRAPHKEYS_SNAP_CFRA,
      "CFRA",
-     0,
-     "Selection to Current Frame",
+     ICON_SNAP_CURRENTFRAME,
+     "Current Frame",
      "Snap selected keyframes to the current frame"},
     {GRAPHKEYS_SNAP_VALUE,
      "VALUE",
-     0,
-     "Selection to Cursor Value",
+     ICON_SNAP_CURSORVALUE,
+     "Cursor Value",
      "Set values of selected keyframes to the cursor value (Y/Horizontal component)"},
     {GRAPHKEYS_SNAP_NEAREST_FRAME,
      "NEAREST_FRAME",
-     0,
-     "Selection to Nearest Frame",
-     "Snap selected keyframes to the nearest (whole) frame (use to fix accidental subframe "
+     ICON_SNAP_NEARESTFRAME,
+     "Nearest Frame",
+     "Snap selected keyframes to the nearest (whole) frame (use to fix accidental sub-frame "
      "offsets)"},
     {GRAPHKEYS_SNAP_NEAREST_SECOND,
      "NEAREST_SECOND",
-     0,
-     "Selection to Nearest Second",
+     ICON_SNAP_NEARESTSECOND,
+     "Nearest Second",
      "Snap selected keyframes to the nearest second"},
     {GRAPHKEYS_SNAP_NEAREST_MARKER,
      "NEAREST_MARKER",
-     0,
-     "Selection to Nearest Marker",
+     ICON_SNAP_NEARESTMARKER,
+     "Nearest Marker",
      "Snap selected keyframes to the nearest marker"},
     {GRAPHKEYS_SNAP_HORIZONTAL,
      "HORIZONTAL",
-     0,
+     ICON_FLATTEN_HANDLER,
      "Flatten Handles",
      "Flatten handles for a smoother transition"},
     {0, NULL, 0, NULL, NULL},
@@ -2519,28 +2522,28 @@ void GRAPH_OT_equalize_handles(wmOperatorType *ot)
 static const EnumPropertyItem prop_graphkeys_mirror_types[] = {
     {GRAPHKEYS_MIRROR_CFRA,
      "CFRA",
-     0,
+     ICON_MIRROR_TIME,
      "By Times Over Current Frame",
      "Flip times of selected keyframes using the current frame as the mirror line"},
     {GRAPHKEYS_MIRROR_VALUE,
      "VALUE",
-     0,
+     ICON_MIRROR_CURSORVALUE,
      "By Values Over Cursor Value",
      "Flip values of selected keyframes using the cursor value (Y/Horizontal component) as the "
      "mirror line"},
     {GRAPHKEYS_MIRROR_YAXIS,
      "YAXIS",
-     0,
+     ICON_MIRROR_TIME,
      "By Times Over Zero Time",
      "Flip times of selected keyframes, effectively reversing the order they appear in"},
     {GRAPHKEYS_MIRROR_XAXIS,
      "XAXIS",
-     0,
+     ICON_MIRROR_CURSORVALUE,
      "By Values Over Zero Value",
      "Flip values of selected keyframes (i.e. negative values become positive, and vice versa)"},
     {GRAPHKEYS_MIRROR_MARKER,
      "MARKER",
-     0,
+     ICON_MIRROR_MARKER,
      "By Times Over First Selected Marker",
      "Flip times of selected keyframes using the first selected marker as the reference point"},
     {0, NULL, 0, NULL, NULL},

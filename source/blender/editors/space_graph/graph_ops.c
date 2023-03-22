@@ -33,6 +33,8 @@
 #include "WM_api.h"
 #include "WM_types.h"
 
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
 /* ************************** view-based operators **********************************/
 /* XXX should these really be here? */
 
@@ -309,6 +311,17 @@ static int graphview_curves_hide_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *graph_ot_hide_get_description(bContext *UNUSED(C),
+                                           wmOperatorType *UNUSED(ot),
+                                           PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "unselected")) {
+    return BLI_strdup("Hide unselected curves from Graph Editor view");
+  }
+  return NULL;
+}
+
 static void GRAPH_OT_hide(wmOperatorType *ot)
 {
   /* identifiers */
@@ -318,14 +331,18 @@ static void GRAPH_OT_hide(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = graphview_curves_hide_exec;
+  ot->get_description = graph_ot_hide_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_graphedit_active;
 
   /* flags */
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
   /* props */
-  RNA_def_boolean(
-      ot->srna, "unselected", 0, "Unselected", "Hide unselected rather than selected curves");
+  RNA_def_boolean(ot->srna,
+                  "unselected",
+                  0,
+                  "Unselected",
+                  "Unselected\nHide unselected rather than selected curves");
 }
 
 /* ........ */
@@ -490,10 +507,11 @@ void ED_operatormacros_graph(void)
   wmOperatorType *ot;
   wmOperatorTypeMacro *otmacro;
 
-  ot = WM_operatortype_append_macro("GRAPH_OT_duplicate_move",
-                                    "Duplicate",
-                                    "Make a copy of all selected keyframes and move them",
-                                    OPTYPE_UNDO | OPTYPE_REGISTER);
+  ot = WM_operatortype_append_macro(
+      "GRAPH_OT_duplicate_move",
+      "Duplicate",
+      "Duplicate\nMake a copy of all selected keyframes and move them",
+      OPTYPE_UNDO | OPTYPE_REGISTER);
   WM_operatortype_macro_define(ot, "GRAPH_OT_duplicate");
   otmacro = WM_operatortype_macro_define(ot, "TRANSFORM_OT_transform");
   RNA_enum_set(otmacro->ptr, "mode", TFM_TIME_DUPLICATE);

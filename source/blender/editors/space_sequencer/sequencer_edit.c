@@ -72,6 +72,9 @@
 /* Own include. */
 #include "sequencer_intern.h"
 
+#include "UI_interface.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+#include "UI_resources.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+
 /* -------------------------------------------------------------------- */
 /** \name Structs & Enums
  * \{ */
@@ -1515,6 +1518,30 @@ static void sequencer_split_ui(bContext *UNUSED(C), wmOperator *op)
   }
 }
 
+/*bfa - tool name*/
+static const char *SEQUENCER_OT_split_get_name(wmOperatorType *ot, PointerRNA *ptr)
+{
+  if (RNA_enum_get(ptr, "type") == SEQ_SPLIT_HARD) {
+    return CTX_IFACE_(ot->translation_context, "Hold Split");
+  }
+  return NULL;
+}
+
+/*bfa - descriptions*/
+static char *SEQUENCER_OT_split_get_description(bContext *UNUSED(C),
+                                                wmOperatorType *UNUSED(ot),
+                                                PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "type") == SEQ_SPLIT_HARD) {
+    return BLI_strdup(
+        "Split the selected strips in two\nBut you cannot drag the endpoints to show the frames "
+        "past the split of each resulting strip");
+  }
+
+  return NULL;
+}
+
 void SEQUENCER_OT_split(struct wmOperatorType *ot)
 {
   /* Identifiers. */
@@ -1525,6 +1552,8 @@ void SEQUENCER_OT_split(struct wmOperatorType *ot)
   /* Api callbacks. */
   ot->invoke = sequencer_split_invoke;
   ot->exec = sequencer_split_exec;
+  ot->get_name = SEQUENCER_OT_split_get_name;               /*bfa - tool name*/
+  ot->get_description = SEQUENCER_OT_split_get_description; /*bfa - descriptions*/
   ot->poll = sequencer_edit_poll;
   ot->ui = sequencer_split_ui;
 
@@ -1709,23 +1738,22 @@ static int sequencer_delete_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
-static int sequencer_delete_invoke(bContext *C, wmOperator *op, const wmEvent *event)
-{
-  ARegion *region = CTX_wm_region(C);
-  Scene *scene = CTX_data_scene(C);
-  ListBase *markers = &scene->markers;
+/* Not used by BFA */
+// static int sequencer_delete_invoke(bContext *C, wmOperator *op, const wmEvent *event)
+// {
+//   ARegion *region = CTX_wm_region(C);
 
-  if (region->regiontype == RGN_TYPE_WINDOW && !BLI_listbase_is_empty(markers)) {
-    /* Bounding box of 30 pixels is used for markers shortcuts,
-     * prevent conflict with markers shortcuts here.
-     */
-    if (event->mval[1] <= 30) {
-      return OPERATOR_PASS_THROUGH;
-    }
-  }
+//   if (region->regiontype == RGN_TYPE_WINDOW) {
+//     /* Bounding box of 30 pixels is used for markers shortcuts,
+//      * prevent conflict with markers shortcuts here.
+//      */
+//     if (event->mval[1] <= 30) {
+//       return OPERATOR_PASS_THROUGH;
+//     }
+//   }
 
-  return sequencer_delete_exec(C, op);
-}
+//   return sequencer_delete_exec(C, op);
+// }
 
 void SEQUENCER_OT_delete(wmOperatorType *ot)
 {
@@ -1736,7 +1764,7 @@ void SEQUENCER_OT_delete(wmOperatorType *ot)
   ot->description = "Erase selected strips from the sequencer";
 
   /* Api callbacks. */
-  ot->invoke = sequencer_delete_invoke;
+  /*ot->invoke = sequencer_delete_invoke;*/ /*bfa - turned this dialog off*/
   ot->exec = sequencer_delete_exec;
   ot->poll = sequencer_edit_poll;
 
@@ -2300,6 +2328,34 @@ static int sequencer_swap_exec(bContext *C, wmOperator *op)
   return OPERATOR_CANCELLED;
 }
 
+/*bfa - tool name*/
+static const char *SEQUENCER_OT_swap_get_name(wmOperatorType *ot, PointerRNA *ptr)
+{
+  if (RNA_enum_get(ptr, "side") == SEQ_SIDE_RIGHT) {
+    return CTX_IFACE_(ot->translation_context, "Swap Strip Right");
+  }
+  else if (RNA_enum_get(ptr, "side") == SEQ_SIDE_LEFT) {
+    return CTX_IFACE_(ot->translation_context, "Swap Strip Left");
+  }
+  return NULL;
+}
+
+/*bfa - descriptions*/
+static char *SEQUENCER_OT_swap_get_description(bContext *UNUSED(C),
+                                               wmOperatorType *UNUSED(ot),
+                                               PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "side") == SEQ_SIDE_RIGHT) {
+    return BLI_strdup("Swap active strip with strip to the right");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "side") == SEQ_SIDE_LEFT) {
+    return BLI_strdup("Swap active strip with strip to the left");
+  }
+  return NULL;
+}
+
 void SEQUENCER_OT_swap(wmOperatorType *ot)
 {
   /* Identifiers. */
@@ -2309,6 +2365,8 @@ void SEQUENCER_OT_swap(wmOperatorType *ot)
 
   /* Api callbacks. */
   ot->exec = sequencer_swap_exec;
+  ot->get_name = SEQUENCER_OT_swap_get_name;               /*bfa - tool name*/
+  ot->get_description = SEQUENCER_OT_swap_get_description; /*bfa - descriptions*/
   ot->poll = sequencer_edit_poll;
 
   /* Flags. */
@@ -2785,24 +2843,44 @@ void SEQUENCER_OT_change_effect_input(struct wmOperatorType *ot)
  * \{ */
 
 EnumPropertyItem sequencer_prop_effect_types[] = {
-    {SEQ_TYPE_CROSS, "CROSS", 0, "Crossfade", "Crossfade effect strip type"},
-    {SEQ_TYPE_ADD, "ADD", 0, "Add", "Add effect strip type"},
-    {SEQ_TYPE_SUB, "SUBTRACT", 0, "Subtract", "Subtract effect strip type"},
-    {SEQ_TYPE_ALPHAOVER, "ALPHA_OVER", 0, "Alpha Over", "Alpha Over effect strip type"},
-    {SEQ_TYPE_ALPHAUNDER, "ALPHA_UNDER", 0, "Alpha Under", "Alpha Under effect strip type"},
-    {SEQ_TYPE_GAMCROSS, "GAMMA_CROSS", 0, "Gamma Cross", "Gamma Cross effect strip type"},
-    {SEQ_TYPE_MUL, "MULTIPLY", 0, "Multiply", "Multiply effect strip type"},
-    {SEQ_TYPE_OVERDROP, "OVER_DROP", 0, "Alpha Over Drop", "Alpha Over Drop effect strip type"},
-    {SEQ_TYPE_WIPE, "WIPE", 0, "Wipe", "Wipe effect strip type"},
-    {SEQ_TYPE_GLOW, "GLOW", 0, "Glow", "Glow effect strip type"},
-    {SEQ_TYPE_TRANSFORM, "TRANSFORM", 0, "Transform", "Transform effect strip type"},
-    {SEQ_TYPE_COLOR, "COLOR", 0, "Color", "Color effect strip type"},
-    {SEQ_TYPE_SPEED, "SPEED", 0, "Speed", "Color effect strip type"},
-    {SEQ_TYPE_MULTICAM, "MULTICAM", 0, "Multicam Selector", ""},
-    {SEQ_TYPE_ADJUSTMENT, "ADJUSTMENT", 0, "Adjustment Layer", ""},
-    {SEQ_TYPE_GAUSSIAN_BLUR, "GAUSSIAN_BLUR", 0, "Gaussian Blur", ""},
-    {SEQ_TYPE_TEXT, "TEXT", 0, "Text", ""},
-    {SEQ_TYPE_COLORMIX, "COLORMIX", 0, "Color Mix", ""},
+    {SEQ_TYPE_CROSS, "CROSS", ICON_NODE_VECTOR, "Crossfade", "Crossfade effect strip type"},
+    {SEQ_TYPE_ADD, "ADD", ICON_SEQ_ADD, "Add", "Add effect strip type"},
+    {SEQ_TYPE_SUB, "SUBTRACT", ICON_NODE_INVERT, "Subtract", "Subtract effect strip type"},
+    {SEQ_TYPE_ALPHAOVER,
+     "ALPHA_OVER",
+     ICON_SEQ_ALPHA_OVER,
+     "Alpha Over",
+     "Alpha Over effect strip type"},
+    {SEQ_TYPE_ALPHAUNDER,
+     "ALPHA_UNDER",
+     ICON_NODE_HOLDOUTSHADER,
+     "Alpha Under",
+     "Alpha Under effect strip type"},
+    {SEQ_TYPE_GAMCROSS,
+     "GAMMA_CROSS",
+     ICON_NODE_VECTOR,
+     "Gamma Cross",
+     "Gamma Cross effect strip type"},
+    {SEQ_TYPE_MUL, "MULTIPLY", ICON_SEQ_MULTIPLY, "Multiply", "Multiply effect strip type"},
+    {SEQ_TYPE_OVERDROP,
+     "OVER_DROP",
+     ICON_SEQ_ALPHA_OVER,
+     "Alpha Over Drop",
+     "Alpha Over Drop effect strip type"},
+    {SEQ_TYPE_WIPE, "WIPE", ICON_NODE_VECTOR_TRANSFORM, "Wipe", "Wipe effect strip type"},
+    {SEQ_TYPE_GLOW, "GLOW", ICON_LIGHT_SUN, "Glow", "Glow effect strip type"},
+    {SEQ_TYPE_TRANSFORM,
+     "TRANSFORM",
+     ICON_TRANSFORM_MOVE,
+     "Transform",
+     "Transform effect strip type"},
+    {SEQ_TYPE_COLOR, "COLOR", ICON_COLOR, "Color", "Color effect strip type"},
+    {SEQ_TYPE_SPEED, "SPEED", ICON_NODE_CURVE_TIME, "Speed", "Color effect strip type"},
+    {SEQ_TYPE_MULTICAM, "MULTICAM", ICON_SEQ_MULTICAM, "Multicam Selector", ""},
+    {SEQ_TYPE_ADJUSTMENT, "ADJUSTMENT", ICON_MOD_DISPLACE, "Adjustment Layer", ""},
+    {SEQ_TYPE_GAUSSIAN_BLUR, "GAUSSIAN_BLUR", ICON_NODE_BLUR, "Gaussian Blur", ""},
+    {SEQ_TYPE_TEXT, "TEXT", ICON_FONT_DATA, "Text", ""},
+    {SEQ_TYPE_COLORMIX, "COLORMIX", ICON_NODE_MIXRGB, "Color Mix", ""},
     {0, NULL, 0, NULL, NULL},
 };
 
@@ -3414,9 +3492,17 @@ void SEQUENCER_OT_strip_transform_clear(struct wmOperatorType *ot)
  * \{ */
 
 static const EnumPropertyItem scale_fit_methods[] = {
-    {SEQ_SCALE_TO_FIT, "FIT", 0, "Scale to Fit", "Scale image so fits in preview"},
-    {SEQ_SCALE_TO_FILL, "FILL", 0, "Scale to Fill", "Scale image so it fills preview completely"},
-    {SEQ_STRETCH_TO_FILL, "STRETCH", 0, "Stretch to Fill", "Stretch image so it fills preview"},
+    {SEQ_SCALE_TO_FIT, "FIT", 0, "Scale to Fit", "Scale the image so that it fits in the preview"},
+    {SEQ_SCALE_TO_FILL,
+     "FILL",
+     0,
+     "Scale to Fill",
+     "Scale the image so that it fills the preview completely"},
+    {SEQ_STRETCH_TO_FILL,
+     "STRETCH",
+     0,
+     "Stretch to Fill",
+     "Stretch the image so that it fills the preview"},
     {0, NULL, 0, NULL, NULL},
 };
 

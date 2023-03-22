@@ -12,9 +12,9 @@ class MATERIAL_MT_context_menu(Menu):
         layout = self.layout
 
         layout.operator("material.copy", icon='COPYDOWN')
-        layout.operator("object.material_slot_copy")
+        layout.operator("object.material_slot_copy", icon='COPYDOWN')
         layout.operator("material.paste", icon='PASTEDOWN')
-        layout.operator("object.material_slot_remove_unused")
+        layout.operator("object.material_slot_remove_unused", icon='DELETE')
 
 
 class MATERIAL_UL_matslots(UIList):
@@ -94,6 +94,10 @@ class EEVEE_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
         slot = context.material_slot
         space = context.space_data
 
+        #bfa - no remove in edit mode
+        obj = context.active_object
+        object_mode = 'OBJECT' if obj is None else obj.mode
+
         if ob:
             is_sortable = len(ob.material_slots) > 1
             rows = 3
@@ -106,7 +110,11 @@ class EEVEE_MATERIAL_PT_context_material(MaterialButtonsPanel, Panel):
 
             col = row.column(align=True)
             col.operator("object.material_slot_add", icon='ADD', text="")
-            col.operator("object.material_slot_remove", icon='REMOVE', text="")
+
+            #bfa - no remove in edit mode
+            sub = col.column()
+            sub.active = (object_mode != 'EDIT')
+            sub.operator("object.material_slot_remove", icon='REMOVE', text="")
 
             col.separator()
 
@@ -203,21 +211,43 @@ def draw_material_settings(self, context):
 
     mat = context.material
 
+    layout.use_property_split = False
     layout.prop(mat, "use_backface_culling")
+    layout.use_property_split = True
+
     layout.prop(mat, "blend_method")
     layout.prop(mat, "shadow_method")
 
     row = layout.row()
-    row.active = ((mat.blend_method == 'CLIP') or (mat.shadow_method == 'CLIP'))
-    row.prop(mat, "alpha_threshold")
+    if ((mat.blend_method == 'CLIP') or (mat.shadow_method == 'CLIP')):
+        row.prop(mat, "alpha_threshold")
 
     if mat.blend_method not in {'OPAQUE', 'CLIP', 'HASHED'}:
+        layout.use_property_split = False
         layout.prop(mat, "show_transparent_back")
+        layout.use_property_split = True
 
-    layout.prop(mat, "use_screen_refraction")
-    layout.prop(mat, "refraction_depth")
-    layout.prop(mat, "use_sss_translucency")
-    layout.prop(mat, "pass_index")
+    col = layout.column()
+
+    subcol = col.column()
+    subcol.use_property_split = False
+    row = subcol.row()
+    split = row.split(factor = 0.55)
+    split.prop(mat, "use_screen_refraction")
+    if mat.use_screen_refraction:
+        split.prop(mat, "refraction_depth", text = "")
+    else:
+        split.label(icon='DISCLOSURE_TRI_RIGHT')
+
+    subcol = col.column()
+    subcol.use_property_split = False
+    row = subcol.row()
+    split = row.split(factor = 0.55)
+    split.prop(mat, "use_sss_translucency")
+    if mat.use_sss_translucency:
+        split.prop(mat, "pass_index", text = "")
+    else:
+        split.label(icon='DISCLOSURE_TRI_RIGHT')
 
 
 class EEVEE_MATERIAL_PT_settings(MaterialButtonsPanel, Panel):
@@ -300,20 +330,33 @@ class MATERIAL_PT_lineart(MaterialButtonsPanel, Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
 
         mat = context.material
         lineart = mat.lineart
 
-        layout.prop(lineart, "use_material_mask", text="Material Mask")
+        row = layout.row()
+        split = row.split(factor = 0.5)
+        row = split.row()
+        row.prop(lineart, "use_material_mask", text="Material Mask")
+        row = split.row()
+        if lineart.use_material_mask:
+            row.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            row.label(icon='DISCLOSURE_TRI_RIGHT')
+        row = split.row()
+        row.alignment = 'RIGHT'
+        row.prop_decorator(lineart, "use_material_mask")
+
+        layout.use_property_split = True
 
         col = layout.column(align=True)
-        col.active = lineart.use_material_mask
-        row = col.row(align=True, heading="Masks")
-        for i in range(8):
-            row.prop(lineart, "use_material_mask_bits", text=" ", index=i, toggle=True)
-            if i == 3:
-                row = col.row(align=True)
+        if lineart.use_material_mask:
+            row = col.row(align=True, heading="      Masks")
+            for i in range(8):
+                row.prop(lineart, "use_material_mask_bits", text=str(i), index=i, toggle=True) # bfa - labels on the maks bits
+                if i == 3:
+                    row = col.row(align=True)
 
         row = layout.row(align=True, heading="Custom Occlusion")
         row.prop(lineart, "mat_occlusion", text="Levels")

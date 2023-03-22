@@ -585,7 +585,7 @@ static void path_panel_draw_header(const bContext * /*C*/, Panel *panel)
 
 static void path_panel_draw(const bContext * /*C*/, Panel *panel)
 {
-  uiLayout *col;
+  uiLayout *col, *row; /*bfa, added *row*/
   uiLayout *layout = panel->layout;
 
   PointerRNA ob_ptr;
@@ -602,7 +602,15 @@ static void path_panel_draw(const bContext * /*C*/, Panel *panel)
   uiItemR(col, ptr, "rotation", UI_ITEM_R_SLIDER, nullptr, ICON_NONE);
   uiItemR(col, ptr, "random_rotation", UI_ITEM_R_SLIDER, IFACE_("Random"), ICON_NONE);
 
-  uiItemR(layout, ptr, "use_preserve_shape", 0, nullptr, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_preserve_shape", 0, nullptr, ICON_NONE);
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_preserve_shape", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_preserve_shape", 0); /*bfa - decorator*/
+
+  /* ------------ end bfa */
 }
 
 static void layers_panel_draw(const bContext * /*C*/, Panel *panel)

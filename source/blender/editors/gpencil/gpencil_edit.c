@@ -82,6 +82,9 @@
 
 #include "gpencil_intern.h"
 
+#include "UI_interface.h" /*bfa - needed for the icons*/
+#include "UI_resources.h" /*bfa - needed for the icons*/
+
 /* -------------------------------------------------------------------- */
 /** \name Stroke Edit Mode Management
  * \{ */
@@ -2022,6 +2025,30 @@ static int gpencil_blank_frame_add_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - tool name*/
+static const char *GPENCIL_OT_blank_frame_add_name(wmOperatorType *ot, PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "all_layers")) {
+    return CTX_IFACE_(ot->translation_context, "Insert Blank Frame (All Layers)");
+  }
+  else {
+    return CTX_IFACE_(ot->translation_context, "Insert Blank Frame (Active Layer)");
+  }
+}
+
+/*bfa - descriptions*/
+static char *GPENCIL_OT_blank_frame_add_get_description(bContext *UNUSED(C),
+                                                        wmOperatorType *UNUSED(ot),
+                                                        PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "all_layers")) {
+    return BLI_strdup(
+        "Insert a blank frame on all layers "
+        "(all subsequently existing frames, if any, are shifted right by one frame)");
+  }
+  return NULL;
+}
+
 void GPENCIL_OT_blank_frame_add(wmOperatorType *ot)
 {
   PropertyRNA *prop;
@@ -2030,11 +2057,13 @@ void GPENCIL_OT_blank_frame_add(wmOperatorType *ot)
   ot->name = "Insert Blank Frame";
   ot->idname = "GPENCIL_OT_blank_frame_add";
   ot->description =
-      "Insert a blank frame on the current frame "
+      "Insert a blank frame on the current layer "
       "(all subsequently existing frames, if any, are shifted right by one frame)";
 
   /* callbacks */
   ot->exec = gpencil_blank_frame_add_exec;
+  ot->get_name = GPENCIL_OT_blank_frame_add_name;                   /*bfa - tool name*/
+  ot->get_description = GPENCIL_OT_blank_frame_add_get_description; /*bfa - descriptions*/
   ot->poll = gpencil_add_poll;
 
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
@@ -2729,11 +2758,11 @@ void GPENCIL_OT_delete(wmOperatorType *ot)
   static const EnumPropertyItem prop_gpencil_delete_types[] = {
       {GP_DELETEOP_POINTS,
        "POINTS",
-       0,
+       ICON_DELETE,
        "Points",
        "Delete selected points and split strokes into segments"},
-      {GP_DELETEOP_STROKES, "STROKES", 0, "Strokes", "Delete selected strokes"},
-      {GP_DELETEOP_FRAME, "FRAME", 0, "Frame", "Delete active frame"},
+      {GP_DELETEOP_STROKES, "STROKES", ICON_DELETE, "Strokes", "Delete selected strokes"},
+      {GP_DELETEOP_FRAME, "FRAME", ICON_DELETE, "Frame", "Delete active frame"},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -2775,13 +2804,17 @@ static int gpencil_dissolve_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_dissolve(wmOperatorType *ot)
 {
   static EnumPropertyItem prop_gpencil_dissolve_types[] = {
-      {GP_DISSOLVE_POINTS, "POINTS", 0, "Dissolve", "Dissolve selected points"},
+      {GP_DISSOLVE_POINTS, "POINTS", ICON_DISSOLVE_VERTS, "Dissolve", "Dissolve selected points"},
       {GP_DISSOLVE_BETWEEN,
        "BETWEEN",
-       0,
+       ICON_DISSOLVE_BETWEEN,
        "Dissolve Between",
        "Dissolve points between selected points"},
-      {GP_DISSOLVE_UNSELECT, "UNSELECT", 0, "Dissolve Unselect", "Dissolve all unselected points"},
+      {GP_DISSOLVE_UNSELECT,
+       "UNSELECT",
+       ICON_DISSOLVE_UNSELECTED,
+       "Dissolve Unselect",
+       "Dissolve all unselected points"},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -3481,10 +3514,14 @@ static int gpencil_stroke_caps_set_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_stroke_caps_set(wmOperatorType *ot)
 {
   static const EnumPropertyItem toggle_type[] = {
-      {GP_STROKE_CAPS_TOGGLE_BOTH, "TOGGLE", 0, "Both", ""},
-      {GP_STROKE_CAPS_TOGGLE_START, "START", 0, "Start", ""},
-      {GP_STROKE_CAPS_TOGGLE_END, "END", 0, "End", ""},
-      {GP_STROKE_CAPS_TOGGLE_DEFAULT, "DEFAULT", 0, "Default", "Set as default rounded"},
+      {GP_STROKE_CAPS_TOGGLE_BOTH, "TOGGLE", ICON_TOGGLECAPS_BOTH, "Both", ""},
+      {GP_STROKE_CAPS_TOGGLE_START, "START", ICON_TOGGLECAPS_START, "Start", ""},
+      {GP_STROKE_CAPS_TOGGLE_END, "END", ICON_TOGGLECAPS_END, "End", ""},
+      {GP_STROKE_CAPS_TOGGLE_DEFAULT,
+       "DEFAULT",
+       ICON_TOGGLECAPS_DEFAULT,
+       "Default",
+       "Set as default rounded"},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -3688,8 +3725,8 @@ static int gpencil_stroke_join_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_stroke_join(wmOperatorType *ot)
 {
   static const EnumPropertyItem join_type[] = {
-      {GP_STROKE_JOIN, "JOIN", 0, "Join", ""},
-      {GP_STROKE_JOINCOPY, "JOINCOPY", 0, "Join and Copy", ""},
+      {GP_STROKE_JOIN, "JOIN", ICON_JOIN, "Join", ""},
+      {GP_STROKE_JOINCOPY, "JOINCOPY", ICON_JOIN, "Join and Copy", ""},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -4018,24 +4055,31 @@ void GPENCIL_OT_reproject(wmOperatorType *ot)
 {
   PropertyRNA *prop;
   static const EnumPropertyItem reproject_type[] = {
-      {GP_REPROJECT_FRONT, "FRONT", 0, "Front", "Reproject the strokes using the X-Z plane"},
-      {GP_REPROJECT_SIDE, "SIDE", 0, "Side", "Reproject the strokes using the Y-Z plane"},
-      {GP_REPROJECT_TOP, "TOP", 0, "Top", "Reproject the strokes using the X-Y plane"},
+      {GP_REPROJECT_FRONT,
+       "FRONT",
+       ICON_VIEW_FRONT,
+       "Front",
+       "Reproject the strokes using the X-Z plane"},
+      {GP_REPROJECT_SIDE,
+       "SIDE",
+       ICON_VIEW_LEFT,
+       "Side",
+       "Reproject the strokes using the Y-Z plane"},
+      {GP_REPROJECT_TOP, "TOP", ICON_VIEW_TOP, "Top", "Reproject the strokes using the X-Y plane"},
       {GP_REPROJECT_VIEW,
        "VIEW",
-       0,
+       ICON_VIEW,
        "View",
-       "Reproject the strokes to end up on the same plane, as if drawn from the current "
-       "viewpoint "
+       "Reproject the strokes to end up on the same plane, as if drawn from the current viewpoint "
        "using 'Cursor' Stroke Placement"},
       {GP_REPROJECT_SURFACE,
        "SURFACE",
-       0,
+       ICON_REPROJECT,
        "Surface",
        "Reproject the strokes on to the scene geometry, as if drawn using 'Surface' placement"},
       {GP_REPROJECT_CURSOR,
        "CURSOR",
-       0,
+       ICON_CURSOR,
        "Cursor",
        "Reproject the strokes using the orientation of 3D cursor"},
       {0, NULL, 0, NULL, NULL},
@@ -4045,10 +4089,7 @@ void GPENCIL_OT_reproject(wmOperatorType *ot)
   ot->name = "Reproject Strokes";
   ot->idname = "GPENCIL_OT_reproject";
   ot->description =
-      "Reproject the selected strokes from the current viewpoint as if they had been newly "
-      "drawn "
-      "(e.g. to fix problems from accidental 3D cursor movement or accidental viewport changes, "
-      "or for matching deforming geometry)";
+      "Reproject the selected strokes from the current viewpoint as if they had been newly drawn ";
 
   /* callbacks */
   ot->invoke = WM_menu_invoke;
@@ -4333,7 +4374,7 @@ void GPENCIL_OT_stroke_outline(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Convert Stroke to Outline";
   ot->idname = "GPENCIL_OT_stroke_outline";
-  ot->description = "Convert stroke to perimeter";
+  ot->description = "Requires a active camera in the scene\nConvert stroke to perimeter";
 
   /* api callbacks */
   ot->exec = gpencil_stroke_outline_exec;
@@ -5256,9 +5297,21 @@ static int gpencil_stroke_separate_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_stroke_separate(wmOperatorType *ot)
 {
   static const EnumPropertyItem separate_type[] = {
-      {GP_SEPARATE_POINT, "POINT", 0, "Selected Points", "Separate the selected points"},
-      {GP_SEPARATE_STROKE, "STROKE", 0, "Selected Strokes", "Separate the selected strokes"},
-      {GP_SEPARATE_LAYER, "LAYER", 0, "Active Layer", "Separate the strokes of the current layer"},
+      {GP_SEPARATE_POINT,
+       "POINT",
+       ICON_SEPARATE_GP_POINTS,
+       "Selected Points",
+       "Separate the selected points"},
+      {GP_SEPARATE_STROKE,
+       "STROKE",
+       ICON_SEPARATE_GP_STROKES,
+       "Selected Strokes",
+       "Separate the selected strokes"},
+      {GP_SEPARATE_LAYER,
+       "LAYER",
+       ICON_SEPARATE_GP_LAYER,
+       "Active Layer",
+       "Separate the strokes of the current layer"},
       {0, NULL, 0, NULL, NULL},
   };
 

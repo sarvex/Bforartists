@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-from bpy.types import Menu
+from bpy.types import Menu, Panel # bfa - panel
 
 
 class UnifiedPaintPanel:
@@ -148,7 +148,6 @@ class BrushSelectPanel(BrushPanel):
         else:
             row.column().template_ID(settings, "brush", new="brush.add")
         col = row.column()
-        col.menu("VIEW3D_MT_brush_context_menu", icon='DOWNARROW_HLT', text="")
 
         if brush is not None:
             col.prop(brush, "use_custom_icon", toggle=True, icon='FILE_IMAGE', text="")
@@ -313,7 +312,9 @@ class StrokePanel(BrushPanel):
         col.separator()
 
         if brush.use_anchor:
+            col.use_property_split = False
             col.prop(brush, "use_edge_to_edge", text="Edge to Edge")
+            col.use_property_split = True
 
         if brush.use_airbrush:
             col.prop(brush, "rate", text="Rate", slider=True)
@@ -332,7 +333,9 @@ class StrokePanel(BrushPanel):
 
         if mode in {'PAINT_TEXTURE', 'PAINT_2D', 'SCULPT'}:
             if brush.image_paint_capabilities.has_space_attenuation or brush.sculpt_capabilities.has_space_attenuation:
+                col.use_property_split = False
                 col.prop(brush, "use_space_attenuation")
+                col.use_property_split = True
 
         if brush.use_curve:
             col.separator()
@@ -361,7 +364,7 @@ class StrokePanel(BrushPanel):
 
 
 class SmoothStrokePanel(BrushPanel):
-    bl_label = "Stabilize Stroke"
+    bl_label = ""
     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
@@ -377,8 +380,10 @@ class SmoothStrokePanel(BrushPanel):
     def draw_header(self, context):
         settings = self.paint_settings(context)
         brush = settings.brush
-
-        self.layout.prop(brush, "use_smooth_stroke", text="")
+        # bfa - align props left
+        row = self.layout.row(align=True)
+        row.use_property_split = False
+        row.prop(brush, "use_smooth_stroke", text="Stabilize Stroke")
 
     def draw(self, context):
         layout = self.layout
@@ -472,8 +477,9 @@ class DisplayPanel(BrushPanel):
 
         if self.is_popover:
             row = layout.row(align=True)
-            row.prop(settings, "show_brush", text="")
-            row.label(text="Display Cursor")
+            # bfa - align props left
+            row.use_property_split = False
+            row.prop(settings, "show_brush", text="Display Cursor")
 
         col = layout.column()
         col.active = brush.brush_capabilities.has_overlay and settings.show_brush
@@ -550,6 +556,8 @@ def brush_settings(layout, context, brush, popover=False):
         row.prop(brush, "invert_hardness_pressure", text="")
         row.prop(brush, "use_hardness_pressure", text="")
 
+        layout.separator()
+
         # auto_smooth_factor and use_inverse_smooth_pressure
         if capabilities.has_auto_smooth:
             UnifiedPaintPanel.prop_unified(
@@ -595,13 +603,17 @@ def brush_settings(layout, context, brush, popover=False):
                 slider=True,
             )
 
-            row = layout.row(heading="Plane Trim")
-            row.prop(brush, "use_plane_trim", text="")
-            sub = row.row()
-            sub.active = brush.use_plane_trim
-            sub.prop(brush, "plane_trim", slider=True, text="")
-
             layout.separator()
+
+            split = layout.split(factor=0.36)
+            col = split.column()
+            col.use_property_split = False
+            col.prop(brush, "use_plane_trim", text="Plane Trim")
+            col = split.column()
+            if brush.use_plane_trim:
+                col.prop(brush, "plane_trim", slider=True, text="")
+            else:
+                col.label(icon='DISCLOSURE_TRI_RIGHT')
 
         # height
         if capabilities.has_height:
@@ -609,7 +621,9 @@ def brush_settings(layout, context, brush, popover=False):
 
         # use_persistent, set_persistent_base
         if capabilities.has_persistence:
+
             layout.separator()
+            layout.use_property_split = False
             layout.prop(brush, "use_persistent")
             layout.operator("sculpt.set_persistent_base")
             layout.separator()
@@ -653,21 +667,28 @@ def brush_settings(layout, context, brush, popover=False):
                 layout.prop(brush, "pose_ik_segments")
             if brush.pose_deform_type == 'SCALE_TRANSLATE':
                 layout.prop(brush, "use_pose_lock_rotation")
+
+            layout.use_property_split = False
             layout.prop(brush, "use_pose_ik_anchored")
             layout.prop(brush, "use_connected_only")
+            layout.use_property_split = True
+
             layout.prop(brush, "disconnected_distance_max")
 
             layout.separator()
 
         elif sculpt_tool == 'CLOTH':
             layout.separator()
+            layout.use_property_split = True
             layout.prop(brush, "cloth_simulation_area_type")
             if brush.cloth_simulation_area_type != 'GLOBAL':
                 layout.prop(brush, "cloth_sim_limit")
                 layout.prop(brush, "cloth_sim_falloff")
 
             if brush.cloth_simulation_area_type == 'LOCAL':
+                layout.use_property_split = False
                 layout.prop(brush, "use_cloth_pin_simulation_boundary")
+                layout.use_property_split = True
 
             layout.separator()
             layout.prop(brush, "cloth_deform_type")
@@ -677,7 +698,9 @@ def brush_settings(layout, context, brush, popover=False):
             layout.prop(brush, "cloth_damping")
             layout.prop(brush, "cloth_constraint_softbody_strength")
             layout.separator()
+            layout.use_property_split = False
             layout.prop(brush, "use_cloth_collision")
+
             layout.separator()
 
         elif sculpt_tool == 'SCRAPE':
@@ -685,6 +708,7 @@ def brush_settings(layout, context, brush, popover=False):
             row.prop(brush, "area_radius_factor")
             row.prop(brush, "use_pressure_area_radius", text="")
             row = layout.row()
+            row.use_property_split = False
             row.prop(brush, "invert_to_scrape_fill", text="Invert to Fill")
 
         elif sculpt_tool == 'FILL':
@@ -692,9 +716,11 @@ def brush_settings(layout, context, brush, popover=False):
             row.prop(brush, "area_radius_factor")
             row.prop(brush, "use_pressure_area_radius", text="")
             row = layout.row()
+            row.use_property_split = False
             row.prop(brush, "invert_to_scrape_fill", text="Invert to Scrape")
 
         elif sculpt_tool == 'GRAB':
+            layout.use_property_split = False
             layout.prop(brush, "use_grab_active_vertex")
             layout.prop(brush, "use_grab_silhouette")
 
@@ -747,6 +773,7 @@ def brush_settings(layout, context, brush, popover=False):
         elif sculpt_tool == 'MULTIPLANE_SCRAPE':
             col = layout.column()
             col.prop(brush, "multiplane_scrape_angle")
+            col.use_property_split = False
             col.prop(brush, "use_multiplane_scrape_dynamic")
             col.prop(brush, "show_multiplane_scrape_planes_preview")
 
@@ -781,11 +808,22 @@ def brush_settings(layout, context, brush, popover=False):
 
     elif mode == 'SCULPT_CURVES':
         if brush.curves_sculpt_tool == 'ADD':
+            layout.use_property_split = True
             layout.prop(brush.curves_sculpt_settings, "add_amount")
-            col = layout.column(heading="Interpolate", align=True)
-            col.prop(brush.curves_sculpt_settings, "interpolate_length", text="Length")
-            col.prop(brush.curves_sculpt_settings, "interpolate_shape", text="Shape")
-            col.prop(brush.curves_sculpt_settings, "interpolate_point_count", text="Point Count")
+
+            col = layout.column()
+            col.use_property_split = False
+            col.label(text = "Interpolate")
+
+            row = col.row()
+            row.separator()
+            row.prop(brush.curves_sculpt_settings, "interpolate_length", text="Length")
+            row = col.row()
+            row.separator()
+            row.prop(brush.curves_sculpt_settings, "interpolate_shape", text="Shape")
+            row = col.row()
+            row.separator()
+            row.prop(brush.curves_sculpt_settings, "interpolate_point_count", text="Point Count")
 
             col = layout.column()
             col.active = not brush.curves_sculpt_settings.interpolate_length
@@ -795,7 +833,9 @@ def brush_settings(layout, context, brush, popover=False):
             col.active = not brush.curves_sculpt_settings.interpolate_point_count
             col.prop(brush.curves_sculpt_settings, "points_per_curve")
         elif brush.curves_sculpt_tool == 'GROW_SHRINK':
+            layout.use_property_split = False
             layout.prop(brush.curves_sculpt_settings, "scale_uniform")
+            layout.use_property_split = True
             layout.prop(brush.curves_sculpt_settings, "minimum_length")
 
 
@@ -812,6 +852,7 @@ def brush_shared_settings(layout, context, brush, popover=False):
     strength_pressure = False
     weight = False
     direction = False
+    use_frontface = False
 
     # 3D and 2D Texture Paint #
     if mode in {'PAINT_TEXTURE', 'PAINT_2D'}:
@@ -828,6 +869,7 @@ def brush_shared_settings(layout, context, brush, popover=False):
             strength = True
             strength_pressure = brush.sculpt_capabilities.has_strength_pressure
             direction = not brush.sculpt_capabilities.has_direction
+            use_frontface = True
 
     # Vertex Paint #
     if mode == 'PAINT_VERTEX':
@@ -836,6 +878,7 @@ def brush_shared_settings(layout, context, brush, popover=False):
             size = True
             strength = True
             strength_pressure = True
+            use_frontface = True
 
     # Weight Paint #
     if mode == 'PAINT_WEIGHT':
@@ -843,6 +886,7 @@ def brush_shared_settings(layout, context, brush, popover=False):
             size = True
             weight = brush.weight_paint_capabilities.has_weight
             strength = strength_pressure = True
+            use_frontface = True
         # Only draw blend mode for the Draw tool, because for other tools it is pointless. D5928#137944
         if brush.weight_tool == 'DRAW':
             blend_mode = True
@@ -906,10 +950,19 @@ def brush_shared_settings(layout, context, brush, popover=False):
             pressure_name=pressure_name,
             slider=True,
         )
-        layout.separator()
 
     if direction:
         layout.row().prop(brush, "direction", expand=True)
+        layout.separator()
+
+    if use_frontface:
+        col = layout.column()
+        col.use_property_split = False
+        col.prop(brush, "use_frontface", text="Front Faces Only")
+        
+    layout.use_property_split = False        
+    layout.prop(context.object.data, "use_sculpt_collision")
+    
 
 
 def brush_settings_advanced(layout, context, brush, popover=False):
@@ -925,92 +978,188 @@ def brush_settings_advanced(layout, context, brush, popover=False):
 
     # These options are shared across many modes.
     use_accumulate = False
-    use_frontface = False
 
     if mode == 'SCULPT':
         sculpt = context.tool_settings.sculpt
         capabilities = brush.sculpt_capabilities
         use_accumulate = capabilities.has_accumulate
-        use_frontface = True
 
-        col = layout.column(heading="Auto-Masking", align=True)
+        col = layout.column(align = True)
+        col.label(text="Auto Masking")
 
-        col = layout.column(align=True)
-        col.prop(brush, "use_automasking_topology", text="Topology")
-        col.prop(brush, "use_automasking_face_sets", text="Face Sets")
+        # topology automasking
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(brush, "use_automasking_topology")
 
-        layout.separator()
+        # face masks automasking
+        row = col.row()
+        row.separator()
+        row.prop(brush, "use_automasking_face_sets")
 
-        col = layout.column(align=True)
-        col.prop(brush, "use_automasking_boundary_edges", text="Mesh Boundary")
-        col.prop(brush, "use_automasking_boundary_face_sets", text="Face Sets Boundary")
+        col = layout.column(align = True)
+        col.use_property_split = False
+
+        col = layout.column()
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
+        row.prop(brush, "use_automasking_boundary_edges", text="Mesh Boundary")
+
+        if brush.use_automasking_boundary_edges or brush.use_automasking_boundary_face_sets:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
+
+        col = layout.column()
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
+        row.prop(brush, "use_automasking_boundary_face_sets", text="Face Sets Boundary")
+
+        if brush.use_automasking_boundary_edges or brush.use_automasking_boundary_face_sets:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
 
         if brush.use_automasking_boundary_edges or brush.use_automasking_boundary_face_sets:
             col = layout.column()
-            col.use_property_split = False
-            split = col.split(factor=0.4)
-            col = split.column()
-            split.prop(brush, "automasking_boundary_edges_propagation_steps")
+            col.use_property_split = True
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(brush, "automasking_boundary_edges_propagation_steps", text = "Steps")
 
-        layout.separator()
-
-        col = layout.column(align=True)
-        row = col.row()
+        col = layout.column()
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
         row.prop(brush, "use_automasking_cavity", text="Cavity")
 
         is_cavity_active = brush.use_automasking_cavity or brush.use_automasking_cavity_inverted
 
         if is_cavity_active:
-            props = row.operator("sculpt.mask_from_cavity", text="Create Mask")
-            props.settings_source = "BRUSH"
-
-        col.prop(brush, "use_automasking_cavity_inverted", text="Cavity (inverted)")
-
-        if is_cavity_active:
-            col = layout.column(align=True)
-            col.prop(brush, "automasking_cavity_factor", text="Factor")
-            col.prop(brush, "automasking_cavity_blur_steps", text="Blur")
-
-            col = layout.column()
-            col.prop(brush, "use_automasking_custom_cavity_curve", text="Custom Curve")
-
-            if brush.use_automasking_custom_cavity_curve:
-                col.template_curve_mapping(brush, "automasking_cavity_curve")
-
-        layout.separator()
-
-        col = layout.column(align=True)
-        col.prop(brush, "use_automasking_view_normal", text="View Normal")
-
-        if brush.use_automasking_view_normal:
-            col.prop(brush, "use_automasking_view_occlusion", text="Occlusion")
-            subcol = col.column(align=True)
-            subcol.active = not brush.use_automasking_view_occlusion
-            subcol.prop(sculpt, "automasking_view_normal_limit", text="Limit")
-            subcol.prop(sculpt, "automasking_view_normal_falloff", text="Falloff")
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
 
         col = layout.column()
-        col.prop(brush, "use_automasking_start_normal", text="Area Normal")
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
+        row.prop(brush, "use_automasking_cavity_inverted", text="Cavity (inverted)")
+
+        is_cavity_active = brush.use_automasking_cavity or brush.use_automasking_cavity_inverted
+
+        if is_cavity_active:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
+
+        if is_cavity_active:
+
+            col = layout.column(align=True)
+            row = col.row()
+            row.separator(factor = 3.5)
+            props = row.operator("sculpt.mask_from_cavity", text="Create Mask")
+            props.settings_source = "BRUSH"
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(brush, "automasking_cavity_factor", text="Factor")
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(brush, "automasking_cavity_blur_steps", text="Blur")
+
+            col = layout.column()
+            col.use_property_split = False
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(brush, "use_automasking_custom_cavity_curve", text="Custom Curve")
+
+            if brush.use_automasking_custom_cavity_curve:
+
+                col.template_curve_mapping(brush, "automasking_cavity_curve")
+
+        col = layout.column()
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
+        row.prop(brush, "use_automasking_view_normal", text="View Normal")
+
+        if brush.use_automasking_view_normal:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
+
+        if brush.use_automasking_view_normal:
+
+            row = col.row()
+            row.use_property_split = False
+            row.separator(factor = 3.5)
+            row.prop(brush, "use_automasking_view_occlusion", text="Occlusion")
+            subcol = col.column(align=True)
+            if not brush.use_automasking_view_occlusion:
+                subcol.use_property_split = True
+                row = subcol.row()
+                row.separator(factor = 3.5)
+                row.prop(sculpt, "automasking_view_normal_limit", text="Limit")
+                row = subcol.row()
+                row.separator(factor = 3.5)
+                row.prop(sculpt, "automasking_view_normal_falloff", text="Falloff")
+
+        col = layout.column()
+        split = col.split(factor=0.9)
+        split.use_property_split=False
+        row = split.row()
+        row.separator()
+        row.prop(brush, "use_automasking_start_normal", text="Area Normal")
+
+        if brush.use_automasking_start_normal:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
 
         if brush.use_automasking_start_normal:
             col = layout.column(align=True)
-            col.prop(sculpt, "automasking_start_normal_limit", text="Limit")
-            col.prop(sculpt, "automasking_start_normal_falloff", text="Falloff")
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(sculpt, "automasking_start_normal_limit", text="Limit")
+            row = col.row()
+            row.separator(factor = 3.5)
+            row.prop(sculpt, "automasking_start_normal_falloff", text="Falloff")
+            col.separator()
 
         layout.separator()
 
         # sculpt plane settings
         if capabilities.has_sculpt_plane:
-            layout.prop(brush, "sculpt_plane")
-            col = layout.column(heading="Original", align=True)
-            col.prop(brush, "use_original_normal", text="Normal")
-            col.prop(brush, "use_original_plane", text="Plane")
+            col.use_property_split = True
+            col.prop(brush, "sculpt_plane")
+            col.use_property_split = False
+
+            col = layout.column()
+            col.label(text="Use Original")
+            col.use_property_split = False
+            row = col.row()
+            row.separator()
+            row.prop(brush, "use_original_normal", text="Normal")
+            row = col.row()
+            row.separator()
+            row.prop(brush, "use_original_plane", text="Plane")
+
             layout.separator()
 
     # 3D and 2D Texture Paint.
     elif mode in {'PAINT_TEXTURE', 'PAINT_2D'}:
         capabilities = brush.image_paint_capabilities
         use_accumulate = capabilities.has_accumulate
+
+        layout.use_property_split = False
 
         if mode == 'PAINT_2D':
             layout.prop(brush, "use_paint_antialiasing")
@@ -1036,23 +1185,20 @@ def brush_settings_advanced(layout, context, brush, popover=False):
 
     # Vertex Paint #
     elif mode == 'PAINT_VERTEX':
+        layout.use_property_split = False
         layout.prop(brush, "use_alpha")
         if brush.vertex_tool != 'SMEAR':
             use_accumulate = True
-        use_frontface = True
 
     # Weight Paint
     elif mode == 'PAINT_WEIGHT':
         if brush.weight_tool != 'SMEAR':
             use_accumulate = True
-        use_frontface = True
 
     # Draw shared settings.
     if use_accumulate:
+        layout.use_property_split = False
         layout.prop(brush, "use_accumulate")
-
-    if use_frontface:
-        layout.prop(brush, "use_frontface", text="Front Faces Only")
 
 
 def draw_color_settings(context, layout, brush, color_type=False):
@@ -1073,7 +1219,7 @@ def draw_color_settings(context, layout, brush, color_type=False):
         UnifiedPaintPanel.prop_unified_color(row, context, brush, "secondary_color", text="")
         row.separator()
         row.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="", emboss=False)
-        row.prop(ups, "use_unified_color", text="", icon='BRUSHES_ALL')
+        row.prop(ups, "use_unified_color", text="", icon="BRUSHES_ALL")
     # Gradient
     elif brush.color_type == 'GRADIENT':
         layout.template_color_ramp(brush, "gradient", expand=True)
@@ -1120,13 +1266,16 @@ def brush_texture_settings(layout, brush, sculpt):
         col = layout.column()
         col.prop(tex_slot, "angle", text="Angle")
         if tex_slot.has_texture_angle_source:
+            col.use_property_split = False
             col.prop(tex_slot, "use_rake", text="Rake")
 
             if brush.brush_capabilities.has_random_texture_angle and tex_slot.has_random_texture_angle:
                 if sculpt:
                     if brush.sculpt_capabilities.has_random_texture_angle:
+                        col.use_property_split = False
                         col.prop(tex_slot, "use_random", text="Random")
                         if tex_slot.use_random:
+                            col.use_property_split = True
                             col.prop(tex_slot, "random_angle", text="Random Angle")
                 else:
                     col.prop(tex_slot, "use_random", text="Random")
@@ -1144,6 +1293,7 @@ def brush_texture_settings(layout, brush, sculpt):
         if brush.sculpt_tool == 'DRAW':
             col = layout.column()
             col.active = tex_slot.map_mode == 'AREA_PLANE'
+            col.use_property_split = False
             col.prop(brush, "use_color_as_displacement", text="Vector Displacement")
 
 
@@ -1189,7 +1339,11 @@ def brush_basic_texpaint_settings(layout, context, brush, *, compact=False):
         row.ui_units_x = 4
         UnifiedPaintPanel.prop_unified_color(row, context, brush, "color", text="")
         UnifiedPaintPanel.prop_unified_color(row, context, brush, "secondary_color", text="")
+
         row.separator()
+
+        row.operator("paint.brush_colors_flip", icon='FILE_REFRESH', text="", emboss=False)
+
         layout.prop(brush, "blend", text="" if compact else "Blend")
 
     UnifiedPaintPanel.prop_unified(
@@ -1256,9 +1410,13 @@ def brush_basic__draw_color_selector(context, layout, brush, gp_settings, props)
             sub_row.prop_enum(settings, "color_mode", 'VERTEXCOLOR', text="", icon='VPAINT_HLT')
 
         sub_row = row.row(align=True)
-        sub_row.enabled = settings.color_mode == 'VERTEXCOLOR' or gp_settings.brush_draw_mode == 'VERTEXCOLOR'
-        sub_row.prop_with_popover(brush, "color", text="", panel="TOPBAR_PT_gpencil_vertexcolor")
-        row.prop(gp_settings, "pin_draw_mode", text="")
+        if settings.color_mode == 'VERTEXCOLOR' or gp_settings.brush_draw_mode == 'VERTEXCOLOR':
+            sub = row.row(align=True)
+            sub.scale_x = 0.33
+            sub.prop_with_popover(brush, "color", text="", panel="TOPBAR_PT_gpencil_vertexcolor")
+            sub.prop(brush, "secondary_color", text="")
+            row.operator("gpencil.tint_flip", icon='FILE_REFRESH', text="")
+            row.prop(gp_settings, "pin_draw_mode", text="")
 
     if props:
         row = layout.row(align=True)
@@ -1317,18 +1475,28 @@ def brush_basic_gpencil_paint_settings(layout, context, brush, *, compact=False)
         row.prop(gp_settings, "use_pressure", text="", icon='STYLUS_PRESSURE')
 
         if gp_settings.use_pressure and not compact:
-            col = layout.column()
-            col.template_curve_mapping(gp_settings, "curve_sensitivity", brush=True,
-                                       use_negative_slope=True)
+            row = layout.row()
+            row.separator()
+            row.popover(panel="VIEW3D_PT_gpencil_brush_settings_radius", text="Radius Pressure Curve")
+
+#        if gp_settings.use_pressure and not compact:
+#            col = layout.column()
+#            col.template_curve_mapping(gp_settings, "curve_sensitivity", brush=True,
+#                                       use_negative_slope=True)
 
         row = layout.row(align=True)
         row.prop(gp_settings, "pen_strength", slider=True)
         row.prop(gp_settings, "use_strength_pressure", text="", icon='STYLUS_PRESSURE')
 
         if gp_settings.use_strength_pressure and not compact:
-            col = layout.column()
-            col.template_curve_mapping(gp_settings, "curve_strength", brush=True,
-                                       use_negative_slope=True)
+            row = layout.row()
+            row.separator()
+            row.popover(panel="VIEW3D_PT_gpencil_brush_settings_strength", text="Strength Pressure Curve")
+
+#        if gp_settings.use_strength_pressure and not compact:
+#            col = layout.column()
+#            col.template_curve_mapping(gp_settings, "curve_strength", brush=True,
+#                                       use_negative_slope=True)
 
         if brush.gpencil_tool == 'TINT':
             row = layout.row(align=True)
@@ -1434,8 +1602,48 @@ def brush_basic_gpencil_vertex_settings(layout, _context, brush, *, compact=Fals
         row.prop(gp_settings, "vertex_mode", text="Mode")
 
 
+class VIEW3D_PT_gpencil_brush_settings_radius(Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_label = "Radius"
+    bl_region_type = 'HEADER'
+    bl_ui_units_x = 10
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        tool_settings = context.scene.tool_settings
+        gpencil_paint = tool_settings.gpencil_paint
+        brush = gpencil_paint.brush
+        gp_settings = brush.gpencil_settings
+
+        layout.template_curve_mapping(gp_settings, "curve_sensitivity", brush=True, use_negative_slope=True)
+
+
+class VIEW3D_PT_gpencil_brush_settings_strength(Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_label = "Strength"
+    bl_region_type = 'HEADER'
+    bl_ui_units_x = 10
+
+    def draw(self, context):
+        layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+
+        tool_settings = context.scene.tool_settings
+        gpencil_paint = tool_settings.gpencil_paint
+        brush = gpencil_paint.brush
+        gp_settings = brush.gpencil_settings
+
+        layout.template_curve_mapping(gp_settings, "curve_strength", brush=True, use_negative_slope=True)
+
+
 classes = (
     VIEW3D_MT_tools_projectpaint_clone,
+    VIEW3D_PT_gpencil_brush_settings_radius,
+    VIEW3D_PT_gpencil_brush_settings_strength,
 )
 
 if __name__ == "__main__":  # only for live edit.

@@ -110,7 +110,7 @@ static void rna_def_lighting(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "WorldLighting", NULL);
   RNA_def_struct_sdna(srna, "World");
   RNA_def_struct_nested(brna, srna, "World");
-  RNA_def_struct_ui_text(srna, "Lighting", "Lighting for a World data-block");
+  RNA_def_struct_ui_text(srna, "Lighting", "Lighting for a World data");
 
   /* ambient occlusion */
   prop = RNA_def_property(srna, "use_ambient_occlusion", PROP_BOOLEAN, PROP_NONE);
@@ -155,7 +155,7 @@ static void rna_def_world_mist(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "WorldMistSettings", NULL);
   RNA_def_struct_sdna(srna, "World");
   RNA_def_struct_nested(brna, srna, "World");
-  RNA_def_struct_ui_text(srna, "World Mist", "Mist settings for a World data-block");
+  RNA_def_struct_ui_text(srna, "World Mist", "Mist settings for a World data");
 
   prop = RNA_def_property(srna, "use_mist", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "mode", WO_MIST);
@@ -206,10 +206,8 @@ void RNA_def_world(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "World", "ID");
   RNA_def_struct_ui_text(
-      srna,
-      "World",
-      "World data-block describing the environment and ambient lighting of a scene");
-  RNA_def_struct_ui_icon(srna, ICON_WORLD_DATA);
+      srna, "World", "World data describing the environment and ambient lighting of a scene");
+  RNA_def_struct_ui_icon(srna, ICON_WORLD);
 
   rna_def_animdata_common(srna);
 

@@ -61,6 +61,11 @@
 
 #include "uvedit_intern.h"
 
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
+#include "UI_interface.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+#include "UI_resources.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+
 static void uv_select_all_perform(const Scene *scene, Object *obedit, int action);
 
 static void uv_select_all_perform_multi_ex(const Scene *scene,
@@ -2401,6 +2406,26 @@ static int uv_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *node_ot_select_all_get_description(bContext *UNUSED(C),
+                                                wmOperatorType *UNUSED(ot),
+                                                PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all UV vertices");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all UV vertices");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void UV_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -2411,6 +2436,7 @@ void UV_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = uv_select_all_exec;
+  ot->get_description = node_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_uvedit;
 
   WM_operator_properties_select_all(ot);
@@ -3187,8 +3213,8 @@ static int uv_select_split_exec(bContext *C, wmOperator *op)
 void UV_OT_select_split(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Select Split";
-  ot->description = "Select only entirely selected faces";
+  ot->name = "Split Selection"; /*bfa - Split selection, not Select Split*/
+  ot->description = "Splits the selected UV parts\nOnly entirely selected faces are split";
   ot->idname = "UV_OT_select_split";
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
@@ -5171,27 +5197,28 @@ static int uv_select_similar_exec(bContext *C, wmOperator *op)
   return uv_select_similar_vert_exec(C, op);
 }
 
-static EnumPropertyItem prop_vert_similar_types[] = {{UV_SSIM_PIN, "PIN", 0, "Pinned", ""}, {0}};
+static EnumPropertyItem prop_vert_similar_types[] = {
+    {UV_SSIM_PIN, "PIN", ICON_PINNED, "Pinned", ""}, {0}};
 
 static EnumPropertyItem prop_edge_similar_types[] = {
-    {UV_SSIM_LENGTH_UV, "LENGTH", 0, "Length", ""},
-    {UV_SSIM_LENGTH_3D, "LENGTH_3D", 0, "Length 3D", ""},
-    {UV_SSIM_PIN, "PIN", 0, "Pinned", ""},
+    {UV_SSIM_LENGTH_UV, "LENGTH", ICON_PARTICLEBRUSH_LENGTH, "Length", ""},
+    {UV_SSIM_LENGTH_3D, "LENGTH_3D", ICON_PARTICLEBRUSH_LENGTH, "Length 3D", ""},
+    {UV_SSIM_PIN, "PIN", ICON_PINNED, "Pinned", ""},
     {0}};
 
 static EnumPropertyItem prop_face_similar_types[] = {
-    {UV_SSIM_AREA_UV, "AREA", 0, "Area", ""},
-    {UV_SSIM_AREA_3D, "AREA_3D", 0, "Area 3D", ""},
-    {UV_SSIM_MATERIAL, "MATERIAL", 0, "Material", ""},
-    {UV_SSIM_OBJECT, "OBJECT", 0, "Object", ""},
-    {UV_SSIM_SIDES, "SIDES", 0, "Polygon Sides", ""},
-    {UV_SSIM_WINDING, "WINDING", 0, "Winding", ""},
+    {UV_SSIM_AREA_UV, "AREA", ICON_AREA, "Area", ""},
+    {UV_SSIM_AREA_3D, "AREA_3D", ICON_AREA, "Area 3D", ""},
+    {UV_SSIM_MATERIAL, "MATERIAL", ICON_MATERIAL_DATA, "Material", ""},
+    {UV_SSIM_OBJECT, "OBJECT", ICON_OBJECT_DATA, "Object", ""},
+    {UV_SSIM_SIDES, "SIDES", ICON_SELECT_FACES_BY_SIDE, "Polygon Sides", ""},
+    {UV_SSIM_WINDING, "WINDING", ICON_WINDING, "Winding", ""},
     {0}};
 
 static EnumPropertyItem prop_island_similar_types[] = {
-    {UV_SSIM_AREA_UV, "AREA", 0, "Area", ""},
-    {UV_SSIM_AREA_3D, "AREA_3D", 0, "Area 3D", ""},
-    {UV_SSIM_FACE, "FACE", 0, "Amount of Faces in Island", ""},
+    {UV_SSIM_AREA_UV, "AREA", ICON_AREA, "Area", ""},
+    {UV_SSIM_AREA_3D, "AREA_3D", ICON_AREA, "Area 3D", ""},
+    {UV_SSIM_FACE, "FACE", ICON_FACE_MAPS, "Amount of Faces in Island", ""},
     {0}};
 
 static EnumPropertyItem prop_similar_compare_types[] = {{SIM_CMP_EQ, "EQUAL", 0, "Equal", ""},

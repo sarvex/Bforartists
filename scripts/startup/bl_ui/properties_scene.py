@@ -43,10 +43,17 @@ class SCENE_PT_scene(SceneButtonsPanel, Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        scene = context.scene
+        # Active workspace view-layer is retrieved through window, not through workspace.
+        window = context.window
+        screen = context.screen
+        scene = window.scene
+        layout.template_ID(window, "scene", new="scene.new", unlink="scene.delete")
 
-        layout.prop(scene, "camera")
-        layout.prop(scene, "background_set")
+        # the following props have another scene definition
+
+        scn = context.scene
+        layout.prop(scn, "camera")
+        layout.prop(scn, "background_set")
         layout.prop(scene, "active_clip", text="Active Clip")
 
 
@@ -65,18 +72,20 @@ class SCENE_PT_unit(SceneButtonsPanel, Panel):
         layout.prop(unit, "system")
 
         col = layout.column()
-        col.enabled = unit.system != 'NONE'
-        col.prop(unit, "scale_length")
-        col.prop(unit, "use_separate")
+        if unit.system != 'NONE':
+            col.prop(unit, "scale_length")
+
+            col.use_property_split = False
+            col.prop(unit, "use_separate")
 
         col = layout.column()
         col.prop(unit, "system_rotation", text="Rotation")
         subcol = col.column()
-        subcol.enabled = unit.system != 'NONE'
-        subcol.prop(unit, "length_unit", text="Length")
-        subcol.prop(unit, "mass_unit", text="Mass")
-        subcol.prop(unit, "time_unit", text="Time")
-        subcol.prop(unit, "temperature_unit", text="Temperature")
+        if unit.system != 'NONE':
+            subcol.prop(unit, "length_unit", text="Length")
+            subcol.prop(unit, "mass_unit", text="Mass")
+            subcol.prop(unit, "time_unit", text="Time")
+            subcol.prop(unit, "temperature_unit", text="Temperature")
 
 
 class SceneKeyingSetsPanel:
@@ -367,7 +376,11 @@ class SCENE_PT_rigid_body_world_settings(RigidBodySubPanel, Panel):
 
             col = flow.column()
             col.active = rbw.enabled
-            col.prop(rbw, "use_split_impulse")
+            row = col.row()
+            row.use_property_split = False
+            row.prop(rbw, "use_split_impulse")
+            row.prop_decorator(rbw, "use_split_impulse")
+            row.use_property_split = True
 
             col = col.column()
             col.prop(rbw, "substeps_per_frame")

@@ -933,7 +933,8 @@ static void region_azone_edge(AZone *az, ARegion *region)
 {
   /* If region is overlapped (transparent background), move #AZone to content.
    * Note this is an arbitrary amount that matches nicely with numbers elsewhere. */
-  int overlap_padding = (region->overlap) ? int(0.4f * U.widget_unit) : 0;
+  /*bfa - changed the value from 0.4f to 0.2f since our margin is just 0.2*. See #2731*/
+  int overlap_padding = (region->overlap) ? int(0.2f * U.widget_unit) : 0;
 
   switch (az->edge) {
     case AE_TOP_TO_BOTTOMRIGHT:
@@ -2854,12 +2855,10 @@ static bool panel_add_check(const bContext *C,
   return true;
 }
 
-static bool region_uses_category_tabs(const ScrArea *area, const ARegion *region)
+/* bfa - readd tabs to tools area */
+static bool region_uses_category_tabs(const ScrArea * /*area*/, const ARegion *region)
 {
-  /* XXX, should use some better check? */
-  /* For now also has hardcoded check for clip editor until it supports actual toolbar. */
-  return ((1 << region->regiontype) & RGN_TYPE_HAS_CATEGORY_MASK) ||
-         (region->regiontype == RGN_TYPE_TOOLS && area->spacetype == SPACE_CLIP);
+  return ((1 << region->regiontype) & RGN_TYPE_HAS_CATEGORY_MASK);
 }
 
 static const char *region_panels_collect_categories(ARegion *region,
@@ -2890,10 +2889,20 @@ static int panel_draw_width_from_max_width_get(const ARegion *region,
                                                const PanelType *panel_type,
                                                const int max_width)
 {
-  /* With a background, we want some extra padding. */
-  return UI_panel_should_show_background(region, panel_type) ?
-             max_width - UI_PANEL_MARGIN_X * 2.0f :
-             max_width;
+  /* bfa - With a background, we want some extra padding.
+  But not for our no header panel in the tool shelves. So if - else. See #2731*/
+  if (region->regiontype == RGN_TYPE_TOOLS) {
+    /*our tool shelf, fix cutoff panel*/
+    return UI_panel_should_show_background(region, panel_type) ?
+               max_width - UI_PANEL_MARGIN_X * 2.0f :
+               max_width;
+  }
+  else {
+    /* With a background, we want some extra padding*/
+    return UI_panel_should_show_background(region, panel_type) ?
+               max_width - UI_PANEL_MARGIN_X * 2.0f :
+               max_width;
+  }
 }
 
 void ED_region_panels_layout_ex(const bContext *C,

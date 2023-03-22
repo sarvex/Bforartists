@@ -65,6 +65,12 @@ static int brush_add_exec(bContext *C, wmOperator * /*op*/)
 
   BKE_paint_brush_set(paint, br);
 
+  /* bfa - hackish: force screen refresh to fix brush panel addon not refreshing on adding brushes,
+   * we could make brush data change emit a message and catch it with msgbus, but it is a hassle */
+  wmWindowManager *wm = CTX_wm_manager(C);
+  LISTBASE_FOREACH (wmWindow *, win, &wm->windows) {
+    ED_screen_refresh(wm, win);
+  }
   return OPERATOR_FINISHED;
 }
 
@@ -335,7 +341,7 @@ static void PALETTE_OT_new(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Add New Palette";
-  ot->description = "Add new palette";
+  ot->description = "Add a new palette of indexed colors";
   ot->idname = "PALETTE_OT_new";
 
   /* api callbacks */
@@ -1271,7 +1277,9 @@ static void BRUSH_OT_stencil_control(wmOperatorType *ot)
   };
   /* identifiers */
   ot->name = "Stencil Brush Control";
-  ot->description = "Control the stencil brush";
+  ot->description =
+      "Control the position, rotation or size of the stencil brush image"
+      "image\nHotkey Tool! You need to be with the mouse in the viewport to see the changes!";
   ot->idname = "BRUSH_OT_stencil_control";
 
   /* api callbacks */

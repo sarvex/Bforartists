@@ -47,7 +47,7 @@ const EnumPropertyItem rna_enum_particle_edit_hair_brush_items[] = {
 static const EnumPropertyItem rna_enum_gpencil_lock_axis_items[] = {
     {GP_LOCKAXIS_VIEW,
      "VIEW",
-     ICON_RESTRICT_VIEW_ON,
+     ICON_VIEW,
      "View",
      "Align strokes to current view plane"},
     {GP_LOCKAXIS_Y,
@@ -129,11 +129,11 @@ static void rna_GPencil_update(Main *UNUSED(bmain), Scene *scene, PointerRNA *UN
 }
 
 const EnumPropertyItem rna_enum_particle_edit_disconnected_hair_brush_items[] = {
-    {PE_BRUSH_COMB, "COMB", 0, "Comb", "Comb hairs"},
-    {PE_BRUSH_SMOOTH, "SMOOTH", 0, "Smooth", "Smooth hairs"},
-    {PE_BRUSH_LENGTH, "LENGTH", 0, "Length", "Make hairs longer or shorter"},
-    {PE_BRUSH_CUT, "CUT", 0, "Cut", "Cut hairs"},
-    {PE_BRUSH_WEIGHT, "WEIGHT", 0, "Weight", "Weight hair particles"},
+    {PE_BRUSH_COMB, "COMB", ICON_PARTICLEBRUSH_COMB, "Comb", "Comb hairs"},
+    {PE_BRUSH_SMOOTH, "SMOOTH", ICON_PARTICLEBRUSH_SMOOTH, "Smooth", "Smooth hairs"},
+    {PE_BRUSH_LENGTH, "LENGTH", ICON_PARTICLEBRUSH_ADD, "Length", "Make hairs longer or shorter"},
+    {PE_BRUSH_CUT, "CUT", ICON_CUT, "Cut", "Cut hairs"},
+    {PE_BRUSH_WEIGHT, "WEIGHT", ICON_PARTICLEBRUSH_WEIGHT, "Weight", "Weight hair particles"},
     {0, NULL, 0, NULL, NULL},
 };
 
@@ -831,8 +831,10 @@ static void rna_def_sculpt(BlenderRNA *brna)
   prop = RNA_def_property(srna, "detail_size", PROP_FLOAT, PROP_PIXEL);
   RNA_def_property_ui_range(prop, 0.5, 40.0, 0.1, 2);
   RNA_def_property_ui_scale_type(prop, PROP_SCALE_CUBIC);
-  RNA_def_property_ui_text(
-      prop, "Detail Size", "Maximum edge length for dynamic topology sculpting (in pixels)");
+  RNA_def_property_ui_text(prop,
+                           "Detail Size",
+                           "Maximum edge length for dynamic topology sculpting (in "
+                           "pixels)\nHotkey in the default keymap: Shift D");
   RNA_def_property_update(prop, NC_SCENE | ND_TOOLSETTINGS, NULL);
 
   prop = RNA_def_property(srna, "detail_percent", PROP_FLOAT, PROP_PERCENTAGE);
@@ -1421,11 +1423,12 @@ static void rna_def_particle_edit(BlenderRNA *brna)
   prop = RNA_def_property(srna, "size", PROP_INT, PROP_PIXEL);
   RNA_def_property_range(prop, 1, SHRT_MAX);
   RNA_def_property_ui_range(prop, 1, MAX_BRUSH_PIXEL_RADIUS, 10, 3);
-  RNA_def_property_ui_text(prop, "Radius", "Radius of the brush in pixels");
+  RNA_def_property_ui_text(
+      prop, "Radius", "Radius of the brush in pixels\nHotkey in the default keymap: X");
 
   prop = RNA_def_property(srna, "strength", PROP_FLOAT, PROP_FACTOR);
   RNA_def_property_range(prop, 0.001, 1.0);
-  RNA_def_property_ui_text(prop, "Strength", "Brush strength");
+  RNA_def_property_ui_text(prop, "Strength", "Brush strength\nHotkey in the default keymap: C");
 
   prop = RNA_def_property(srna, "count", PROP_INT, PROP_NONE);
   RNA_def_property_range(prop, 1, 1000);

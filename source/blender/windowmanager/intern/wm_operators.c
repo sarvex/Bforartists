@@ -1408,8 +1408,10 @@ static uiBlock *wm_block_create_redo(bContext *C, ARegion *region, void *arg_op)
   }
 
   uiLayout *col = uiLayoutColumn(layout, false);
+  // bfa - align left? But what? Not sure, comment was added afterwards.
+  // Original change is not to find.
   uiTemplateOperatorPropertyButs(
-      C, col, op, UI_BUT_LABEL_ALIGN_NONE, UI_TEMPLATE_OP_PROPS_SHOW_TITLE);
+      C, col, op, UI_BUT_LABEL_ALIGN_SPLIT_COLUMN, UI_TEMPLATE_OP_PROPS_SHOW_TITLE);
 
   UI_block_bounds_set_popup(block, 6 * UI_SCALE_FAC, NULL);
 
@@ -2073,9 +2075,9 @@ static int wm_exit_blender_invoke(bContext *C,
 
 static void WM_OT_quit_blender(wmOperatorType *ot)
 {
-  ot->name = "Quit Blender";
+  ot->name = "Quit Bforartists";
   ot->idname = "WM_OT_quit_blender";
-  ot->description = "Quit Blender";
+  ot->description = "Quit Bforartists";
 
   ot->invoke = wm_exit_blender_invoke;
   ot->exec = wm_exit_blender_exec;
@@ -3516,10 +3518,10 @@ static int previews_ensure_exec(bContext *C, wmOperator *UNUSED(op))
 
 static void WM_OT_previews_ensure(wmOperatorType *ot)
 {
-  ot->name = "Refresh Data-Block Previews";
+  ot->name = "Refresh Data Previews";
   ot->idname = "WM_OT_previews_ensure";
   ot->description =
-      "Ensure data-block previews are available and up-to-date "
+      "Ensure data previews are available and up-to-date "
       "(to be saved in .blend file, only for some types like materials, textures, etc.)";
 
   ot->exec = previews_ensure_exec;
@@ -3650,10 +3652,10 @@ static int previews_clear_exec(bContext *C, wmOperator *op)
 
 static void WM_OT_previews_clear(wmOperatorType *ot)
 {
-  ot->name = "Clear Data-Block Previews";
+  ot->name = "Clear Data Previews";
   ot->idname = "WM_OT_previews_clear";
   ot->description =
-      "Clear data-block previews (only for some types like objects, materials, textures, etc.)";
+      "Clear data previews (only for some types like objects, materials, textures, etc.)";
 
   ot->exec = previews_clear_exec;
   ot->invoke = WM_menu_invoke;
@@ -3662,8 +3664,8 @@ static void WM_OT_previews_clear(wmOperatorType *ot)
                                "id_type",
                                preview_id_type_items,
                                PREVIEW_FILTER_ALL,
-                               "Data-Block Type",
-                               "Which data-block previews to clear");
+                               "Data Type",
+                               "Which data set previews to clear");
 }
 
 /** \} */

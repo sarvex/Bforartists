@@ -86,11 +86,11 @@ class DATA_PT_lens(CameraButtonsPanel, Panel):
         col.separator()
 
         if cam.type == 'PERSP':
+            col.prop(cam, "lens_unit")
             if cam.lens_unit == 'MILLIMETERS':
                 col.prop(cam, "lens")
             elif cam.lens_unit == 'FOV':
                 col.prop(cam, "angle")
-            col.prop(cam, "lens_unit")
 
         elif cam.type == 'ORTHO':
             col.prop(cam, "ortho_scale")
@@ -121,11 +121,12 @@ class DATA_PT_lens(CameraButtonsPanel, Panel):
                     col.prop(ccam, "fisheye_polynomial_k4", text="K4")
 
             elif engine in {'BLENDER_RENDER', 'BLENDER_EEVEE', 'BLENDER_EEVEE_NEXT', 'BLENDER_WORKBENCH', 'BLENDER_WORKBENCH_NEXT'}:
+                col.prop(cam, "lens_unit")
                 if cam.lens_unit == 'MILLIMETERS':
                     col.prop(cam, "lens")
                 elif cam.lens_unit == 'FOV':
                     col.prop(cam, "angle")
-                col.prop(cam, "lens_unit")
+
 
         col = layout.column()
         col.separator()
@@ -136,8 +137,8 @@ class DATA_PT_lens(CameraButtonsPanel, Panel):
 
         col.separator()
         sub = col.column(align=True)
-        sub.prop(cam, "clip_start", text="Clip Start")
-        sub.prop(cam, "clip_end", text="End")
+        sub.prop(cam, "clip_start", text="Clip Near")
+        sub.prop(cam, "clip_end", text="Clip Far")
 
 
 class DATA_PT_camera_stereoscopy(CameraButtonsPanel, Panel):
@@ -252,7 +253,9 @@ class DATA_PT_camera_dof(CameraButtonsPanel, Panel):
             col.prop_search(dof, "focus_subtarget", dof.focus_object.data, "bones", text="Focus on Bone")
         sub = col.column()
         sub.active = (dof.focus_object is None)
-        sub.prop(dof, "focus_distance", text="Focus Distance")
+        row = sub.row()
+        row.prop(dof, "focus_distance", text="Focus Distance")
+        row.operator("ui.eyedropper_depth", text = "", icon='EYEDROPPER')
 
 
 class DATA_PT_camera_dof_aperture(CameraButtonsPanel, Panel):
@@ -324,7 +327,7 @@ class DATA_PT_camera_background_image(CameraButtonsPanel, Panel):
                 "show_background_image",
                 text="",
                 emboss=False,
-                icon='RESTRICT_VIEW_OFF' if bg.show_background_image else 'RESTRICT_VIEW_ON',
+                icon='HIDE_OFF' if bg.show_background_image else 'HIDE_ON',
             )
 
             row.operator("view3d.background_image_remove", text="", emboss=False, icon='X').index = i
@@ -411,21 +414,34 @@ class DATA_PT_camera_display(CameraButtonsPanel, Panel):
 
         col.prop(cam, "display_size", text="Size")
 
-        col = layout.column(heading="Show")
-        col.prop(cam, "show_limits", text="Limits")
-        col.prop(cam, "show_mist", text="Mist")
-        col.prop(cam, "show_sensor", text="Sensor")
-        col.prop(cam, "show_name", text="Name")
+        col.label( text = "Show")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_limits", text="Limits")
+        row.prop_decorator(cam, "show_limits")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_mist", text="Mist")
+        row.prop_decorator(cam, "show_mist")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_sensor", text="Sensor")
+        row.prop_decorator(cam, "show_sensor")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_name", text="Name")
+        row.prop_decorator(cam, "show_name")
 
-        col = layout.column(align=False, heading="Passepartout")
-        col.use_property_decorate = False
-        row = col.row(align=True)
-        sub = row.row(align=True)
-        sub.prop(cam, "show_passepartout", text="")
-        sub = sub.row(align=True)
-        sub.active = cam.show_passepartout
-        sub.prop(cam, "passepartout_alpha", text="")
-        row.prop_decorator(cam, "passepartout_alpha")
+        split = layout.split(factor = 0.36)
+        col = split.column()
+        col.use_property_split = False
+        col.prop(cam, "show_passepartout", text = "Passepartout")
+        col = split.column()
+        if cam.show_passepartout:
+            col.prop(cam, "passepartout_alpha", text="")
+        else:
+            col.label(icon='DISCLOSURE_TRI_RIGHT')
 
 
 class DATA_PT_camera_display_composition_guides(CameraButtonsPanel, Panel):
@@ -445,20 +461,50 @@ class DATA_PT_camera_display_composition_guides(CameraButtonsPanel, Panel):
 
         cam = context.camera
 
-        layout.prop(cam, "show_composition_thirds")
+        row = layout.row()
+        row.use_property_split = False
+        row.prop(cam, "show_composition_thirds")
+        row.prop_decorator(cam, "show_composition_thirds")
 
-        col = layout.column(heading="Center", align=True)
-        col.prop(cam, "show_composition_center")
-        col.prop(cam, "show_composition_center_diagonal", text="Diagonal")
+        col = layout.column(align=True)
+        col.label( text = "Center")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_center")
+        row.prop_decorator(cam, "show_composition_center")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_center_diagonal", text="Diagonal")
+        row.prop_decorator(cam, "show_composition_center_diagonal")
 
-        col = layout.column(heading="Golden", align=True)
-        col.prop(cam, "show_composition_golden", text="Ratio")
-        col.prop(cam, "show_composition_golden_tria_a", text="Triangle A")
-        col.prop(cam, "show_composition_golden_tria_b", text="Triangle B")
+        col = layout.column(align=True)
+        col.label( text = "Golden")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_golden", text="Ratio")
+        row.prop_decorator(cam, "show_composition_golden")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_golden_tria_a", text="Triangle A")
+        row.prop_decorator(cam, "show_composition_golden_tria_a")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_golden_tria_b", text="Triangle B")
+        row.prop_decorator(cam, "show_composition_golden_tria_b")
 
-        col = layout.column(heading="Harmony", align=True)
-        col.prop(cam, "show_composition_harmony_tri_a", text="Triangle A")
-        col.prop(cam, "show_composition_harmony_tri_b", text="Triangle B")
+        col = layout.column(align=True)
+        col.label( text = "Harmony")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_harmony_tri_a", text="Triangle A")
+        row.prop_decorator(cam, "show_composition_harmony_tri_a")
+        row = col.row()
+        row.separator()
+        row.prop(cam, "show_composition_harmony_tri_b", text="Triangle B")
+        row.prop_decorator(cam, "show_composition_harmony_tri_b")
 
 
 class DATA_PT_camera_safe_areas(CameraButtonsPanel, Panel):

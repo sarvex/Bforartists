@@ -15,31 +15,32 @@ class GPENCIL_MT_material_context_menu(Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("gpencil.material_reveal", icon='RESTRICT_VIEW_OFF', text="Show All")
-        layout.operator("gpencil.material_hide", icon='RESTRICT_VIEW_ON', text="Hide Others").unselected = True
+        layout.operator("gpencil.material_reveal", text="Show All", icon='HIDE_OFF')
+        layout.operator("gpencil.material_hide", text="Hide Others", icon='HIDE_UNSELECTED').unselected = True
 
         layout.separator()
 
-        layout.operator("gpencil.material_lock_all", icon='LOCKED', text="Lock All")
-        layout.operator("gpencil.material_unlock_all", icon='UNLOCKED', text="Unlock All")
+        layout.operator("gpencil.material_lock_all", text="Lock All", icon='LOCKED')
+        layout.operator("gpencil.material_unlock_all", text="Unlock All", icon='UNLOCKED')
 
-        layout.operator("gpencil.material_lock_unused", text="Lock Unselected")
-        layout.operator("gpencil.lock_layer", text="Lock Unused")
-
-        layout.separator()
-
-        layout.operator("gpencil.material_to_vertex_color", text="Convert Materials to Color Attribute")
-        layout.operator("gpencil.extract_palette_vertex", text="Extract Palette from Color Attribute")
+        layout.operator("gpencil.material_lock_unused", text="Lock Unselected", icon='LOCKED')
+        layout.operator("gpencil.lock_layer", text="Lock Unused", icon='LOCKED')
 
         layout.separator()
 
-        layout.operator("gpencil.materials_copy_to_object", text="Copy Material to Selected").only_active = True
-        layout.operator("gpencil.materials_copy_to_object", text="Copy All Materials to Selected").only_active = False
+        layout.separator()
+        layout.operator("gpencil.material_to_vertex_color", text="Convert Materials to Color Attribute", icon='NODE_VERTEX_COLOR')
+        layout.operator("gpencil.extract_palette_vertex", text="Extract Palette from Color Attribute", icon='MATERIAL_DATA')
 
         layout.separator()
 
-        layout.operator("gpencil.stroke_merge_material", text="Merge Similar")
-        layout.operator("object.material_slot_remove_unused")
+        layout.operator("gpencil.materials_copy_to_object", text="Copy Material to Selected", icon = "COPYDOWN").only_active = True
+        layout.operator("gpencil.materials_copy_to_object", text="Copy All Materials to Selected",  icon = "COPYDOWN").only_active = False
+
+        layout.separator()
+
+        layout.operator("gpencil.stroke_merge_material", text="Merge Similar", icon = "MERGE")
+        layout.operator("object.material_slot_remove_unused", icon = "DELETE")
 
 
 class GPENCIL_UL_matslots(UIList):
@@ -136,14 +137,15 @@ class MATERIAL_PT_gpencil_strokecolor(GPMaterialButtonsPanel, Panel):
 
             col.prop(gpcolor, "stroke_style", text="Style")
 
-            col.prop(gpcolor, "color", text="Base Color")
-            col.prop(gpcolor, "use_stroke_holdout")
+            row = col.row()
+            row.prop(gpcolor, "color", text="Base Color")
 
             if gpcolor.stroke_style == 'TEXTURE':
                 row = col.row()
                 row.enabled = not gpcolor.lock
                 col = row.column(align=True)
                 col.template_ID(gpcolor, "stroke_image", open="image.open")
+                col.separator()
 
             if gpcolor.stroke_style == 'TEXTURE':
                 row = col.row()
@@ -156,7 +158,15 @@ class MATERIAL_PT_gpencil_strokecolor(GPMaterialButtonsPanel, Panel):
                 col.prop(gpcolor, "alignment_rotation")
 
             if gpcolor.mode == 'LINE':
-                col.prop(gpcolor, "use_overlap_strokes")
+                row = layout.row()
+                row.use_property_split = False
+                row.prop(gpcolor, "use_overlap_strokes")
+                row.prop_decorator(gpcolor, "use_overlap_strokes")
+
+            row = layout.row()
+            row.use_property_split = False
+            row.prop(gpcolor, "use_stroke_holdout")
+            row.prop_decorator(gpcolor, "use_stroke_holdout")
 
 
 class MATERIAL_PT_gpencil_fillcolor(GPMaterialButtonsPanel, Panel):
@@ -183,16 +193,18 @@ class MATERIAL_PT_gpencil_fillcolor(GPMaterialButtonsPanel, Panel):
 
         if gpcolor.fill_style == 'SOLID':
             col.prop(gpcolor, "fill_color", text="Base Color")
-            col.prop(gpcolor, "use_fill_holdout")
 
         elif gpcolor.fill_style == 'GRADIENT':
             col.prop(gpcolor, "gradient_type")
 
             col.prop(gpcolor, "fill_color", text="Base Color")
             col.prop(gpcolor, "mix_color", text="Secondary Color")
-            col.prop(gpcolor, "use_fill_holdout")
             col.prop(gpcolor, "mix_factor", text="Blend", slider=True)
-            col.prop(gpcolor, "flip", text="Flip Colors")
+
+            row = col.row(align = True)
+            row.use_property_split = False
+            row.prop(gpcolor, "flip", text="Flip Colors")
+            row.prop_decorator(gpcolor, "flip")
 
             col.prop(gpcolor, "texture_offset", text="Location")
 
@@ -204,7 +216,6 @@ class MATERIAL_PT_gpencil_fillcolor(GPMaterialButtonsPanel, Panel):
 
         elif gpcolor.fill_style == 'TEXTURE':
             col.prop(gpcolor, "fill_color", text="Base Color")
-            col.prop(gpcolor, "use_fill_holdout")
 
             col.template_ID(gpcolor, "fill_image", open="image.open")
 
@@ -213,7 +224,16 @@ class MATERIAL_PT_gpencil_fillcolor(GPMaterialButtonsPanel, Panel):
             col.prop(gpcolor, "texture_offset", text="Location")
             col.prop(gpcolor, "texture_angle", text="Rotation")
             col.prop(gpcolor, "texture_scale", text="Scale")
-            col.prop(gpcolor, "texture_clamp", text="Clip Image")
+
+            row = col.row(align = True)
+            row.use_property_split = False
+            row.prop(gpcolor, "texture_clamp", text="Clip Image")
+            row.prop_decorator(gpcolor, "texture_clamp")
+
+        row = layout.row()
+        row.use_property_split = False
+        row.prop(gpcolor, "use_fill_holdout")
+        row.prop_decorator(gpcolor, "use_fill_holdout")
 
 
 class MATERIAL_PT_gpencil_preview(GPMaterialButtonsPanel, Panel):

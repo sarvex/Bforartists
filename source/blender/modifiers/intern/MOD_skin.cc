@@ -2012,7 +2012,7 @@ static void requiredDataMask(ModifierData * /*md*/, CustomData_MeshMasks *r_cdda
 
 static void panel_draw(const bContext * /*C*/, Panel *panel)
 {
-  uiLayout *row;
+  uiLayout *row, *col; /*bfa - added *col*/
   uiLayout *layout = panel->layout;
   int toggles_flag = UI_ITEM_R_TOGGLE | UI_ITEM_R_FORCE_BLANK_DECORATE;
 
@@ -2030,7 +2030,15 @@ static void panel_draw(const bContext * /*C*/, Panel *panel)
   uiItemR(row, ptr, "use_y_symmetry", toggles_flag, nullptr, ICON_NONE);
   uiItemR(row, ptr, "use_z_symmetry", toggles_flag, nullptr, ICON_NONE);
 
-  uiItemR(layout, ptr, "use_smooth_shade", 0, nullptr, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_smooth_shade", 0, nullptr, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_smooth_shade", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_smooth_shade", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   row = uiLayoutRow(layout, false);
   uiItemO(row, IFACE_("Create Armature"), ICON_NONE, "OBJECT_OT_skin_armature_create");

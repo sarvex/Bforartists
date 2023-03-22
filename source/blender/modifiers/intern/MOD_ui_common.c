@@ -202,11 +202,12 @@ static void modifier_ops_extra_draw(bContext *C, uiLayout *layout, void *md_v)
 
   uiLayoutSetUnitsX(layout, 4.0f);
 
-  /* Apply. */
-  uiItemO(layout,
-          CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Apply"),
-          ICON_CHECKMARK,
-          "OBJECT_OT_modifier_apply");
+  /* Apply */
+  /* bfa - moved apply to top level */
+  //uiItemO(layout,
+  //        CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Apply"),
+  //        ICON_CHECKMARK,
+  //        "OBJECT_OT_modifier_apply");
 
   /* Apply as shapekey. */
   if (BKE_modifier_is_same_topology(md) && !BKE_modifier_is_non_geometrical(md)) {
@@ -240,7 +241,7 @@ static void modifier_ops_extra_draw(bContext *C, uiLayout *layout, void *md_v)
 
   uiItemO(layout,
           CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Copy to Selected"),
-          0,
+          ICON_COPYDOWN,
           "OBJECT_OT_modifier_copy_to_selected");
 
   uiItemS(layout);
@@ -289,7 +290,8 @@ static void modifier_ops_extra_draw(bContext *C, uiLayout *layout, void *md_v)
 
 static void modifier_panel_header(const bContext *C, Panel *panel)
 {
-  uiLayout *row, *sub, *name_row;
+  /* bfa - modifers apply button */
+  uiLayout *row, *sub, *name_row, *op_row;
   uiLayout *layout = panel->layout;
 
   /* Don't use #modifier_panel_get_property_pointers, we don't want to lock the header. */
@@ -407,26 +409,29 @@ static void modifier_panel_header(const bContext *C, Panel *panel)
     buttons_number += 2;
   }
 
+  /* bfa - modifer apply button */
+  op_row = uiLayoutRow(layout, true);
+  uiItemO(op_row, "", ICON_CHECKMARK, "OBJECT_OT_modifier_apply");
+  buttons_number++;
+
   /* Extra operators menu. */
-  uiItemMenuF(row, "", ICON_DOWNARROW_HLT, modifier_ops_extra_draw, md);
+  uiItemMenuF(op_row, "", ICON_DOWNARROW_HLT, modifier_ops_extra_draw, md);
 
   /* Delete button. */
   if (modifier_can_delete(md) && !modifier_is_simulation(md)) {
-    sub = uiLayoutRow(row, false);
-    uiLayoutSetEmboss(sub, UI_EMBOSS_NONE);
-    uiItemO(sub, "", ICON_X, "OBJECT_OT_modifier_remove");
+    uiItemO(op_row, "", ICON_X, "OBJECT_OT_modifier_remove");
     buttons_number++;
   }
 
   /* Switch context buttons. */
   if (modifier_is_simulation(md) == 1) {
     uiItemStringO(
-        row, "", ICON_PROPERTIES, "WM_OT_properties_context_change", "context", "PHYSICS");
+        op_row, "", ICON_PROPERTIES, "WM_OT_properties_context_change", "context", "PHYSICS");
     buttons_number++;
   }
   else if (modifier_is_simulation(md) == 2) {
     uiItemStringO(
-        row, "", ICON_PROPERTIES, "WM_OT_properties_context_change", "context", "PARTICLES");
+        op_row, "", ICON_PROPERTIES, "WM_OT_properties_context_change", "context", "PARTICLES");
     buttons_number++;
   }
 

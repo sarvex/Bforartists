@@ -103,24 +103,24 @@ class USERPREF_MT_save_load(Menu):
 
         layout.operator_context = 'EXEC_AREA'
         if prefs.use_preferences_save:
-            layout.operator("wm.save_userpref", text="Save Preferences")
+            layout.operator("wm.save_userpref", text="Save Preferences", icon='SAVE_PREFS')
         sub_revert = layout.column(align=True)
         sub_revert.active = prefs.is_dirty
-        sub_revert.operator("wm.read_userpref", text="Revert to Saved Preferences")
+        sub_revert.operator("wm.read_userpref", text="Revert to Saved Preferences", icon = "UNDO")
 
         layout.operator_context = 'INVOKE_AREA'
 
         app_template = prefs.app_template
         if app_template:
             display_name = bpy.path.display_name(iface_(app_template))
-            layout.operator("wm.read_factory_userpref", text="Load Factory Blender Preferences")
+            layout.operator("wm.read_factory_userpref", text="Load Factory Preferences", icon="LOAD_FACTORY")
             props = layout.operator("wm.read_factory_userpref",
-                                    text=iface_("Load Factory %s Preferences") % display_name,
+                                    text=iface_("Load Factory %s Preferences") % display_name, icon="LOAD_FACTORY",
                                     translate=False)
             props.use_factory_startup_app_template_only = True
             del display_name
         else:
-            layout.operator("wm.read_factory_userpref", text="Load Factory Preferences")
+            layout.operator("wm.read_factory_userpref", text="Load Factory Preferences", icon="LOAD_FACTORY")
 
 
 class USERPREF_PT_save_preferences(Panel):
@@ -197,20 +197,21 @@ class USERPREF_PT_interface_display(InterfacePanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         view = prefs.view
 
-        col = layout.column()
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col.prop(view, "ui_scale", text="Resolution Scale")
-        col.prop(view, "ui_line_width", text="Line Width")
-        col.prop(view, "show_splash", text="Splash Screen")
-        col.prop(view, "show_developer_ui")
+        flow.prop(view, "ui_scale", text="Resolution Scale")
+        flow.prop(view, "ui_line_width", text="Line Width")
 
-        col.separator()
+        layout.separator()
 
-        col = layout.column(heading="Tooltips", align=True)
-        col.prop(view, "show_tooltips", text="User Tooltips")
-        sub = col.column()
-        sub.active = view.show_tooltips
-        sub.prop(view, "show_tooltips_python")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(view, "show_splash", text ="Splash Screen")
+        flow.prop(view, "show_tooltips")
+        if view.show_tooltips:
+            flow.prop(view, "show_tooltips_python")
+        flow.prop(view, "show_developer_ui")
 
 
 class USERPREF_PT_interface_text(InterfacePanel, CenterAlignMixIn, Panel):
@@ -223,7 +224,9 @@ class USERPREF_PT_interface_text(InterfacePanel, CenterAlignMixIn, Panel):
 
         flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
+        flow.use_property_split = False
         flow.prop(view, "use_text_antialiasing", text="Anti-Aliasing")
+        flow.use_property_split = True
         sub = flow.column()
         sub.active = view.use_text_antialiasing
         sub.prop(view, "text_hinting", text="Hinting")
@@ -246,11 +249,13 @@ class USERPREF_PT_interface_translation(InterfacePanel, CenterAlignMixIn, Panel)
 
         layout.prop(view, "language")
 
-        col = layout.column(heading="Affect")
-        col.active = (bpy.app.translations.locale != 'en_US')
-        col.prop(view, "use_translate_tooltips", text="Tooltips")
-        col.prop(view, "use_translate_interface", text="Interface")
-        col.prop(view, "use_translate_new_dataname", text="New Data")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+        flow.active = (bpy.app.translations.locale != 'en_US')
+
+        flow.use_property_split = False
+        flow.prop(view, "use_translate_tooltips", text="Tooltips")
+        flow.prop(view, "use_translate_interface", text="Interface")
+        flow.prop(view, "use_translate_new_dataname", text="New Data")
 
 
 class USERPREF_PT_interface_editors(InterfacePanel, CenterAlignMixIn, Panel):
@@ -261,12 +266,16 @@ class USERPREF_PT_interface_editors(InterfacePanel, CenterAlignMixIn, Panel):
         view = prefs.view
         system = prefs.system
 
-        col = layout.column()
-        col.prop(system, "use_region_overlap")
-        col.prop(view, "show_navigate_ui")
-        col.prop(view, "color_picker_type")
-        col.row().prop(view, "header_align")
-        col.prop(view, "factor_display_type")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(system, "use_region_overlap")
+        flow.prop(view, "show_navigate_ui")
+
+        flow.use_property_split = True
+        flow.prop(view, "color_picker_type")
+        flow.row().prop(view, "header_align")
+        flow.prop(view, "factor_display_type")
 
 
 class USERPREF_PT_interface_temporary_windows(InterfacePanel, CenterAlignMixIn, Panel):
@@ -278,9 +287,10 @@ class USERPREF_PT_interface_temporary_windows(InterfacePanel, CenterAlignMixIn, 
         prefs = context.preferences
         view = prefs.view
 
-        col = layout.column()
-        col.prop(view, "render_display_type", text="Render In")
-        col.prop(view, "filebrowser_display_type", text="File Browser")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(view, "render_display_type", text="Render In")
+        flow.prop(view, "filebrowser_display_type", text="File Browser")
 
 
 class USERPREF_PT_interface_statusbar(InterfacePanel, CenterAlignMixIn, Panel):
@@ -292,11 +302,16 @@ class USERPREF_PT_interface_statusbar(InterfacePanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         view = prefs.view
 
-        col = layout.column(heading="Show")
-        col.prop(view, "show_statusbar_stats", text="Scene Statistics")
-        col.prop(view, "show_statusbar_memory", text="System Memory")
-        col.prop(view, "show_statusbar_vram", text="Video Memory")
-        col.prop(view, "show_statusbar_version", text="Blender Version")
+        col = layout.column()
+        col.label(text = "Show:")
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(view, "show_statusbar_stats", text="Scene Statistics")
+        flow.prop(view, "show_statusbar_memory", text="System Memory")
+        flow.prop(view, "show_statusbar_vram", text="Video Memory")
+        flow.prop(view, "show_statusbar_version", text="Bforartists Version")
 
 
 class USERPREF_PT_interface_menus(InterfacePanel, Panel):
@@ -375,7 +390,10 @@ class USERPREF_PT_edit_objects_new(EditingPanel, CenterAlignMixIn, Panel):
 
         flow.prop(edit, "material_link", text="Link Materials To")
         flow.prop(edit, "object_align", text="Align To")
+
+        flow.use_property_split = False
         flow.prop(edit, "use_enter_edit_mode", text="Enter Edit Mode")
+        flow.use_property_split = True
         flow.prop(edit, "collection_instance_empty_size", text="Instance Empty Size")
 
 
@@ -386,7 +404,6 @@ class USERPREF_PT_edit_objects_duplicate_data(EditingPanel, CenterAlignMixIn, Pa
     def draw_centered(self, context, layout):
         prefs = context.preferences
         edit = prefs.edit
-
         layout.use_property_split = False
 
         flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=True)
@@ -427,9 +444,11 @@ class USERPREF_PT_edit_cursor(EditingPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "use_mouse_depth_cursor")
-        col.prop(edit, "use_cursor_lock_adjust")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(edit, "use_mouse_depth_cursor")
+        flow.prop(edit, "use_cursor_lock_adjust")
 
 
 class USERPREF_PT_edit_gpencil(EditingPanel, CenterAlignMixIn, Panel):
@@ -440,9 +459,10 @@ class USERPREF_PT_edit_gpencil(EditingPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         edit = prefs.edit
 
-        col = layout.column(heading="Distance")
-        col.prop(edit, "grease_pencil_manhattan_distance", text="Manhattan")
-        col.prop(edit, "grease_pencil_euclidean_distance", text="Euclidean")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(edit, "grease_pencil_manhattan_distance", text="Manhattan Distance")
+        flow.prop(edit, "grease_pencil_euclidean_distance", text="Euclidean Distance")
 
 
 class USERPREF_PT_edit_annotations(EditingPanel, CenterAlignMixIn, Panel):
@@ -452,9 +472,10 @@ class USERPREF_PT_edit_annotations(EditingPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "grease_pencil_default_color", text="Default Color")
-        col.prop(edit, "grease_pencil_eraser_radius", text="Eraser Radius")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(edit, "grease_pencil_default_color", text="Default Color")
+        flow.prop(edit, "grease_pencil_eraser_radius", text="Eraser Radius")
 
 
 class USERPREF_PT_edit_weight_paint(EditingPanel, CenterAlignMixIn, Panel):
@@ -466,8 +487,8 @@ class USERPREF_PT_edit_weight_paint(EditingPanel, CenterAlignMixIn, Panel):
         view = prefs.view
 
         layout.use_property_split = False
-
         layout.prop(view, "use_weight_color_range", text="Use Custom Colors")
+        layout.use_property_split = True
 
         col = layout.column()
         col.active = view.use_weight_color_range
@@ -493,9 +514,10 @@ class USERPREF_PT_edit_misc(EditingPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "sculpt_paint_overlay_color", text="Sculpt Overlay Color")
-        col.prop(edit, "node_margin", text="Node Auto-Offset Margin")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(edit, "sculpt_paint_overlay_color", text="Sculpt Overlay Color")
+        flow.prop(edit, "node_margin", text="Node Auto-Offset Margin")
 
 
 # -----------------------------------------------------------------------------
@@ -515,16 +537,22 @@ class USERPREF_PT_animation_timeline(AnimationPanel, CenterAlignMixIn, Panel):
         view = prefs.view
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "use_negative_frames")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+        flow.use_property_split = False
+        flow.prop(edit, "use_negative_frames")
+        flow.use_property_split = True
 
-        col.prop(view, "view2d_grid_spacing_min", text="Minimum Grid Spacing")
-        col.prop(view, "timecode_style")
-        col.prop(view, "view_frame_type")
+        layout.separator()
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(view, "view2d_grid_spacing_min", text="Minimum Grid Spacing")
+        flow.prop(view, "timecode_style")
+        flow.prop(view, "view_frame_type")
         if view.view_frame_type == 'SECONDS':
-            col.prop(view, "view_frame_seconds")
+            flow.prop(view, "view_frame_seconds")
         elif view.view_frame_type == 'KEYFRAMES':
-            col.prop(view, "view_frame_keyframes")
+            flow.prop(view, "view_frame_keyframes")
 
 
 class USERPREF_PT_animation_keyframes(AnimationPanel, CenterAlignMixIn, Panel):
@@ -534,14 +562,27 @@ class USERPREF_PT_animation_keyframes(AnimationPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "use_visual_keying")
-        col.prop(edit, "use_keyframe_insert_needed", text="Only Insert Needed")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col = layout.column(heading="Auto-Keyframing")
-        col.prop(edit, "use_auto_keying_warning", text="Show Warning")
-        col.prop(edit, "use_keyframe_insert_available", text="Only Insert Available")
-        col.prop(edit, "use_auto_keying", text="Enable in New Scenes")
+        flow.use_property_split = False
+        flow.prop(edit, "use_visual_keying")
+        flow.prop(edit, "use_keyframe_insert_needed", text="Only Insert Needed")
+
+
+class USERPREF_PT_animation_autokey(AnimationPanel, CenterAlignMixIn, Panel):
+    bl_label = "Auto-Keyframing"
+    bl_parent_id = "USERPREF_PT_animation_keyframes"
+
+    def draw_centered(self, context, layout):
+        prefs = context.preferences
+        edit = prefs.edit
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(edit, "use_auto_keying_warning", text="Show Warning")
+        flow.prop(edit, "use_keyframe_insert_available", text="Only Insert Available")
+        flow.prop(edit, "use_auto_keying", text="Enable in New Scenes")
 
 
 class USERPREF_PT_animation_fcurves(AnimationPanel, CenterAlignMixIn, Panel):
@@ -557,6 +598,7 @@ class USERPREF_PT_animation_fcurves(AnimationPanel, CenterAlignMixIn, Panel):
         flow.prop(edit, "fcurve_new_auto_smoothing", text="Default Smoothing Mode")
         flow.prop(edit, "keyframe_new_interpolation_type", text="Default Interpolation")
         flow.prop(edit, "keyframe_new_handle_type", text="Default Handles")
+        flow.use_property_split = False
         flow.prop(edit, "use_insertkey_xyz_to_rgb", text="XYZ to RGB")
         flow.prop(edit, "use_anim_channel_group_colors")
         flow.prop(edit, "show_only_selected_curve_keyframes")
@@ -574,7 +616,6 @@ class SystemPanel:
 
 class USERPREF_PT_system_sound(SystemPanel, CenterAlignMixIn, Panel):
     bl_label = "Sound"
-    bl_options = {'DEFAULT_CLOSED'}
 
     def draw_centered(self, context, layout):
         prefs = context.preferences
@@ -637,7 +678,7 @@ class USERPREF_PT_system_os_settings(SystemPanel, CenterAlignMixIn, Panel):
         return sys.platform[:3] == "win"
 
     def draw_centered(self, _context, layout):
-        layout.label(text="Make this installation your default Blender")
+        layout.label(text="Make this installation your default Bforartists")
         split = layout.split(factor=0.4)
         split.alignment = 'RIGHT'
         split.label(text="")
@@ -652,27 +693,33 @@ class USERPREF_PT_system_memory(SystemPanel, CenterAlignMixIn, Panel):
         system = prefs.system
         edit = prefs.edit
 
-        col = layout.column()
-        col.prop(edit, "undo_steps", text="Undo Steps")
-        col.prop(edit, "undo_memory_limit", text="Undo Memory Limit")
-        col.prop(edit, "use_global_undo")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(edit, "undo_steps", text="Undo Steps")
+        flow.prop(edit, "undo_memory_limit", text="Undo Memory Limit")
+
+        flow.use_property_split = False
+        flow.prop(edit, "use_global_undo")
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(system, "scrollback", text="Console Scrollback Lines")
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
         layout.separator()
 
-        col = layout.column()
-        col.prop(system, "scrollback", text="Console Scrollback Lines")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(system, "texture_time_out", text="Texture Time Out")
+        flow.prop(system, "texture_collection_rate", text="Garbage Collection Rate")
 
         layout.separator()
 
-        col = layout.column()
-        col.prop(system, "texture_time_out", text="Texture Time Out")
-        col.prop(system, "texture_collection_rate", text="Garbage Collection Rate")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        layout.separator()
-
-        col = layout.column()
-        col.prop(system, "vbo_time_out", text="VBO Time Out")
-        col.prop(system, "vbo_collection_rate", text="Garbage Collection Rate")
+        flow.prop(system, "vbo_time_out", text="VBO Time Out")
+        flow.prop(system, "vbo_collection_rate", text="Garbage Collection Rate")
 
 
 class USERPREF_PT_system_video_sequencer(SystemPanel, CenterAlignMixIn, Panel):
@@ -685,14 +732,26 @@ class USERPREF_PT_system_video_sequencer(SystemPanel, CenterAlignMixIn, Panel):
 
         layout.prop(system, "memory_cache_limit")
 
-        layout.separator()
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        layout.prop(system, "use_sequencer_disk_cache", text="Disk Cache")
-        col = layout.column()
-        col.active = system.use_sequencer_disk_cache
-        col.prop(system, "sequencer_disk_cache_dir", text="Directory")
-        col.prop(system, "sequencer_disk_cache_size_limit", text="Cache Limit")
-        col.prop(system, "sequencer_disk_cache_compression", text="Compression")
+        split = flow.split()
+        col = split.column()
+        col.use_property_split = False
+        col.prop(system, "use_sequencer_disk_cache", text="Disk Cache")
+        col = split.column()
+        if system.use_sequencer_disk_cache:
+            col.label(icon='DISCLOSURE_TRI_DOWN')
+            row = flow.row()
+            row.separator()
+            row.prop(system, "sequencer_disk_cache_dir")
+            row = flow.row()
+            row.separator()
+            row.prop(system, "sequencer_disk_cache_size_limit")
+            row = flow.row()
+            row.separator()
+            row.prop(system, "sequencer_disk_cache_compression")
+        else:
+            col.label(icon='DISCLOSURE_TRI_RIGHT')
 
         layout.separator()
 
@@ -715,19 +774,35 @@ class USERPREF_PT_viewport_display(ViewportPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         view = prefs.view
 
-        col = layout.column(heading="Text Info Overlay")
-        col.prop(view, "show_object_info", text="Object Info")
-        col.prop(view, "show_view_name", text="View Name")
-        col.prop(view, "show_playback_fps", text="Playback Frame Rate (FPS)")
+        layout.label(text = "Text Info Overlay")
+
+        col = layout.column()
+
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(view, "show_object_info", text="Object Info")
+        row = col.row()
+        row.separator()
+        row.prop(view, "show_view_name", text="View Name")
+        row = col.row()
+        row.separator()
+        row.prop(view, "show_playback_fps", text="Playback Frame Rate (FPS)")
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
 
         layout.separator()
 
-        col = layout.column()
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        col = flow.column()
         col.prop(view, "gizmo_size")
         col.prop(view, "lookdev_sphere_size")
 
-        col.separator()
+        flow.separator()
 
+        col = flow.column()
         col.prop(view, "mini_axis_type", text="3D Viewport Axes")
 
         if view.mini_axis_type == 'MINIMAL':
@@ -745,12 +820,13 @@ class USERPREF_PT_viewport_quality(ViewportPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         system = prefs.system
 
-        col = layout.column()
-        col.prop(system, "viewport_aa")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col = layout.column(heading="Smooth Wires")
-        col.prop(system, "use_overlay_smooth_wire", text="Overlay")
-        col.prop(system, "use_edit_mode_smooth_wire", text="Edit Mode")
+        flow.prop(system, "viewport_aa")
+
+        flow.use_property_split = False
+        flow.prop(system, "use_overlay_smooth_wire")
+        flow.prop(system, "use_edit_mode_smooth_wire")
 
 
 class USERPREF_PT_viewport_textures(ViewportPanel, CenterAlignMixIn, Panel):
@@ -760,11 +836,12 @@ class USERPREF_PT_viewport_textures(ViewportPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         system = prefs.system
 
-        col = layout.column()
-        col.prop(system, "gl_texture_limit", text="Limit Size")
-        col.prop(system, "anisotropic_filter")
-        col.prop(system, "gl_clip_alpha", slider=True)
-        col.prop(system, "image_draw_method", text="Image Display Method")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(system, "gl_texture_limit", text="Limit Size")
+        flow.prop(system, "anisotropic_filter")
+        flow.prop(system, "gl_clip_alpha", slider=True)
+        flow.prop(system, "image_draw_method", text="Image Display Method")
 
 
 class USERPREF_PT_viewport_selection(ViewportPanel, CenterAlignMixIn, Panel):
@@ -775,7 +852,10 @@ class USERPREF_PT_viewport_selection(ViewportPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         system = prefs.system
 
-        layout.prop(system, "use_select_pick_depth")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(system, "use_select_pick_depth")
 
 
 class USERPREF_PT_viewport_subdivision(ViewportPanel, CenterAlignMixIn, Panel):
@@ -785,7 +865,7 @@ class USERPREF_PT_viewport_subdivision(ViewportPanel, CenterAlignMixIn, Panel):
     def draw_centered(self, context, layout):
         prefs = context.preferences
         system = prefs.system
-
+        layout.use_property_split = False # bfa: align left
         layout.prop(system, "use_gpu_subdivision")
 
 
@@ -1096,7 +1176,7 @@ class USERPREF_PT_theme_collection_colors(ThemePanel, CenterAlignMixIn, Panel):
     def draw_header(self, _context):
         layout = self.layout
 
-        layout.label(icon='OUTLINER_COLLECTION')
+        layout.label(icon='GROUP')
 
     def draw_centered(self, context, layout):
         theme = context.preferences.themes[0]
@@ -1250,6 +1330,7 @@ class ThemeGenericClassGenerator:
                 "wcol": wcol,
             })
 
+
     @staticmethod
     def generate_theme_area_child_panel_classes(parent_id, rna_type, theme_area, datapath):
         def generate_child_panel_classes_recurse(parent_id, rna_type, theme_area, datapath):
@@ -1275,12 +1356,7 @@ class ThemeGenericClassGenerator:
                             "datapath": new_datapath,
                         })
 
-                        yield from generate_child_panel_classes_recurse(
-                            panel_id,
-                            prop.fixed_type,
-                            theme_area,
-                            new_datapath,
-                        )
+                        yield from generate_child_panel_classes_recurse(panel_id, prop.fixed_type, theme_area, new_datapath,)
 
         yield from generate_child_panel_classes_recurse(parent_id, rna_type, theme_area, datapath)
 
@@ -1479,40 +1555,47 @@ class USERPREF_PT_saveload_blend(SaveLoadPanel, CenterAlignMixIn, Panel):
         paths = prefs.filepaths
         view = prefs.view
 
-        col = layout.column(heading="Save")
-        col.prop(view, "use_save_prompt")
-        col.prop(paths, "file_preview_type")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col = layout.column(heading="Default To")
-        col.prop(paths, "use_relative_paths")
-        col.prop(paths, "use_file_compression")
-        col.prop(paths, "use_load_ui")
+        flow.use_property_split = False
+        flow.prop(paths, "use_relative_paths")
+        flow.prop(paths, "use_file_compression")
+        flow.prop(paths, "use_load_ui")
 
-        col = layout.column(heading="Text Files")
-        col.prop(paths, "use_tabs_as_spaces")
+        split = flow.split(factor = 0.5)
+        row = split.row()
+        row.label(text = "File Preview")
+        row = split.row()
+        row.use_property_split = False
+        row.prop(paths, "file_preview_type", text = "")
 
-        col = layout.column()
-        col.prop(paths, "save_version")
-        col.prop(paths, "recent_files")
+        flow.prop(paths, "use_tabs_as_spaces")
+        flow.prop(view, "use_save_prompt")
+
+        layout.separator()
+
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = True
+        flow.prop(paths, "save_version")
+        flow.prop(paths, "recent_files")
 
 
 class USERPREF_PT_saveload_blend_autosave(SaveLoadPanel, CenterAlignMixIn, Panel):
     bl_label = "Auto Save"
     bl_parent_id = "USERPREF_PT_saveload_blend"
 
-    def draw_header(self, context):
-        prefs = context.preferences
-        paths = prefs.filepaths
-
-        self.layout.prop(paths, "use_auto_save_temporary_files", text="")
-
     def draw_centered(self, context, layout):
         prefs = context.preferences
         paths = prefs.filepaths
 
-        col = layout.column()
-        col.active = paths.use_auto_save_temporary_files
-        col.prop(paths, "auto_save_time", text="Timer (Minutes)")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.use_property_split = False
+        flow.prop(paths, "use_auto_save_temporary_files")
+        sub = flow.column()
+        sub.active = paths.use_auto_save_temporary_files
+        sub.prop(paths, "auto_save_time", text="Timer (Minutes)")
 
 
 class USERPREF_PT_saveload_file_browser(SaveLoadPanel, CenterAlignMixIn, Panel):
@@ -1522,13 +1605,13 @@ class USERPREF_PT_saveload_file_browser(SaveLoadPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         paths = prefs.filepaths
 
-        col = layout.column(heading="Show Locations")
-        col.prop(paths, "show_recent_locations", text="Recent")
-        col.prop(paths, "show_system_bookmarks", text="System")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col = layout.column(heading="Defaults")
-        col.prop(paths, "use_filter_files")
-        col.prop(paths, "show_hidden_files_datablocks")
+        flow.use_property_split = False
+        flow.prop(paths, "use_filter_files")
+        flow.prop(paths, "show_hidden_files_datablocks")
+        flow.prop(paths, "show_recent_locations")
+        flow.prop(paths, "show_system_bookmarks")
 
 
 # -----------------------------------------------------------------------------
@@ -1547,6 +1630,7 @@ class USERPREF_PT_input_keyboard(InputPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         inputs = prefs.inputs
 
+        layout.use_property_split = False
         layout.prop(inputs, "use_emulate_numpad")
         layout.prop(inputs, "use_numeric_input_advanced")
 
@@ -1561,6 +1645,7 @@ class USERPREF_PT_input_mouse(InputPanel, CenterAlignMixIn, Panel):
 
         flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
+        flow.use_property_split = False
         flow.prop(inputs, "use_mouse_emulate_3_button")
         if sys.platform[:3] != "win":
             rowsub = flow.row()
@@ -1568,6 +1653,8 @@ class USERPREF_PT_input_mouse(InputPanel, CenterAlignMixIn, Panel):
             rowsub.prop(inputs, "mouse_emulate_3_button_modifier")
         flow.prop(inputs, "use_mouse_continuous")
         flow.prop(inputs, "use_drag_immediately")
+
+        flow.use_property_split = True
         flow.prop(inputs, "mouse_double_click_time", text="Double Click Speed")
         flow.prop(inputs, "drag_threshold_mouse")
         flow.prop(inputs, "drag_threshold_tablet")
@@ -1588,6 +1675,8 @@ class USERPREF_PT_input_touchpad(InputPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         inputs = prefs.inputs
 
+        layout.use_property_split = False
+
         col = layout.column()
         col.prop(inputs, "use_multitouch_gestures")
 
@@ -1604,9 +1693,10 @@ class USERPREF_PT_input_tablet(InputPanel, CenterAlignMixIn, Panel):
             layout.prop(inputs, "tablet_api")
             layout.separator()
 
-        col = layout.column()
-        col.prop(inputs, "pressure_threshold_max")
-        col.prop(inputs, "pressure_softness")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(inputs, "pressure_threshold_max")
+        flow.prop(inputs, "pressure_softness")
 
 
 class USERPREF_PT_input_ndof(InputPanel, CenterAlignMixIn, Panel):
@@ -1643,24 +1733,24 @@ class USERPREF_PT_navigation_orbit(NavigationPanel, CenterAlignMixIn, Panel):
         inputs = prefs.inputs
         view = prefs.view
 
-        col = layout.column()
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col.row().prop(inputs, "view_rotate_method", expand=True)
+        flow.row().prop(inputs, "view_rotate_method", expand=True)
         if inputs.view_rotate_method == 'TURNTABLE':
-            col.prop(inputs, "view_rotate_sensitivity_turntable")
+            flow.prop(inputs, "view_rotate_sensitivity_turntable")
         else:
-            col.prop(inputs, "view_rotate_sensitivity_trackball")
-        col.prop(inputs, "use_rotate_around_active")
+            flow.prop(inputs, "view_rotate_sensitivity_trackball")
 
-        col.separator()
+        flow.use_property_split = False
+        flow.prop(inputs, "use_rotate_around_active")
+        flow.prop(inputs, "use_auto_perspective")
+        flow.prop(inputs, "use_mouse_depth_navigate")
 
-        col = layout.column(heading="Auto")
-        col.prop(inputs, "use_auto_perspective", text="Perspective")
-        col.prop(inputs, "use_mouse_depth_navigate", text="Depth")
+        flow.separator()
 
-        col = layout.column()
-        col.prop(view, "smooth_view")
-        col.prop(view, "rotation_angle")
+        flow.use_property_split = True
+        flow.prop(view, "smooth_view")
+        flow.prop(view, "rotation_angle")
 
 
 class USERPREF_PT_navigation_zoom(NavigationPanel, CenterAlignMixIn, Panel):
@@ -1670,18 +1760,17 @@ class USERPREF_PT_navigation_zoom(NavigationPanel, CenterAlignMixIn, Panel):
         prefs = context.preferences
         inputs = prefs.inputs
 
-        col = layout.column()
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col.row().prop(inputs, "view_zoom_method", text="Zoom Method")
+        flow.row().prop(inputs, "view_zoom_method", text="Zoom Method")
         if inputs.view_zoom_method in {'DOLLY', 'CONTINUE'}:
-            col.row().prop(inputs, "view_zoom_axis")
-            col.prop(inputs, "use_zoom_to_mouse")
-            col = layout.column(heading="Invert Zoom Direction", align=True)
-            col.prop(inputs, "invert_mouse_zoom", text="Mouse")
-            col.prop(inputs, "invert_zoom_wheel", text="Wheel")
-        else:
-            col.prop(inputs, "use_zoom_to_mouse")
-            col.prop(inputs, "invert_zoom_wheel", text="Invert Wheel Zoom Direction")
+            flow.row().prop(inputs, "view_zoom_axis")
+            flow.use_property_split = False
+            flow.prop(inputs, "invert_mouse_zoom", text="Invert Mouse Zoom Direction")
+
+        flow.use_property_split = False
+        flow.prop(inputs, "invert_zoom_wheel", text="Invert Wheel Zoom Direction")
+        flow.prop(inputs, "use_zoom_to_mouse")
 
 
 class USERPREF_PT_navigation_fly_walk(NavigationPanel, CenterAlignMixIn, Panel):
@@ -1709,14 +1798,17 @@ class USERPREF_PT_navigation_fly_walk_navigation(NavigationPanel, CenterAlignMix
         inputs = prefs.inputs
         walk = inputs.walk_navigation
 
-        col = layout.column()
-        col.prop(walk, "use_mouse_reverse")
-        col.prop(walk, "mouse_speed")
-        col.prop(walk, "teleport_time")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
 
-        col = layout.column(align=True)
-        col.prop(walk, "walk_speed")
-        col.prop(walk, "walk_speed_factor")
+        flow.use_property_split = False
+        flow.prop(walk, "use_mouse_reverse")
+        flow.use_property_split = True
+        flow.prop(walk, "mouse_speed")
+        flow.prop(walk, "teleport_time")
+
+        sub = flow.column(align=True)
+        sub.prop(walk, "walk_speed")
+        sub.prop(walk, "walk_speed_factor")
 
 
 class USERPREF_PT_navigation_fly_walk_gravity(NavigationPanel, CenterAlignMixIn, Panel):
@@ -1743,9 +1835,10 @@ class USERPREF_PT_navigation_fly_walk_gravity(NavigationPanel, CenterAlignMixIn,
 
         layout.active = walk.use_gravity
 
-        col = layout.column()
-        col.prop(walk, "view_height")
-        col.prop(walk, "jump_height")
+        flow = layout.grid_flow(row_major=False, columns=0, even_columns=True, even_rows=False, align=False)
+
+        flow.prop(walk, "view_height")
+        flow.prop(walk, "jump_height")
 
 
 # Special case, this is only exposed as a popover.
@@ -1757,6 +1850,9 @@ class USERPREF_PT_ndof_settings(Panel):
 
     @staticmethod
     def draw_settings(layout, props, show_3dview_settings=True):
+
+        #layout.use_property_split = False
+
         col = layout.column()
         col.prop(props, "ndof_sensitivity", text="Pan Sensitivity")
         col.prop(props, "ndof_orbit_sensitivity")
@@ -1771,12 +1867,18 @@ class USERPREF_PT_ndof_settings(Panel):
 
             layout.separator()
 
-        col = layout.column()
+        col = layout.column(align = True)
+        col.use_property_split = False
         if show_3dview_settings:
             col.prop(props, "ndof_show_guide")
         col.prop(props, "ndof_zoom_invert")
-        col.prop(props, "ndof_lock_camera_pan_zoom")
-        row = col.row(heading="Pan")
+
+        col.label(text = "Pan")
+        row = col.row()
+        row.separator()
+        row.prop(props, "ndof_lock_camera_pan_zoom")
+        row = col.row()
+        row.separator()
         row.prop(props, "ndof_pan_yz_swap_axis", text="Swap Y and Z Axes")
 
         layout.separator()
@@ -1800,9 +1902,15 @@ class USERPREF_PT_ndof_settings(Panel):
 
             layout.separator()
 
-            col = layout.column(heading="Fly/Walk")
-            col.prop(props, "ndof_lock_horizon")
-            col.prop(props, "ndof_fly_helicopter")
+            col = layout.column(align = True)
+            col.use_property_split = False
+            col.label(text = "Fly/Walk")
+            row = col.row()
+            row.separator()
+            row.prop(props, "ndof_lock_horizon")
+            row = col.row()
+            row.separator()
+            row.prop(props, "ndof_fly_helicopter")
 
     def draw(self, context):
         layout = self.layout
@@ -2225,7 +2333,9 @@ class USERPREF_PT_studiolight_light_editor(StudioLightPanel, Panel):
         col = layout.column()
         col.active = light.use
 
+        col.use_property_split = False
         col.prop(light, "use", text="Use Light")
+        col.use_property_split = True
         col.prop(light, "diffuse_color", text="Diffuse")
         col.prop(light, "specular_color", text="Specular")
         col.prop(light, "smooth")
@@ -2321,6 +2431,16 @@ class USERPREF_PT_experimental_virtual_reality(ExperimentalPanel, Panel):
             ),
         )
 """
+
+class USERPREF_PT_experimental_ui(ExperimentalPanel, Panel):
+    bl_label = "UI"
+
+    def draw(self, context):
+        self._draw_items(
+            context, (
+                ({"property": "use_menu_search"}, "T74157"),
+            ),
+        )
 
 
 class USERPREF_PT_experimental_new_features(ExperimentalPanel, Panel):
@@ -2434,6 +2554,7 @@ classes = (
 
     USERPREF_PT_animation_timeline,
     USERPREF_PT_animation_keyframes,
+    USERPREF_PT_animation_autokey,
     USERPREF_PT_animation_fcurves,
 
     USERPREF_PT_system_cycles_devices,

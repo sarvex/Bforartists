@@ -700,9 +700,9 @@ void ACTION_OT_unlink(wmOperatorType *ot)
   PropertyRNA *prop;
 
   /* identifiers */
-  ot->name = "Unlink Action";
+  ot->name = "Remove Action";
   ot->idname = "ACTION_OT_unlink";
-  ot->description = "Unlink this action from the active action slot (and/or exit Tweak Mode)";
+  ot->description = "Remove this action from the active action slot (and/or exit Tweak Mode)";
 
   /* callbacks */
   ot->invoke = action_unlink_invoke;
@@ -715,7 +715,7 @@ void ACTION_OT_unlink(wmOperatorType *ot)
                          false,
                          "Force Delete",
                          "Clear Fake User and remove "
-                         "copy stashed in this data-block's NLA stack");
+                         "copy stashed in this data's NLA stack");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE);
 
   /* flags */

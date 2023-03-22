@@ -1,5 +1,7 @@
 # generic files to ignore
 .*
+# Bforartists: include .github folder
+!.github
 
 # python temp paths
 __pycache__/
@@ -41,6 +43,9 @@ Desktop.ini
 # in-source lib downloads
 /build_files/build_environment/downloads/
 
+#bfa - we don't have sub modules
+/.gitmodules
+
 # in-source buildbot signing configuration
 /build_files/buildbot/codesign/config_server.py
 
@@ -54,8 +59,9 @@ waveletNoiseTile.bin
 /locale/user-config.py
 
 # External repositories.
-/scripts/addons/
-/scripts/addons_contrib/
+# bfa: we don't use external repositories for those
+# /scripts/addons/
+# /scripts/addons_contrib/
 
 # Ignore old submodules directories.
 # Eventually need to get rid of those, but for the first time of transition

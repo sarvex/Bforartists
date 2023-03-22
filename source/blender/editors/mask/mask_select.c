@@ -11,6 +11,7 @@
 #include "BLI_listbase.h"
 #include "BLI_math.h"
 #include "BLI_rect.h"
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 #include "BLI_utildefines.h"
 
 #include "BKE_context.h"
@@ -211,6 +212,26 @@ static int select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - description*/
+static char *wm_mask_select_all_get_description(bContext *UNUSED(C),
+                                                wmOperatorType *UNUSED(ot),
+                                                PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all curve points");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all curve points");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Invert selection of the selected curve points");
+  }
+  return NULL;
+}
+
 void MASK_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -220,6 +241,7 @@ void MASK_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = select_all_exec;
+  ot->get_description = wm_mask_select_all_get_description; /* bfa - dynamic description */
   ot->poll = ED_maskedit_mask_visible_splines_poll;
 
   /* flags */

@@ -60,6 +60,12 @@ _modules = [
     "space_toolsystem_common",
     "space_toolsystem_toolbar",
 
+    #bfa - toolbar tabs panels
+    "space_toolsystem_toolbar_tabs",
+    "space_image_uv_toolbar_tabs",
+    "space_node_tabs",
+    "space_sequencer_tabs",
+
     "space_clip",
     "space_console",
     "space_dopesheet",
@@ -81,6 +87,11 @@ _modules = [
     "space_view3d",
     "space_view3d_toolbar",
 
+    # bfa - toolbar
+    "space_toolbar",
+    # bfa - node toolshelf
+    "space_node_toolshelf",
+
     # XXX, keep last so panels show after all other tool options.
     "properties_workspace",
 ]
@@ -94,7 +105,6 @@ __import__(name=__name__, fromlist=_modules)
 _namespace = globals()
 _modules_loaded = [_namespace[name] for name in _modules]
 del _namespace
-
 
 def register():
     from bpy.utils import register_class
@@ -141,13 +151,17 @@ def register():
         description="Filter add-ons by category",
     )
 
+
+
     # These items are static but depend on the version cycle.
+    # bfa - iconized enum menu
     items = [
-        ('OFFICIAL', "Official", "Officially supported"),
-        ('COMMUNITY', "Community", "Maintained by community developers"),
+        ('OFFICIAL', "Official", "Officially supported", 'FILE_BLEND', 1),
+        ('COMMUNITY', "Community", "Maintained by community developers", 'COMMUNITY', 2),
     ]
-    if bpy.app.version_cycle == "alpha":
-        items.append(('TESTING', "Testing", "Newly contributed scripts (excluded from release builds)"))
+    if bpy.app.version_cycle == 'alpha':
+        items.append(('TESTING', "Testing", "Newly contributed scripts (excluded from release builds)", 'EXPERIMENTAL', 4)) # bfa - 4 , not 3. enum flag requires for every new item a power of two value. Fourth element would be 8, fifth, 16 and so on.
+
 
     WindowManager.addon_support = EnumProperty(
         items=items,

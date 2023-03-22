@@ -2581,7 +2581,7 @@ static void rna_def_userdef_theme_space_userpref(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ThemePreferences", NULL);
   RNA_def_struct_sdna(srna, "ThemeSpace");
   RNA_def_struct_clear_flag(srna, STRUCT_UNDO);
-  RNA_def_struct_ui_text(srna, "Theme Preferences", "Theme settings for the Blender Preferences");
+  RNA_def_struct_ui_text(srna, "Theme Preferences", "Theme settings for the Preferences");
 
   rna_def_userdef_theme_spaces_main(srna);
 }
@@ -3551,14 +3551,13 @@ static void rna_def_userdef_theme_space_nla(BlenderRNA *brna)
   prop = RNA_def_property(srna, "active_action", PROP_FLOAT, PROP_COLOR_GAMMA);
   RNA_def_property_float_sdna(prop, NULL, "anim_active");
   RNA_def_property_array(prop, 4);
-  RNA_def_property_ui_text(prop, "Active Action", "Animation data-block has active action");
+  RNA_def_property_ui_text(prop, "Active Action", "Animation has active action");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 
   prop = RNA_def_property(srna, "active_action_unset", PROP_FLOAT, PROP_COLOR_GAMMA);
   RNA_def_property_float_sdna(prop, NULL, "anim_non_active");
   RNA_def_property_array(prop, 4);
-  RNA_def_property_ui_text(
-      prop, "No Active Action", "Animation data-block doesn't have active action");
+  RNA_def_property_ui_text(prop, "No Active Action", "Animation doesn't have active action");
   RNA_def_property_update(prop, 0, "rna_userdef_theme_update");
 
   prop = RNA_def_property(srna, "preview_range", PROP_FLOAT, PROP_COLOR_GAMMA);
@@ -4945,9 +4944,8 @@ static void rna_def_userdef_view(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "use_translate_new_dataname", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "transopts", USER_TR_NEWDATANAME);
-  RNA_def_property_ui_text(prop,
-                           "Translate New Names",
-                           "Translate the names of new data-blocks (objects, materials...)");
+  RNA_def_property_ui_text(
+      prop, "Translate New Names", "Translate the names of new data (objects, materials...)");
   RNA_def_property_update(prop, 0, "rna_userdef_update");
 
   /* Status-bar. */
@@ -5296,7 +5294,7 @@ static void rna_def_userdef_edit(BlenderRNA *brna)
   prop = RNA_def_property(srna, "use_duplicate_action", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "dupflag", USER_DUP_ACT);
   RNA_def_property_ui_text(
-      prop, "Duplicate Action", "Causes actions to be duplicated with the data-blocks");
+      prop, "Duplicate Action", "Causes actions to be duplicated with the data");
 
   prop = RNA_def_property(srna, "use_duplicate_particle", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "dupflag", USER_DUP_PSYS);
@@ -6238,9 +6236,8 @@ static void rna_def_userdef_filepaths(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "show_hidden_files_datablocks", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_negative_sdna(prop, NULL, "uiflag", USER_HIDE_DOT);
-  RNA_def_property_ui_text(prop,
-                           "Show Hidden Files/Data-Blocks",
-                           "Show files and data-blocks that are normally hidden");
+  RNA_def_property_ui_text(
+      prop, "Show Hidden Files/Data", "Show files and data that are normally hidden");
 
   prop = RNA_def_property(srna, "use_filter_files", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "uiflag", USER_FILTERFILEEXTS);

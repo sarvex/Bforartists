@@ -1772,10 +1772,10 @@ static void outliner_draw_userbuts(uiBlock *block,
     UI_but_flag_enable(bt, but_flag);
 
     if (id->flag & LIB_FAKEUSER) {
-      tip = TIP_("Data-block will be retained using a fake user");
+      tip = TIP_("Data will be retained using a fake user");
     }
     else {
-      tip = TIP_("Data-block has no users and will be deleted");
+      tip = TIP_("Data has no users and will be deleted");
     }
     bt = uiDefIconButBitS(block,
                           UI_BTYPE_ICON_TOGGLE,
@@ -2435,9 +2435,9 @@ static BIFIconID tree_element_get_icon_from_id(const ID *id)
       return (BIFIconID)ED_file_extension_icon(text->filepath);
     }
     case ID_GR:
-      return ICON_OUTLINER_COLLECTION;
+      return ICON_GROUP_BRIGHT; /*bfa - the color coded collection icon*/
     case ID_CV:
-      return ICON_OUTLINER_DATA_CURVES;
+      return ICON_OUTLINER_OB_CURVE;
     case ID_PT:
       return ICON_OUTLINER_DATA_POINTCLOUD;
     case ID_VO:
@@ -2834,7 +2834,7 @@ TreeElementIcon tree_element_get_icon(TreeStoreElem *tselem, TreeElement *te)
           data.drag_parent = (data.drag_id && te->parent) ? TREESTORE(te->parent)->id : nullptr;
         }
 
-        data.icon = ICON_OUTLINER_COLLECTION;
+        data.icon = ICON_GROUP_BRIGHT;
         break;
       }
       case TSE_GP_LAYER: {

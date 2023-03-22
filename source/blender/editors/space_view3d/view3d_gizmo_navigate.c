@@ -53,45 +53,77 @@ enum {
   GZ_INDEX_ORTHO = 4,
   GZ_INDEX_CAMERA = 5,
 
-  GZ_INDEX_TOTAL = 6,
+  /*bfa - lock camera to view in navigation element*/
+  /* overlaps GZ_INDEX_ORTHO (switch between) */
+  GZ_INDEX_CAMERA_LOCK = 6,
+  GZ_INDEX_CAMERA_UNLOCK = 7,
+
+  GZ_INDEX_TOTAL = 8,
 };
 
 struct NavigateGizmoInfo {
   const char *opname;
   const char *gizmo;
   uint icon;
+  void (*op_prop_fn)(PointerRNA *ptr); /*bfa - lock camera to view in navigation element*/
 };
+
+/*bfa - lock camera to view in navigation element*/
+static void navigate_context_toggle_camera_lock_init(PointerRNA *ptr)
+{
+  RNA_string_set(ptr, "data_path", "space_data.lock_camera");
+}
 
 static struct NavigateGizmoInfo g_navigate_params[GZ_INDEX_TOTAL] = {
     {
         .opname = "VIEW3D_OT_move",
         .gizmo = "GIZMO_GT_button_2d",
         .icon = ICON_VIEW_PAN,
+        .op_prop_fn = NULL, /*bfa - lock camera to view in navigation element*/
     },
     {
         .opname = "VIEW3D_OT_rotate",
         .gizmo = "VIEW3D_GT_navigate_rotate",
         .icon = ICON_NONE,
+        .op_prop_fn = NULL, /*bfa - lock camera to view in navigation element*/
     },
     {
         .opname = "VIEW3D_OT_zoom",
         .gizmo = "GIZMO_GT_button_2d",
         .icon = ICON_VIEW_ZOOM,
+        .op_prop_fn = NULL, /*bfa - lock camera to view in navigation element*/
     },
     {
         .opname = "VIEW3D_OT_view_persportho",
         .gizmo = "GIZMO_GT_button_2d",
         .icon = ICON_VIEW_PERSPECTIVE,
+        .op_prop_fn = NULL, /*bfa - lock camera to view in navigation element*/
     },
     {
         .opname = "VIEW3D_OT_view_persportho",
         .gizmo = "GIZMO_GT_button_2d",
         .icon = ICON_VIEW_ORTHO,
+        .op_prop_fn = NULL, /*bfa - lock camera to view in navigation element*/
     },
     {
         .opname = "VIEW3D_OT_view_camera",
         .gizmo = "GIZMO_GT_button_2d",
         .icon = ICON_VIEW_CAMERA,
+
+        /*bfa - lock camera to view in navigation element*/
+        .op_prop_fn = NULL,
+    },
+    {
+        .opname = "WM_OT_context_toggle", /* GZ_INDEX_CAMERA_LOCK. Lock Camera to View. */
+        .gizmo = "GIZMO_GT_button_2d",
+        .icon = ICON_LOCK_TO_CAMVIEW, /*bfa - navigate the passepartout*/
+        .op_prop_fn = navigate_context_toggle_camera_lock_init,
+    },
+    {
+        .opname = "WM_OT_context_toggle", /* GZ_INDEX_CAMERA_UNLOCK. Unlock Camera to View. */
+        .gizmo = "GIZMO_GT_button_2d",
+        .icon = ICON_LOCK_TO_CAMVIEW_ON, /*bfa - navigate in the camera view*/
+        .op_prop_fn = navigate_context_toggle_camera_lock_init,
     },
 };
 
@@ -100,6 +132,10 @@ struct NavigateWidgetGroup {
   /* Store the view state to check for changes. */
   struct {
     rcti rect_visible;
+    struct {
+      /*bfa - lock camera to view in navigation element*/
+      int flag2;
+    } v3d;
     struct {
       char is_persp;
       bool is_camera;
@@ -167,7 +203,11 @@ static void WIDGETGROUP_navigate_setup(const bContext *C, wmGizmoGroup *gzgroup)
     }
 
     wmOperatorType *ot = WM_operatortype_find(info->opname, true);
-    WM_gizmo_operator_set(gz, 0, ot, NULL);
+    /*bfa - lock camera to view in navigation element*/
+    PointerRNA *ptr = WM_gizmo_operator_set(gz, 0, ot, NULL);
+    if (info->op_prop_fn != NULL) {
+      info->op_prop_fn(ptr);
+    }
   }
 
   {
@@ -177,7 +217,14 @@ static void WIDGETGROUP_navigate_setup(const bContext *C, wmGizmoGroup *gzgroup)
 
   /* Click only buttons (not modal). */
   {
-    int gz_ids[] = {GZ_INDEX_PERSP, GZ_INDEX_ORTHO, GZ_INDEX_CAMERA};
+    /*bfa - lock camera to view in navigation element*/
+    int gz_ids[] = {
+        GZ_INDEX_PERSP,
+        GZ_INDEX_ORTHO,
+        GZ_INDEX_CAMERA,
+        GZ_INDEX_CAMERA_LOCK,
+        GZ_INDEX_CAMERA_UNLOCK,
+    };
     for (int i = 0; i < ARRAY_SIZE(gz_ids); i++) {
       wmGizmo *gz = navgroup->gz_array[gz_ids[i]];
       RNA_boolean_set(gz->ptr, "show_drag", false);
@@ -225,6 +272,9 @@ static void WIDGETGROUP_navigate_draw_prepare(const bContext *C, wmGizmoGroup *g
   struct NavigateWidgetGroup *navgroup = gzgroup->customdata;
   ARegion *region = CTX_wm_region(C);
   const RegionView3D *rv3d = region->regiondata;
+  /*bfa - lock camera to view in navigation element*/
+  View3D *v3d = CTX_wm_view3d(C);
+  const int v3d_flag2_test = V3D_LOCK_CAMERA;
 
   for (int i = 0; i < 3; i++) {
     copy_v3_v3(navgroup->gz_array[GZ_INDEX_ROTATE]->matrix_offset[i], rv3d->viewmat[i]);
@@ -233,10 +283,14 @@ static void WIDGETGROUP_navigate_draw_prepare(const bContext *C, wmGizmoGroup *g
   const rcti *rect_visible = ED_region_visible_rect(region);
 
   /* Ensure types match so bits are never lost on assignment. */
+  CHECK_TYPE_PAIR(navgroup->state.v3d.flag2,
+                  v3d->flag2); /*bfa - lock camera to view in navigation element*/
   CHECK_TYPE_PAIR(navgroup->state.rv3d.viewlock, rv3d->viewlock);
 
   if ((navgroup->state.rect_visible.xmax == rect_visible->xmax) &&
       (navgroup->state.rect_visible.ymax == rect_visible->ymax) &&
+      (navgroup->state.v3d.flag2 ==
+       (v3d->flag2 & v3d_flag2_test)) && /*bfa - lock camera to view in navigation element*/
       (navgroup->state.rv3d.is_persp == rv3d->is_persp) &&
       (navgroup->state.rv3d.is_camera == (rv3d->persp == RV3D_CAMOB)) &&
       (navgroup->state.rv3d.viewlock == RV3D_LOCK_FLAGS(rv3d))) {
@@ -244,6 +298,8 @@ static void WIDGETGROUP_navigate_draw_prepare(const bContext *C, wmGizmoGroup *g
   }
 
   navgroup->state.rect_visible = *rect_visible;
+  navgroup->state.v3d.flag2 = v3d->flag2 &
+                              v3d_flag2_test; /*bfa - lock camera to view in navigation element*/
   navgroup->state.rv3d.is_persp = rv3d->is_persp;
   navgroup->state.rv3d.is_camera = (rv3d->persp == RV3D_CAMOB);
   navgroup->state.rv3d.viewlock = RV3D_LOCK_FLAGS(rv3d);
@@ -271,8 +327,10 @@ static void WIDGETGROUP_navigate_draw_prepare(const bContext *C, wmGizmoGroup *g
   }
 
   const float co[2] = {
-      roundf(rect_visible->xmax - icon_offset_mini * 0.75f),
-      roundf(rect_visible->ymax - icon_offset_from_axis),
+      roundf(rect_visible->xmax -
+             icon_offset_from_axis), /* bfa- changed back navigation buttons to horizontal*/
+      roundf(rect_visible->ymax -
+             icon_offset_mini * 0.75f), /* bfa- changed back navigation buttons to horizontal*/
   };
 
   wmGizmo *gz;
@@ -293,30 +351,53 @@ static void WIDGETGROUP_navigate_draw_prepare(const bContext *C, wmGizmoGroup *g
     int icon_mini_slot = 0;
     if ((RV3D_LOCK_FLAGS(rv3d) & RV3D_LOCK_ZOOM_AND_DOLLY) == 0) {
       gz = navgroup->gz_array[GZ_INDEX_ZOOM];
-      gz->matrix_basis[3][0] = roundf(co[0]);
-      gz->matrix_basis[3][1] = roundf(co[1] - (icon_offset_mini * icon_mini_slot++));
+      gz->matrix_basis[3][0] =
+          roundf(co[0]) -
+          (icon_offset_mini *
+           icon_mini_slot++); /* bfa- changed back navigation buttons to horizontal*/
+      gz->matrix_basis[3][1] = roundf(
+          co[1]); /* bfa- changed back navigation buttons to horizontal*/
       WM_gizmo_set_flag(gz, WM_GIZMO_HIDDEN, false);
     }
 
     if ((RV3D_LOCK_FLAGS(rv3d) & RV3D_LOCK_LOCATION) == 0) {
       gz = navgroup->gz_array[GZ_INDEX_MOVE];
-      gz->matrix_basis[3][0] = roundf(co[0]);
-      gz->matrix_basis[3][1] = roundf(co[1] - (icon_offset_mini * icon_mini_slot++));
+      gz->matrix_basis[3][0] =
+          roundf(co[0]) -
+          (icon_offset_mini *
+           icon_mini_slot++);         /* bfa- changed back navigation buttons to horizontal*/
+      gz->matrix_basis[3][1] = co[1]; /* bfa- changed back navigation buttons to horizontal*/
       WM_gizmo_set_flag(gz, WM_GIZMO_HIDDEN, false);
     }
 
     if ((RV3D_LOCK_FLAGS(rv3d) & RV3D_LOCK_ROTATION) == 0) {
       gz = navgroup->gz_array[GZ_INDEX_CAMERA];
-      gz->matrix_basis[3][0] = roundf(co[0]);
-      gz->matrix_basis[3][1] = roundf(co[1] - (icon_offset_mini * icon_mini_slot++));
+      gz->matrix_basis[3][0] =
+          (co[0]) - (icon_offset_mini *
+                     icon_mini_slot++); /* bfa- changed back navigation buttons to horizontal*/
+      gz->matrix_basis[3][1] = (co[1]); /* bfa- changed back navigation buttons to horizontal*/
       WM_gizmo_set_flag(gz, WM_GIZMO_HIDDEN, false);
 
       if (navgroup->state.rv3d.is_camera == false) {
         gz = navgroup->gz_array[rv3d->is_persp ? GZ_INDEX_PERSP : GZ_INDEX_ORTHO];
-        gz->matrix_basis[3][0] = roundf(co[0]);
-        gz->matrix_basis[3][1] = roundf(co[1] - (icon_offset_mini * icon_mini_slot++));
+        gz->matrix_basis[3][0] =
+            (co[0]) - (icon_offset_mini *
+                       icon_mini_slot++); /* bfa- changed back navigation buttons to horizontal*/
+        gz->matrix_basis[3][1] = (co[1]); /* bfa- changed back navigation buttons to horizontal*/
         WM_gizmo_set_flag(gz, WM_GIZMO_HIDDEN, false);
       }
+    }
+    /*bfa - lock camera to view in navigation element*/
+    if (navgroup->state.rv3d.is_camera == true) {
+      gz = navgroup->gz_array[(v3d->flag2 & V3D_LOCK_CAMERA) ? GZ_INDEX_CAMERA_UNLOCK :
+                                                               GZ_INDEX_CAMERA_LOCK];
+      gz->matrix_basis[3][0] =
+          roundf(co[0]) -
+          (icon_offset_mini *
+           icon_mini_slot++); /* bfa- changed back navigation buttons to horizontal*/
+      gz->matrix_basis[3][1] = roundf(
+          co[1]); /* bfa- changed back navigation buttons to horizontal*/
+      WM_gizmo_set_flag(gz, WM_GIZMO_HIDDEN, false);
     }
   }
 }

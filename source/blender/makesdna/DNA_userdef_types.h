@@ -504,6 +504,7 @@ typedef struct bTheme {
   ThemeSpace space_preferences;
   ThemeSpace space_console;
   ThemeSpace space_clip;
+  ThemeSpace space_toolbar;
   ThemeSpace space_topbar;
   ThemeSpace space_statusbar;
   ThemeSpace space_spreadsheet;

@@ -832,6 +832,16 @@ static int image_view_all_exec(bContext *C, wmOperator *op)
 
   return OPERATOR_FINISHED;
 }
+/*bfa - descriptions*/
+static char *image_ot_view_all_get_description(bContext *UNUSED(C),
+                                               wmOperatorType *UNUSED(ot),
+                                               PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "fit_view")) {
+    return BLI_strdup("Fits the content area into the window");
+  }
+  return NULL;
+}
 
 void IMAGE_OT_view_all(wmOperatorType *ot)
 {
@@ -844,13 +854,15 @@ void IMAGE_OT_view_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = image_view_all_exec;
+  ot->get_description = image_ot_view_all_get_description; /*bfa - descriptions*/
   ot->poll = space_image_main_region_poll;
 
   /* flags */
   ot->flag = OPTYPE_LOCK_BYPASS;
 
   /* properties */
-  prop = RNA_def_boolean(ot->srna, "fit_view", 0, "Fit View", "Fit frame to the viewport");
+  prop = RNA_def_boolean(
+      ot->srna, "fit_view", 0, "Fit View", "Fit View\nFit frame to the viewport");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE);
 }
 
@@ -1058,7 +1070,7 @@ void IMAGE_OT_view_zoom_in(wmOperatorType *ot)
                               -FLT_MAX,
                               FLT_MAX,
                               "Location",
-                              "Cursor location in screen coordinates",
+                              "Location\nCursor location in screen coordinates",
                               -10.0f,
                               10.0f);
   RNA_def_property_flag(prop, PROP_HIDDEN);
@@ -1099,7 +1111,7 @@ void IMAGE_OT_view_zoom_out(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Zoom Out";
   ot->idname = "IMAGE_OT_view_zoom_out";
-  ot->description = "Zoom out the image (centered around 2D cursor)";
+  ot->description = "Zoom out the image";
 
   /* api callbacks */
   ot->invoke = image_view_zoom_out_invoke;
@@ -1117,7 +1129,7 @@ void IMAGE_OT_view_zoom_out(wmOperatorType *ot)
                               -FLT_MAX,
                               FLT_MAX,
                               "Location",
-                              "Cursor location in screen coordinates",
+                              "Location\nCursor location in screen coordinates",
                               -10.0f,
                               10.0f);
   RNA_def_property_flag(prop, PROP_HIDDEN);
@@ -1215,8 +1227,9 @@ static int image_view_zoom_border_exec(bContext *C, wmOperator *op)
 void IMAGE_OT_view_zoom_border(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Zoom to Border";
-  ot->description = "Zoom in the view to the nearest item contained in the border";
+  ot->name = "Zoom Border";
+  ot->description =
+      "Drawing a rectangle with LMB zooms in. Drawing a rectangle with MMB zooms out";
   ot->idname = "IMAGE_OT_view_zoom_border";
 
   /* api callbacks */
@@ -2040,15 +2053,27 @@ static bool image_save_as_poll(bContext *C)
   return true;
 }
 
+/*bfa - descriptions*/
+static char *image_ot_save_as_get_description(bContext *UNUSED(C),
+                                              wmOperatorType *UNUSED(ot),
+                                              PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "copy")) {
+    return BLI_strdup("Saves a copy of the current Image");
+  }
+  return NULL;
+}
+
 void IMAGE_OT_save_as(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Save As Image";
   ot->idname = "IMAGE_OT_save_as";
-  ot->description = "Save the image with another name and/or settings";
+  ot->description = "Saves the image with another name and/or settings"; /*bfa - descriptions*/
 
   /* api callbacks */
   ot->exec = image_save_as_exec;
+  ot->get_description = image_ot_save_as_get_description;
   ot->check = image_save_as_check;
   ot->invoke = image_save_as_invoke;
   ot->cancel = image_save_as_cancel;
@@ -2637,6 +2662,7 @@ static void image_new_draw(bContext *UNUSED(C), wmOperator *op)
 
   /* copy of WM_operator_props_dialog_popup() layout */
 
+  /*bfa - new image dialog in uv editor*/
   uiLayoutSetPropSep(layout, true);
   uiLayoutSetPropDecorate(layout, false);
 
@@ -2645,8 +2671,11 @@ static void image_new_draw(bContext *UNUSED(C), wmOperator *op)
   uiItemR(col, op->ptr, "width", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "height", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "color", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   uiItemR(col, op->ptr, "alpha", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
   uiItemR(col, op->ptr, "generated_type", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   uiItemR(col, op->ptr, "float", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "tiled", 0, NULL, ICON_NONE);
 
@@ -2683,7 +2712,7 @@ void IMAGE_OT_new(wmOperatorType *ot)
   ot->flag = OPTYPE_UNDO;
 
   /* properties */
-  RNA_def_string(ot->srna, "name", IMA_DEF_NAME, MAX_ID_NAME - 2, "Name", "Image data-block name");
+  RNA_def_string(ot->srna, "name", IMA_DEF_NAME, MAX_ID_NAME - 2, "Name", "Image name");
   prop = RNA_def_int(ot->srna, "width", 1024, 1, INT_MAX, "Width", "Image width", 1, 16384);
   RNA_def_property_subtype(prop, PROP_PIXEL);
   prop = RNA_def_int(ot->srna, "height", 1024, 1, INT_MAX, "Height", "Image height", 1, 16384);
@@ -3197,8 +3226,7 @@ void IMAGE_OT_unpack(wmOperatorType *ot)
   RNA_def_enum(
       ot->srna, "method", rna_enum_unpack_method_items, PF_USE_LOCAL, "Method", "How to unpack");
   /* XXX, weak!, will fail with library, name collisions */
-  RNA_def_string(
-      ot->srna, "id", NULL, MAX_ID_NAME - 2, "Image Name", "Image data-block name to unpack");
+  RNA_def_string(ot->srna, "id", NULL, MAX_ID_NAME - 2, "Image Name", "Image name to unpack");
 }
 
 /** \} */
@@ -3807,7 +3835,7 @@ void IMAGE_OT_render_border(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Render Region";
-  ot->description = "Set the boundaries of the render region and enable render region";
+  ot->description = "Box select an area to render a part of the image";
   ot->idname = "IMAGE_OT_render_border";
 
   /* api callbacks */
@@ -3843,7 +3871,10 @@ void IMAGE_OT_clear_render_border(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Clear Render Region";
-  ot->description = "Clear the boundaries of the render region and disable render region";
+  ot->description =
+      "Removes an existing Render Region rectangle";  // Short, pregnant, working. And
+                                                      // UNDERSTANDABLE! That's how a tooltip
+                                                      // should look like.
   ot->idname = "IMAGE_OT_clear_render_border";
 
   /* api callbacks */
@@ -3883,9 +3914,13 @@ static void draw_fill_tile(PointerRNA *ptr, uiLayout *layout)
   uiItemR(col, ptr, "color", 0, NULL, ICON_NONE);
   uiItemR(col, ptr, "width", 0, NULL, ICON_NONE);
   uiItemR(col, ptr, "height", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   uiItemR(col, ptr, "alpha", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
   uiItemR(col, ptr, "generated_type", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   uiItemR(col, ptr, "float", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
 }
 
 static void tile_fill_init(PointerRNA *ptr, Image *ima, ImageTile *tile)
@@ -4026,7 +4061,9 @@ static void tile_add_draw(bContext *UNUSED(C), wmOperator *op)
   uiItemR(col, op->ptr, "number", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "count", 0, NULL, ICON_NONE);
   uiItemR(col, op->ptr, "label", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(layout, false); /* bfa - use_property_split = False */
   uiItemR(layout, op->ptr, "fill", 0, NULL, ICON_NONE);
+  uiLayoutSetPropSep(layout, true); /* bfa - use_property_split = True */
 
   if (RNA_boolean_get(op->ptr, "fill")) {
     draw_fill_tile(op->ptr, layout);

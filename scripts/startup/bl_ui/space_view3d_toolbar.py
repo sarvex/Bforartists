@@ -79,8 +79,8 @@ class VIEW3D_MT_brush_gpencil_context_menu(Menu):
             layout.label(text="No Brushes currently available", icon='INFO')
             return
 
-        layout.operator("gpencil.brush_reset")
-        layout.operator("gpencil.brush_reset_all")
+        layout.operator("gpencil.brush_reset", icon = "RESET")
+        layout.operator("gpencil.brush_reset_all", icon = "RESET")
 
 
 class View3DPanel:
@@ -134,15 +134,22 @@ class VIEW3D_PT_tools_object_options_transform(View3DPanel, Panel):
     def draw(self, context):
         layout = self.layout
 
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         tool_settings = context.tool_settings
 
-        col = layout.column(heading="Affect Only", align=True)
-        col.prop(tool_settings, "use_transform_data_origin", text="Origins")
-        col.prop(tool_settings, "use_transform_pivot_point_align", text="Locations")
-        col.prop(tool_settings, "use_transform_skip_children", text="Parents")
+        col = layout.column( align=True)
+        col.label(text = "Affect Only")
+        row = col.row()
+        row.separator()
+        row.prop(tool_settings, "use_transform_data_origin", text="Origins")
+        row = col.row()
+        row.separator()
+        row.prop(tool_settings, "use_transform_pivot_point_align", text="Locations")
+        row = col.row()
+        row.separator()
+        row.prop(tool_settings, "use_transform_skip_children", text="Parents")
 
 
 # ********** default tools for editmode_mesh ****************
@@ -169,14 +176,33 @@ class VIEW3D_PT_tools_meshedit_options(View3DPanel, Panel):
         ob = context.active_object
         mesh = ob.data
 
-        row = layout.row(align=True, heading="Transform")
-        row.prop(tool_settings, "use_transform_correct_face_attributes")
+        col = layout.column(align = True)
+        col.label(text = "Transform")
 
-        row = layout.row(align=True)
-        row.active = tool_settings.use_transform_correct_face_attributes
-        row.prop(tool_settings, "use_transform_correct_keep_connected")
+        subcol = col.column()
+        subcol.use_property_split = False
+        row = subcol.row()
+        row.separator()
+        split = row.split(factor = 0.85)
+        split.prop(tool_settings, "use_transform_correct_face_attributes")
+        if tool_settings.use_transform_correct_face_attributes:
+            split.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            split.label(icon='DISCLOSURE_TRI_RIGHT')
 
-        row = layout.row(align=True, heading="UVs")
+
+        if tool_settings.use_transform_correct_face_attributes:
+            row = col.row()
+            row.separator()
+            row.separator()
+            row.use_property_split = False
+            row.prop(tool_settings, "use_transform_correct_keep_connected")
+
+        col = layout.column(align = True)
+        col.label(text = "UV's")
+        row = col.row()
+        row.use_property_split = False
+        row.separator()
         row.prop(tool_settings, "use_edge_path_live_unwrap")
 
         row = layout.row(heading="Mirror")
@@ -185,17 +211,38 @@ class VIEW3D_PT_tools_meshedit_options(View3DPanel, Panel):
         sub.prop(mesh, "use_mirror_y", text="Y", toggle=True)
         sub.prop(mesh, "use_mirror_z", text="Z", toggle=True)
 
+        layout.use_property_split = False
+
         row = layout.row(align=True)
-        row.active = ob.data.use_mirror_x or ob.data.use_mirror_y or ob.data.use_mirror_z
-        row.prop(mesh, "use_mirror_topology")
+        if ob.data.use_mirror_x or ob.data.use_mirror_y or ob.data.use_mirror_z:
+            row.separator()
+            row.prop(mesh, "use_mirror_topology")
 
+        split = layout.split()
+        col = split.column()
+        col.use_property_split = False
+        col.prop(tool_settings, "use_mesh_automerge", text="Auto Merge", toggle=False)
+        col = split.column()
+        if tool_settings.use_mesh_automerge:
+            col.label(icon='DISCLOSURE_TRI_DOWN')
+            col = layout.column(align=True)
+            row = col.row()
+            row.separator()
+            row.prop(tool_settings, "use_mesh_automerge_and_split", toggle=False)
+            col.use_property_split = True
+            row = col.row()
+            row.separator()
+            row.prop(tool_settings, "double_threshold", text="Threshold")
+        else:
+            col.label(icon='DISCLOSURE_TRI_RIGHT')
 
-class VIEW3D_PT_tools_meshedit_options_automerge(View3DPanel, Panel):
-    bl_category = "Tool"
-    bl_context = ".mesh_edit"  # dot on purpose (access from topbar)
-    bl_label = "Auto Merge"
-    bl_parent_id = "VIEW3D_PT_tools_meshedit_options"
-    bl_options = {'DEFAULT_CLOSED'}
+# bfa - panel remains for compatibility reasons. Who knows what Blender developers does in the future here ...
+#class VIEW3D_PT_tools_meshedit_options_automerge(View3DPanel, Panel):
+    #bl_category = "Tool"
+    #bl_context = ".mesh_edit"  # dot on purpose (access from topbar)
+    #bl_label = "Auto Merge"
+    #bl_parent_id = "VIEW3D_PT_tools_meshedit_options" #bfa - not longer, we have the two props in the options panel directly.
+"""     bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -211,13 +258,15 @@ class VIEW3D_PT_tools_meshedit_options_automerge(View3DPanel, Panel):
 
         tool_settings = context.tool_settings
 
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         col = layout.column(align=True)
         col.active = tool_settings.use_mesh_automerge
         col.prop(tool_settings, "use_mesh_automerge_and_split", toggle=False)
-        col.prop(tool_settings, "double_threshold", text="Threshold")
+
+        col.use_property_split = True
+        col.prop(tool_settings, "double_threshold", text="Threshold") """
 
 
 # ********** default tools for editmode_armature ****************
@@ -248,13 +297,24 @@ class VIEW3D_PT_tools_posemode_options(View3DPanel, Panel):
         tool_settings = context.tool_settings
 
         layout.prop(pose, "use_auto_ik")
-        layout.prop(pose, "use_mirror_x")
-        col = layout.column()
-        col.active = pose.use_mirror_x and not pose.use_auto_ik
-        col.prop(pose, "use_mirror_relative")
 
-        layout.label(text="Affect Only")
-        layout.prop(tool_settings, "use_transform_pivot_point_align", text="Locations")
+        split = layout.split()
+        col = split.column()
+        col.prop(pose, "use_mirror_x")
+        col = split.column()
+        if pose.use_mirror_x:
+            col.label(icon='DISCLOSURE_TRI_DOWN')
+        else:
+            col.label(icon='DISCLOSURE_TRI_RIGHT')
+
+        if pose.use_mirror_x:
+            row = layout.row()
+            row.separator()
+            row.active = not pose.use_auto_ik
+            row.prop(pose, "use_mirror_relative")
+
+        layout.prop(tool_settings, "use_transform_pivot_point_align", text="Affect Only Locations")
+
 
 # ********** default tools for paint modes ****************
 
@@ -319,7 +379,9 @@ class VIEW3D_PT_tools_particlemode(Panel, View3DPaintPanel):
                 col.prop(brush, "count")
 
                 col = layout.column()
+                col.use_property_split = False
                 col.prop(settings, "use_default_interpolate")
+                col.use_property_split = True
                 col.prop(brush, "steps", slider=True)
                 col.prop(settings, "default_key_count", slider=True)
             else:
@@ -329,15 +391,15 @@ class VIEW3D_PT_tools_particlemode(Panel, View3DPaintPanel):
                     layout.row().prop(brush, "length_mode", expand=True)
                 elif tool == 'PUFF':
                     layout.row().prop(brush, "puff_mode", expand=True)
+                    layout.use_property_split = False
                     layout.prop(brush, "use_puff_volume")
                 elif tool == 'COMB':
-                    col = layout.column(align=False, heading="Deflect Emitter")
-                    row = col.row(align=True)
-                    sub = row.row(align=True)
-                    sub.prop(settings, "use_emitter_deflect", text="")
-                    sub = sub.row(align=True)
-                    sub.active = settings.use_emitter_deflect
-                    sub.prop(settings, "emitter_distance", text="")
+                    layout.use_property_split = False
+                    layout.prop(settings, "use_emitter_deflect", text="Deflect Emitter")
+                    layout.use_property_split = True
+                    col = layout.column()
+                    col.active = settings.use_emitter_deflect
+                    col.prop(settings, "emitter_distance", text="Distance")
 
 
 # TODO, move to space_view3d.py
@@ -447,7 +509,6 @@ class VIEW3D_MT_tools_projectpaint_uvlayer(Menu):
             props.data_path = "active_object.data.uv_layers.active_index"
             props.value = i
 
-
 class SelectPaintSlotHelper:
     bl_category = "Tool"
 
@@ -471,6 +532,9 @@ class SelectPaintSlotHelper:
 
         match getattr(mode_settings, self.canvas_source_attr_name):
             case 'MATERIAL':
+
+                layout.operator_menu_enum("paint.add_texture_paint_slot", "type", icon='ADD', text="Add Texture Paint Slot")
+
                 if len(ob.material_slots) > 1:
                     layout.template_list(
                         "MATERIAL_UL_matslots", "layers",
@@ -497,9 +561,7 @@ class SelectPaintSlotHelper:
 
                     box = row.box()
                     box.label(text="No Textures")
-
-                sub = row.column(align=True)
-                sub.operator_menu_enum("paint.add_texture_paint_slot", "type", icon='ADD', text="")
+                    box.label(text="Add a Texture Paint Slot")
 
             case 'IMAGE':
                 mesh = ob.data
@@ -724,7 +786,7 @@ class VIEW3D_PT_tools_brush_stroke(Panel, View3DPaintPanel, StrokePanel):
 
 class VIEW3D_PT_tools_brush_stroke_smooth_stroke(Panel, View3DPaintPanel, SmoothStrokePanel):
     bl_context = ".paint_common"  # dot on purpose (access from topbar)
-    bl_label = "Stabilize Stroke"
+    bl_label = "" # bfa - align props left
     bl_parent_id = "VIEW3D_PT_tools_brush_stroke"
     bl_options = {'DEFAULT_CLOSED'}
 
@@ -888,8 +950,11 @@ class VIEW3D_PT_sculpt_dyntopo(Panel, View3DPaintPanel):
         sub.prop(sculpt, "detail_type_method", text="Detailing")
 
         if sculpt.detail_type_method in {'CONSTANT', 'MANUAL'}:
+            col.separator()
             col.operator("sculpt.detail_flood_fill")
 
+        col.separator()
+        col.use_property_split = False
         col.prop(sculpt, "use_smooth_shading")
 
 
@@ -910,20 +975,31 @@ class VIEW3D_PT_sculpt_voxel_remesh(Panel, View3DPaintPanel):
 
         col = layout.column()
         mesh = context.active_object.data
+
         row = col.row(align=True)
         row.prop(mesh, "remesh_voxel_size")
         props = row.operator("sculpt.sample_detail_size", text="", icon='EYEDROPPER')
         props.mode = 'VOXEL'
         col.prop(mesh, "remesh_voxel_adaptivity")
+        col.use_property_split = False
         col.prop(mesh, "use_remesh_fix_poles")
 
-        col = layout.column(heading="Preserve", align=True)
-        col.prop(mesh, "use_remesh_preserve_volume", text="Volume")
-        col.prop(mesh, "use_remesh_preserve_paint_mask", text="Paint Mask")
-        col.prop(mesh, "use_remesh_preserve_sculpt_face_sets", text="Face Sets")
+        col.label(text = "Preserve")
+
+        row = col.row()
+        row.separator()
+        row.prop(mesh, "use_remesh_preserve_volume", text="Volume")
+        row = col.row()
+        row.separator()
+        row.prop(mesh, "use_remesh_preserve_paint_mask", text="Paint Mask")
+        row = col.row()
+        row.separator()
+        row.prop(mesh, "use_remesh_preserve_sculpt_face_sets", text="Face Sets")
+        row = col.row()
+        row.separator()
         col.prop(mesh, "use_remesh_preserve_vertex_colors", text="Color Attributes")
 
-        layout.operator("object.voxel_remesh", text="Remesh")
+        layout.operator("object.voxel_remesh", text="Voxel Remesh")
 
 
 # TODO, move to space_view3d.py
@@ -939,16 +1015,68 @@ class VIEW3D_PT_sculpt_options(Panel, View3DPaintPanel):
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         tool_settings = context.tool_settings
         sculpt = tool_settings.sculpt
 
-        col = layout.column(heading="Display", align=True)
-        col.prop(sculpt, "show_low_resolution")
-        col.prop(sculpt, "use_sculpt_delay_updates")
-        col.prop(sculpt, "use_deform_only")
+        col = layout.column()
+        col.label(text = "Display")
+
+        row = col.row()
+        row.separator()
+        row.prop(sculpt, "show_low_resolution")
+        row = col.row()
+        row.separator()
+        row.prop(sculpt, "use_sculpt_delay_updates")
+        row = col.row()
+        row.separator()
+        row.prop(sculpt, "use_deform_only")
+
+        col = layout.column(heading="Auto-Masking", align=True)
+
+        col.prop(sculpt, "use_automasking_topology", text="Topology")
+        col.prop(sculpt, "use_automasking_face_sets", text="Face Sets")
+        col.prop(sculpt, "use_automasking_boundary_edges", text="Mesh Boundary")
+        col.prop(sculpt, "use_automasking_boundary_face_sets", text="Face Sets Boundary")
+        col.prop(sculpt, "use_automasking_cavity", text="Cavity")
+        col.prop(sculpt, "use_automasking_cavity_inverted", text="Cavity (Inverted)")
+        col.prop(sculpt, "use_automasking_start_normal", text="Area Normal")
+        col.prop(sculpt, "use_automasking_view_normal", text="View Normal")
+
+        if sculpt.use_automasking_start_normal:
+            col.separator()
+
+            col.prop(sculpt, "automasking_start_normal_limit")
+            col.prop(sculpt, "automasking_start_normal_falloff")
+
+        if sculpt.use_automasking_view_normal:
+            col.separator()
+
+            col.prop(sculpt, "use_automasking_view_occlusion", text="Occlusion")
+            col.prop(sculpt, "automasking_view_normal_limit")
+            col.prop(sculpt, "automasking_view_normal_falloff")
+
+        col.separator()
+        col.prop(sculpt.brush, "automasking_boundary_edges_propagation_steps")
+
+        if sculpt.use_automasking_cavity or sculpt.use_automasking_cavity_inverted:
+            col.separator()
+
+            col2 = col.column()
+            props = col2.operator("sculpt.mask_from_cavity", text="Mask From Cavity")
+            props.use_automask_settings = True
+
+            col2 = col.column()
+
+            col2.prop(sculpt, "automasking_cavity_factor", text="Cavity Factor")
+            col2.prop(sculpt, "automasking_cavity_blur_steps", text="Cavity Blur")
+
+            col2.prop(sculpt, "use_automasking_custom_cavity_curve", text="Use Curve")
+
+            if sculpt.use_automasking_custom_cavity_curve:
+                col2.template_curve_mapping(sculpt, "automasking_cavity_curve")
 
 
 class VIEW3D_PT_sculpt_options_gravity(Panel, View3DPaintPanel):
@@ -1012,7 +1140,9 @@ class VIEW3D_PT_sculpt_symmetry(Panel, View3DPaintPanel):
         row.prop(sculpt, "tile_y", text="Y", toggle=True)
         row.prop(sculpt, "tile_z", text="Z", toggle=True)
 
+        layout.use_property_split = False
         layout.prop(sculpt, "use_symmetry_feather", text="Feather")
+        layout.use_property_split = True
         layout.prop(sculpt, "radial_symmetry", text="Radial")
         layout.prop(sculpt, "tile_offset", text="Tile Offset")
 
@@ -1084,13 +1214,19 @@ class VIEW3D_PT_tools_weightpaint_symmetry(Panel, View3DPaintPanel):
         wpaint = tool_settings.weight_paint
         mesh = context.object.data
 
-        layout.prop(mesh, "use_mirror_vertex_groups")
+        col = layout.column(align = True)
+        col.use_property_split = False
+        col.prop(mesh, "use_mirror_vertex_groups")
+
+        row = col.row()
+        if mesh.use_mirror_vertex_groups:
+            row.separator ()
+            row.use_property_split = False
+            row.prop(mesh, "use_mirror_topology")
+
+        layout.use_property_split = True
 
         draw_vpaint_symmetry(layout, wpaint, context.object)
-
-        row = layout.row()
-        row.active = mesh.use_mirror_vertex_groups
-        row.prop(mesh, "use_mirror_topology")
 
 
 class VIEW3D_PT_tools_weightpaint_symmetry_for_topbar(Panel):
@@ -1110,7 +1246,7 @@ class VIEW3D_PT_tools_weightpaint_options(Panel, View3DPaintPanel):
     def draw(self, context):
         layout = self.layout
 
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         tool_settings = context.tool_settings
@@ -1259,6 +1395,7 @@ class VIEW3D_PT_tools_imagepaint_options(View3DPaintPanel, Panel):
         layout.prop(ipaint, "dither", slider=True)
 
         col = layout.column()
+        col.use_property_split = False
         col.prop(ipaint, "use_occlude")
         col.prop(ipaint, "use_backface_culling", text="Backface Culling")
 
@@ -1357,20 +1494,26 @@ class VIEW3D_PT_tools_particlemode_options(View3DPanel, Panel):
 
         col = layout.column(align=True)
         col.active = pe.is_editable
+        col.use_property_split = False
+        col.prop(ob.data, "use_mirror_x")
+        if pe.tool == 'ADD':
+            col.prop(ob.data, "use_mirror_topology")
 
         if not pe.is_hair:
             col.prop(pe, "use_auto_velocity", text="Auto-Velocity")
-            col.separator()
 
-        sub = col.column(align=True, heading="Mirror")
-        sub.prop(ob.data, "use_mirror_x")
         if pe.tool == 'ADD':
             sub.prop(ob.data, "use_mirror_topology")
+
         col.separator()
 
-        sub = col.column(align=True, heading="Preserve")
-        sub.prop(pe, "use_preserve_length", text="Strand Lengths")
-        sub.prop(pe, "use_preserve_root", text="Root Positions")
+        col.label(text = "Preserve")
+        row = col.row()
+        row.separator()
+        row.prop(pe, "use_preserve_length", text="Preserve Strand Lengths")
+        row = col.row()
+        row.separator()
+        row.prop(pe, "use_preserve_root", text="Preserve Root Positions")
 
 
 class VIEW3D_PT_tools_particlemode_options_shapecut(View3DPanel, Panel):
@@ -1410,17 +1553,18 @@ class VIEW3D_PT_tools_particlemode_options_display(View3DPanel, Panel):
         col.active = pe.is_editable
         col.prop(pe, "display_step", text="Path Steps")
         if pe.is_hair:
+            col.use_property_split = False
             col.prop(pe, "show_particles", text="Children")
         else:
             if pe.type == 'PARTICLES':
+                col.use_property_split = False
                 col.prop(pe, "show_particles", text="Particles")
-            col = layout.column(align=False, heading="Fade Time")
-            row = col.row(align=True)
-            sub = row.row(align=True)
-            sub.prop(pe, "use_fade_time", text="")
-            sub = sub.row(align=True)
+            col.use_property_split = False
+            col.prop(pe, "use_fade_time")
+            sub = col.row(align=True)
             sub.active = pe.use_fade_time
-            sub.prop(pe, "fade_frames", slider=True, text="")
+            sub.use_property_split = True
+            sub.prop(pe, "fade_frames", slider=True)
 
 
 # ********** grease pencil object tool panels ****************
@@ -1587,17 +1731,18 @@ class VIEW3D_PT_tools_grease_pencil_brush_advanced(View3DPanel, Panel):
                 col.separator()
                 col.prop(gp_settings, "fill_simplify_level", text="Simplify")
                 if gp_settings.fill_draw_mode != 'STROKE':
-                    col = layout.column(align=False, heading="Ignore Transparent")
-                    col.use_property_decorate = False
-                    row = col.row(align=True)
-                    sub = row.row(align=True)
-                    sub.prop(gp_settings, "show_fill", text="")
-                    sub = sub.row(align=True)
-                    sub.active = gp_settings.show_fill
-                    sub.prop(gp_settings, "fill_threshold", text="")
+                    split = layout.split(factor = 0.4)
+                    col = split.column()
+                    col.use_property_split = False
+                    col.prop(gp_settings, "show_fill")
+                    col = split.column()
+                    if gp_settings.show_fill:
+                        col.prop(gp_settings, "fill_threshold", text="")
+                    else:
+                        col.label(icon='DISCLOSURE_TRI_RIGHT')
 
-                col.separator()
-                row = col.row(align=True)
+                row = layout.row(align=True)
+                row.use_property_split = False
                 row.prop(gp_settings, "use_fill_limit")
 
 
@@ -1706,7 +1851,10 @@ class VIEW3D_PT_tools_grease_pencil_brush_post_processing(View3DPanel, Panel):
         col1.prop(gp_settings, "simplify_factor")
 
         col1 = col.column(align=True)
+        col1.separator()
+        col1.use_property_split = False
         col1.prop(gp_settings, "use_trim")
+        col1.use_property_split = True
 
         col.separator()
 
@@ -2255,15 +2403,15 @@ class VIEW3D_PT_tools_grease_pencil_brush_mixcolor(View3DPanel, Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
         col = layout.column()
-        col.enabled = settings.color_mode == 'VERTEXCOLOR' or brush.gpencil_tool == 'TINT'
+        if settings.color_mode == 'VERTEXCOLOR' or brush.gpencil_tool == 'TINT':
 
-        col.template_color_picker(brush, "color", value_slider=True)
+            col.template_color_picker(brush, "color", value_slider=True)
 
-        sub_row = col.row(align=True)
-        sub_row.prop(brush, "color", text="")
-        sub_row.prop(brush, "secondary_color", text="")
+            sub_row = col.row(align=True)
+            sub_row.prop(brush, "color", text="")
+            sub_row.prop(brush, "secondary_color", text="")
 
-        sub_row.operator("gpencil.tint_flip", icon='FILE_REFRESH', text="")
+            sub_row.operator("gpencil.tint_flip", icon='FILE_REFRESH', text="")
 
         if brush.gpencil_tool in {'DRAW', 'FILL'}:
             col.prop(gp_settings, "vertex_mode", text="Mode")
@@ -2311,12 +2459,12 @@ class VIEW3D_PT_tools_grease_pencil_brush_mix_palette(View3DPanel, Panel):
         brush = settings.brush
 
         col = layout.column()
-        col.enabled = settings.color_mode == 'VERTEXCOLOR' or brush.gpencil_tool == 'TINT'
+        if settings.color_mode == 'VERTEXCOLOR' or brush.gpencil_tool == 'TINT':
 
-        row = col.row(align=True)
-        row.template_ID(settings, "palette", new="palette.new")
-        if settings.palette:
-            col.template_palette(settings, "palette", color=True)
+            row = col.row(align=True)
+            row.template_ID(settings, "palette", new="palette.new")
+            if settings.palette:
+                col.template_palette(settings, "palette", color=True)
 
 
 # Grease Pencil Brush Appearance (one for each mode)
@@ -2363,7 +2511,7 @@ classes = (
     VIEW3D_PT_tools_object_options,
     VIEW3D_PT_tools_object_options_transform,
     VIEW3D_PT_tools_meshedit_options,
-    VIEW3D_PT_tools_meshedit_options_automerge,
+    #VIEW3D_PT_tools_meshedit_options_automerge, # bfa - remains for compatibility
     VIEW3D_PT_tools_armatureedit_options,
     VIEW3D_PT_tools_posemode_options,
 

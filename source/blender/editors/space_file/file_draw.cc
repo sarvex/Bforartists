@@ -418,7 +418,7 @@ static void file_draw_preview(const FileDirEntry *file,
     /* Small icon in the middle of large image, scaled to fit container and UI scale */
     float icon_x, icon_y;
     const float icon_size = 16.0f / icon_aspect * UI_SCALE_FAC;
-    float icon_opacity = 0.3f;
+    float icon_opacity = 0.8f; /*bfa - changed from 0.3 to 0.8*/
     uchar icon_color[4] = {0, 0, 0, 255};
     float bgcolor[4];
     UI_GetThemeColor4fv(TH_ICON_FOLDER, bgcolor);
@@ -428,7 +428,8 @@ static void file_draw_preview(const FileDirEntry *file,
       icon_color[2] = 255;
     }
     icon_x = xco + (ex / 2.0f) - (icon_size / 2.0f);
-    icon_y = yco + (ey / 2.0f) - (icon_size * ((file->typeflag & FILE_TYPE_DIR) ? 0.78f : 0.75f));
+    /* bfa - changed mini icon position y from (ey / 2.0f) to (ey / 2.2f)*/
+    icon_y = yco + (ey / 2.2f) - (icon_size * ((file->typeflag & FILE_TYPE_DIR) ? 0.78f : 0.75f));
     UI_icon_draw_ex(icon_x,
                     icon_y,
                     icon,
@@ -523,7 +524,7 @@ static void file_draw_preview(const FileDirEntry *file,
     icon_y = yco + ey - UI_UNIT_Y;
     UI_icon_draw_ex(icon_x,
                     icon_y,
-                    ICON_CURRENT_FILE,
+                    ICON_BLENDER,
                     1.0f / UI_SCALE_FAC,
                     0.6f,
                     0.0f,

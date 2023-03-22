@@ -709,8 +709,9 @@ static int object_add_exec(bContext *C, wmOperator *op)
 void OBJECT_OT_add(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Add Object";
-  ot->description = "Add an object to the scene";
+  ot->name = "Add Lattice Object";  // bfa - Original was Add Object. But is used to create a
+                                    // Lattice object. Not sure if this gets reused somewhere.
+  ot->description = "Add an Lattice object to the scene";
   ot->idname = "OBJECT_OT_add";
 
   /* api callbacks */
@@ -1491,8 +1492,10 @@ static void object_add_ui(bContext * /*C*/, wmOperator *op)
 
   int type = RNA_enum_get(op->ptr, "type");
   if (ELEM(type, GP_LRT_COLLECTION, GP_LRT_OBJECT, GP_LRT_SCENE)) {
+    uiLayoutSetPropSep(layout, false); /* bfa - use_property_split = False */
     uiItemR(layout, op->ptr, "use_lights", 0, nullptr, ICON_NONE);
     uiItemR(layout, op->ptr, "use_in_front", 0, nullptr, ICON_NONE);
+    uiLayoutSetPropSep(layout, true); /* bfa - use_property_split = True */
     bool in_front = RNA_boolean_get(op->ptr, "use_in_front");
     uiLayout *col = uiLayoutColumn(layout, false);
     uiLayoutSetActive(col, !in_front);
@@ -2328,6 +2331,17 @@ static int object_delete_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *object_ot_delete_get_description(struct bContext * /*C*/,
+                                              struct wmOperatorType * /*op*/,
+                                              struct PointerRNA *values)
+{
+  if (RNA_boolean_get(values, "use_global")) {
+    return BLI_strdup("Delete selected objects from all scenes");
+  }
+  return NULL;
+}
+
 void OBJECT_OT_delete(wmOperatorType *ot)
 {
   /* identifiers */
@@ -2336,8 +2350,10 @@ void OBJECT_OT_delete(wmOperatorType *ot)
   ot->idname = "OBJECT_OT_delete";
 
   /* api callbacks */
-  ot->invoke = WM_operator_confirm_or_exec;
+  // ot->invoke = WM_operator_confirm_or_exec; // bfa - turned off the confirmation dialog for
+  // deleting an object in object mode.
   ot->exec = object_delete_exec;
+  ot->get_description = object_ot_delete_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_objectmode;
 
   /* flags */
@@ -3520,7 +3536,7 @@ static void object_convert_ui(bContext * /*C*/, wmOperator *op)
 {
   uiLayout *layout = op->layout;
 
-  uiLayoutSetPropSep(layout, true);
+  uiLayoutSetPropSep(layout, false); /*bfa - checkboxes, don't split*/
 
   uiItemR(layout, op->ptr, "target", 0, nullptr, ICON_NONE);
   uiItemR(layout, op->ptr, "keep_original", 0, nullptr, ICON_NONE);
@@ -3530,9 +3546,13 @@ static void object_convert_ui(bContext * /*C*/, wmOperator *op)
     uiItemR(layout, op->ptr, "merge_customdata", 0, nullptr, ICON_NONE);
   }
   else if (target == OB_GPENCIL_LEGACY) {
+    uiLayoutSetPropSep(layout, true); /*bfa - split*/
+
     uiItemR(layout, op->ptr, "thickness", 0, nullptr, ICON_NONE);
     uiItemR(layout, op->ptr, "angle", 0, nullptr, ICON_NONE);
     uiItemR(layout, op->ptr, "offset", 0, nullptr, ICON_NONE);
+
+    uiLayoutSetPropSep(layout, false); /*bfa - boolean, don't split*/
     uiItemR(layout, op->ptr, "seams", 0, nullptr, ICON_NONE);
     uiItemR(layout, op->ptr, "faces", 0, nullptr, ICON_NONE);
   }
@@ -4187,7 +4207,9 @@ void OBJECT_OT_join(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Join";
-  ot->description = "Join selected objects into active object";
+  ot->description =
+      "Join selected objects into active object\nSelect first object, hold down shift, select "
+      "second object\nThen perform the join tool";
   ot->idname = "OBJECT_OT_join";
 
   /* api callbacks */

@@ -1058,73 +1058,73 @@ static const char *template_id_browse_tip(const StructRNA *type)
   if (type) {
     switch ((ID_Type)RNA_type_to_ID_code(type)) {
       case ID_SCE:
-        return N_("Browse Scene to be linked");
+        return N_("Scene Browser\nChoose Scene to use");
       case ID_OB:
-        return N_("Browse Object to be linked");
+        return N_("Object Browser\nChoose Object to use");
       case ID_ME:
-        return N_("Browse Mesh Data to be linked");
+        return N_("Data Browser\nChoose Mesh Data to use");
       case ID_CU_LEGACY:
-        return N_("Browse Curve Data to be linked");
+        return N_("Data Browser\nChoose Curve Data to use");
       case ID_MB:
-        return N_("Browse Metaball Data to be linked");
+        return N_("Data Browser\nChoose Metaball Data to use");
       case ID_MA:
-        return N_("Browse Material to be linked");
+        return N_("Material Browser\nChoose Material to use");
       case ID_TE:
-        return N_("Browse Texture to be linked");
+        return N_("Texture Browser\nChoose Texture to use");
       case ID_IM:
-        return N_("Browse Image to be linked");
+        return N_("Image Browser\nChoose Image to use");
       case ID_LS:
-        return N_("Browse Line Style Data to be linked");
+        return N_("Data Browser\nBrowse Line Style Data to use");
       case ID_LT:
-        return N_("Browse Lattice Data to be linked");
+        return N_("Data Browser\nChoose Lattice Data to use");
       case ID_LA:
-        return N_("Browse Light Data to be linked");
+        return N_("Data Browser\nChoose Light Data to use");
       case ID_CA:
-        return N_("Browse Camera Data to be linked");
+        return N_("Data Browser\nChoose Camera Data to use");
       case ID_WO:
-        return N_("Browse World Settings to be linked");
+        return N_("Data Browser\nChoose World Settings to use");
       case ID_SCR:
-        return N_("Choose Screen layout");
+        return N_("Layout Browser\nChoose Screen layout");
       case ID_TXT:
-        return N_("Browse Text to be linked");
+        return N_("Text file Browser\nChoose Text file to use");
       case ID_SPK:
-        return N_("Browse Speaker Data to be linked");
+        return N_("Data Browser\nChoose Speaker Data to use");
       case ID_SO:
-        return N_("Browse Sound to be linked");
+        return N_("Data Browser\nChoose Sound to use");
       case ID_AR:
-        return N_("Browse Armature data to be linked");
+        return N_("Data Browser\nChoose Armature data to use");
       case ID_AC:
-        return N_("Browse Action to be linked");
+        return N_("Data Browser\nChoose Action to use");
       case ID_NT:
-        return N_("Browse Node Tree to be linked");
+        return N_("Data Browser\nChoose Node Tree to use");
       case ID_BR:
-        return N_("Browse Brush to be linked");
+        return N_("Brush Browser\nChoose Brush to use");
       case ID_PA:
-        return N_("Browse Particle Settings to be linked");
+        return N_("Particle Settings Browser\nChoose Particle Settings to use");
       case ID_GD_LEGACY:
-        return N_("Browse Grease Pencil Data to be linked");
+        return N_("Data Browser\nChoose Grease Pencil Data to use");
       case ID_MC:
-        return N_("Browse Movie Clip to be linked");
+        return N_("Clip Browser\nChoose Movie Clip to use");
       case ID_MSK:
-        return N_("Browse Mask to be linked");
+        return N_("Data Browser\nChoose Mask to use");
       case ID_PAL:
-        return N_("Browse Palette Data to be linked");
+        return N_("Data Browser\nChoose Palette Data to use");
       case ID_PC:
-        return N_("Browse Paint Curve Data to be linked");
+        return N_("Data Browser\nChoose Paint Curve Data to use");
       case ID_CF:
-        return N_("Browse Cache Files to be linked");
+        return N_("Data Browser\nChoose Cache Files to use");
       case ID_WS:
-        return N_("Browse Workspace to be linked");
+        return N_("Data Browser\nBrowse Workspace to be linked");
       case ID_LP:
-        return N_("Browse LightProbe to be linked");
+        return N_("Data Browser\nBrowse LightProbe to be linked");
       case ID_CV:
-        return N_("Browse Curves Data to be linked");
+        return N_("Data Browser\nBrowse Curves Data to be linked");
       case ID_PT:
-        return N_("Browse Point Cloud Data to be linked");
+        return N_("Data Browser\nBrowse Point Cloud Data to be linked");
       case ID_VO:
-        return N_("Browse Volume Data to be linked");
+        return N_("Data Browser\nBrowse Volume Data to be linked");
       case ID_SIM:
-        return N_("Browse Simulation to be linked");
+        return N_("Data Browser\nBrowse Simulation to be linked");
 
       /* Use generic text. */
       case ID_LI:
@@ -1136,7 +1136,7 @@ static const char *template_id_browse_tip(const StructRNA *type)
         break;
     }
   }
-  return N_("Browse ID data to be linked");
+  return N_("Data Browser\nChoose a Font to use");
 }
 
 /**
@@ -1228,11 +1228,12 @@ static uiBut *template_id_def_new_but(uiBlock *block,
    * is exceeded. */
 
   if (newop) {
+    /*bfa - changed ICON_DUPLICATE : ICON_ADD to ICON_ADD */
     but = uiDefIconTextButO(block,
                             but_type,
                             newop,
                             WM_OP_INVOKE_DEFAULT,
-                            (id && !use_tab_but) ? ICON_DUPLICATE : ICON_ADD,
+                            ICON_ADD,
                             (id) ? "" : CTX_IFACE_(template_id_context(type), "New"),
                             0,
                             0,
@@ -1243,10 +1244,11 @@ static uiBut *template_id_def_new_but(uiBlock *block,
         but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_ADD_NEW));
   }
   else {
+    /*bfa - changed ICON_DUPLICATE : ICON_ADD to ICON_ADD */
     but = uiDefIconTextBut(block,
                            but_type,
                            0,
-                           (id && !use_tab_but) ? ICON_DUPLICATE : ICON_ADD,
+                           ICON_ADD,
                            (id) ? "" : CTX_IFACE_(template_id_context(type), "New"),
                            0,
                            0,
@@ -1600,8 +1602,10 @@ static void template_ID(const bContext *C,
             0,
             0,
             0,
-            TIP_("Unlink data-block "
-                 "(Shift + Click to set users to zero, data will then not be saved)"));
+            TIP_("Remove "
+                 "\nShift + Click to set users to zero, data will then not be saved"
+                 "\nTo delete the file completely make sure it has no Fake User assigned"
+                 "\nThen either restart Bforartists, or Purge the file"));
         UI_but_funcN_set(
             but, template_id_cb, MEM_dupallocN(template_ui), POINTER_FROM_INT(UI_ID_DELETE));
 
@@ -2938,8 +2942,9 @@ void uiTemplateOperatorRedoProperties(uiLayout *layout, const bContext *C)
 #endif
 
     UI_block_func_handle_set(block, ED_undo_operator_repeat_cb_evt, op);
+    /* bfa - align left if boolean prop */
     template_operator_property_buts_draw_recursive(
-        C, op, layout, UI_BUT_LABEL_ALIGN_NONE, layout_flags, nullptr /* &has_advanced */);
+        C, op, layout, UI_BUT_LABEL_ALIGN_SPLIT_COLUMN, layout_flags, nullptr /* &has_advanced */);
     /* Warning! this leaves the handle function for any other users of this block. */
 
 #if 0
@@ -2979,10 +2984,13 @@ static void constraint_ops_extra_draw(bContext *C, uiLayout *layout, void *con_v
   uiLayoutSetUnitsX(layout, 4.0f);
 
   /* Apply. */
-  uiItemO(layout,
-          CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Apply"),
-          ICON_CHECKMARK,
-          "CONSTRAINT_OT_apply");
+  /*bfa - we have the apply button in the header*/
+  /*
+    uiItemO(layout,
+            CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Apply"),
+            ICON_CHECKMARK,
+            "CONSTRAINT_OT_apply");
+  */
 
   /* Duplicate. */
   uiItemO(layout,
@@ -2992,7 +3000,7 @@ static void constraint_ops_extra_draw(bContext *C, uiLayout *layout, void *con_v
 
   uiItemO(layout,
           CTX_IFACE_(BLT_I18NCONTEXT_OPERATOR_DEFAULT, "Copy to Selected"),
-          0,
+          ICON_COPYDOWN,
           "CONSTRAINT_OT_copy_to_selected");
 
   uiItemS(layout);
@@ -3062,6 +3070,9 @@ static void draw_constraint_header(uiLayout *layout, Object *ob, bConstraint *co
 
   /* Extra operators menu. */
   uiItemMenuF(row, "", ICON_DOWNARROW_HLT, constraint_ops_extra_draw, con);
+
+  /* Apply. */
+  uiItemO(row, "", ICON_CHECKMARK, "CONSTRAINT_OT_apply"); /*bfa - apply*/
 
   /* Close 'button' - emboss calls here disable drawing of 'button' behind X */
   sub = uiLayoutRow(row, false);
@@ -3478,7 +3489,7 @@ static uiBlock *colorband_tools_func(bContext *C, ARegion *region, void *coba_v)
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_FLIP,
                      IFACE_("Flip Color Ramp"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -3493,7 +3504,7 @@ static uiBlock *colorband_tools_func(bContext *C, ARegion *region, void *coba_v)
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_ALIGNVERTICAL,
                      IFACE_("Distribute Stops from Left"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -3508,7 +3519,7 @@ static uiBlock *colorband_tools_func(bContext *C, ARegion *region, void *coba_v)
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_STRAIGHTEN_X,
                      IFACE_("Distribute Stops Evenly"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -3526,7 +3537,7 @@ static uiBlock *colorband_tools_func(bContext *C, ARegion *region, void *coba_v)
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_RESET,
                      IFACE_("Reset Color Ramp"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -3622,7 +3633,7 @@ static void colorband_buttons_layout(uiLayout *layout,
                         0,
                         0,
                         0,
-                        TIP_("Add a new color stop to the color ramp"));
+                        TIP_("Add Stop\nAdd a new color stop to the color ramp"));
   UI_but_funcN_set(bt, colorband_add_cb, MEM_dupallocN(cb), coba);
 
   bt = uiDefIconTextBut(block,
@@ -3639,7 +3650,7 @@ static void colorband_buttons_layout(uiLayout *layout,
                         0,
                         0,
                         0,
-                        TIP_("Delete the active position"));
+                        TIP_("Delete Stop\nDelete the active position"));
   UI_but_funcN_set(bt, colorband_del_cb, MEM_dupallocN(cb), coba);
 
   bt = uiDefIconBlockBut(block,
@@ -4423,7 +4434,7 @@ static uiBlock *curvemap_tools_func(
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_VIEW_RESET,
                      IFACE_("Reset View"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -4441,7 +4452,7 @@ static uiBlock *curvemap_tools_func(
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_EXTRAPOLATION_CONSTANT,
                      IFACE_("Extend Horizontal"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -4456,7 +4467,7 @@ static uiBlock *curvemap_tools_func(
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_EXTRAPOLATION_LINEAR,
                      IFACE_("Extend Extrapolated"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -4474,7 +4485,7 @@ static uiBlock *curvemap_tools_func(
     uiDefIconTextBut(block,
                      UI_BTYPE_BUT_MENU,
                      1,
-                     ICON_BLANK1,
+                     ICON_RESET,
                      IFACE_("Reset Curve"),
                      0,
                      yco -= UI_UNIT_Y,
@@ -5107,7 +5118,7 @@ static uiBlock *CurveProfile_tools_func(bContext *C, ARegion *region, CurveProfi
   uiDefIconTextBut(block,
                    UI_BTYPE_BUT_MENU,
                    1,
-                   ICON_BLANK1,
+                   ICON_VIEW_RESET,
                    IFACE_("Reset View"),
                    0,
                    yco -= UI_UNIT_Y,
@@ -5122,7 +5133,7 @@ static uiBlock *CurveProfile_tools_func(bContext *C, ARegion *region, CurveProfi
   uiDefIconTextBut(block,
                    UI_BTYPE_BUT_MENU,
                    1,
-                   ICON_BLANK1,
+                   ICON_RESET,
                    IFACE_("Reset Curve"),
                    0,
                    yco -= UI_UNIT_Y,
@@ -5794,13 +5805,13 @@ static void ui_template_palette_menu(bContext * /*C*/, uiLayout *layout, void * 
 
   uiItemL(layout, IFACE_("Sort By:"), ICON_NONE);
   row = uiLayoutRow(layout, false);
-  uiItemEnumO_value(row, IFACE_("Hue"), ICON_NONE, "PALETTE_OT_sort", "type", 1);
+  uiItemEnumO_value(row, IFACE_("Hue"), ICON_HUE, "PALETTE_OT_sort", "type", 1);
   row = uiLayoutRow(layout, false);
-  uiItemEnumO_value(row, IFACE_("Saturation"), ICON_NONE, "PALETTE_OT_sort", "type", 2);
+  uiItemEnumO_value(row, IFACE_("Saturation"), ICON_SATURATION, "PALETTE_OT_sort", "type", 2);
   row = uiLayoutRow(layout, false);
-  uiItemEnumO_value(row, IFACE_("Value"), ICON_NONE, "PALETTE_OT_sort", "type", 3);
+  uiItemEnumO_value(row, IFACE_("Value"), ICON_NODE_VALUE, "PALETTE_OT_sort", "type", 3);
   row = uiLayoutRow(layout, false);
-  uiItemEnumO_value(row, IFACE_("Luminance"), ICON_NONE, "PALETTE_OT_sort", "type", 4);
+  uiItemEnumO_value(row, IFACE_("Luminance"), ICON_NODE_LUMINANCE, "PALETTE_OT_sort", "type", 4);
 }
 
 void uiTemplatePalette(uiLayout *layout, PointerRNA *ptr, const char *propname, bool /*colors*/)
@@ -6666,6 +6677,7 @@ void uiTemplateColormanagedViewSettings(uiLayout *layout,
   uiItemR(col, &view_transform_ptr, "gamma", 0, nullptr, ICON_NONE);
 
   col = uiLayoutColumn(layout, false);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   uiItemR(col, &view_transform_ptr, "use_curve_mapping", 0, nullptr, ICON_NONE);
   if (view_settings->flag & COLORMANAGE_VIEW_USE_CURVES) {
     uiTemplateCurveMapping(
@@ -6809,14 +6821,18 @@ void uiTemplateCacheFileProcedural(uiLayout *layout, const bContext *C, PointerR
 
   row = uiLayoutRow(layout, false);
   uiLayoutSetActive(row, engine_supports_procedural);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
   uiItemR(row, fileptr, "use_render_procedural", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, fileptr, "use_render_procedural", 0); /*bfa - decorator*/
 
   const bool use_render_procedural = RNA_boolean_get(fileptr, "use_render_procedural");
   const bool use_prefetch = RNA_boolean_get(fileptr, "use_prefetch");
 
   row = uiLayoutRow(layout, false);
   uiLayoutSetEnabled(row, use_render_procedural);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
   uiItemR(row, fileptr, "use_prefetch", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, fileptr, "use_prefetch", 0); /*bfa - decorator*/
 
   sub = uiLayoutRow(layout, false);
   uiLayoutSetEnabled(sub, use_prefetch && use_render_procedural);
@@ -6832,19 +6848,51 @@ void uiTemplateCacheFileTimeSettings(uiLayout *layout, PointerRNA *fileptr)
   /* Ensure that the context has a CacheFile as this may not be set inside of modifiers panels. */
   uiLayoutSetContextPointer(layout, "edit_cachefile", fileptr);
 
-  uiLayout *row, *sub, *subsub;
+  uiLayout *row, *col; /*bfa, added *col, removed *sub, *subsub*/
 
   row = uiLayoutRow(layout, false);
-  uiItemR(row, fileptr, "is_sequence", 0, nullptr, ICON_NONE);
 
-  row = uiLayoutRowWithHeading(layout, true, IFACE_("Override Frame"));
-  sub = uiLayoutRow(row, true);
-  uiLayoutSetPropDecorate(sub, false);
-  uiItemR(sub, fileptr, "override_frame", 0, "", ICON_NONE);
-  subsub = uiLayoutRow(sub, true);
-  uiLayoutSetActive(subsub, RNA_boolean_get(fileptr, "override_frame"));
-  uiItemR(subsub, fileptr, "frame", 0, "", ICON_NONE);
-  uiItemDecoratorR(row, fileptr, "frame", 0);
+  /*------------------- bfa - original props */
+  // uiItemR(row, fileptr, "is_sequence", 0, nullptr, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, fileptr, "is_sequence", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, fileptr, "is_sequence", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
+
+  /*------------------- bfa - original props */
+  // row = uiLayoutRowWithHeading(layout, true, IFACE_("Override Frame"));
+  // sub = uiLayoutRow(row, true);
+  // uiLayoutSetPropDecorate(sub, false);
+  // uiItemR(sub, fileptr, "override_frame", 0, "", ICON_NONE);
+  // subsub = uiLayoutRow(sub, true);
+  // uiLayoutSetActive(subsub, RNA_boolean_get(fileptr, "override_frame"));
+  // uiItemR(subsub, fileptr, "frame", 0, "", ICON_NONE);
+  // uiItemDecoratorR(row, fileptr, "frame", 0);
+
+  // ------------------ bfa new left aligned prop with triangle button to hide the slider
+
+  /* NOTE: split amount here needs to be synced with normal labels */
+  uiLayout *split = uiLayoutSplit(layout, 0.385f, true);
+
+  /* FIRST PART ................................................ */
+  row = uiLayoutRow(split, false);
+  uiLayoutSetPropDecorate(row, false);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, fileptr, "override_frame", 0, "Override Frame", ICON_NONE);
+
+  /* SECOND PART ................................................ */
+  row = uiLayoutRow(split, false);
+  if (RNA_boolean_get(fileptr, "override_frame")) {
+    uiItemR(row, fileptr, "frame", 0, "", ICON_NONE);
+  }
+  else {
+    uiItemL(row, TIP_(""), ICON_DISCLOSURE_TRI_RIGHT);
+  }
+
+  // ------------------------------- end bfa
 
   row = uiLayoutRow(layout, false);
   uiItemR(row, fileptr, "frame_offset", 0, nullptr, ICON_NONE);

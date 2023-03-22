@@ -43,6 +43,11 @@
 
 #include "armature_intern.h"
 
+#include "UI_interface.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+#include "UI_resources.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
 /* utility macros for storing a temp int in the bone (selection flag) */
 #define EBONE_PREV_FLAG_GET(ebone) ((void)0, (ebone)->temp.i)
 #define EBONE_PREV_FLAG_SET(ebone, val) ((ebone)->temp.i = val)
@@ -1377,6 +1382,26 @@ static int armature_de_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *armature_ot_select_all_get_description(bContext *UNUSED(C),
+                                                    wmOperatorType *UNUSED(ot),
+                                                    PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all bones");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all bones");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void ARMATURE_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -1386,6 +1411,7 @@ void ARMATURE_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = armature_de_select_all_exec;
+  ot->get_description = armature_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_editarmature;
 
   /* flags */
@@ -1584,17 +1610,18 @@ enum {
   SIMEDBONE_SHAPE,
 };
 
+/*bfa - added icons. see header, includes. UI_interface.h and UI_resources.h*/
 static const EnumPropertyItem prop_similar_types[] = {
-    {SIMEDBONE_CHILDREN, "CHILDREN", 0, "Children", ""},
-    {SIMEDBONE_CHILDREN_IMMEDIATE, "CHILDREN_IMMEDIATE", 0, "Immediate Children", ""},
-    {SIMEDBONE_SIBLINGS, "SIBLINGS", 0, "Siblings", ""},
-    {SIMEDBONE_LENGTH, "LENGTH", 0, "Length", ""},
-    {SIMEDBONE_DIRECTION, "DIRECTION", 0, "Direction (Y Axis)", ""},
-    {SIMEDBONE_PREFIX, "PREFIX", 0, "Prefix", ""},
-    {SIMEDBONE_SUFFIX, "SUFFIX", 0, "Suffix", ""},
-    {SIMEDBONE_LAYER, "LAYER", 0, "Layer", ""},
-    {SIMEDBONE_GROUP, "GROUP", 0, "Group", ""},
-    {SIMEDBONE_SHAPE, "SHAPE", 0, "Shape", ""},
+    {SIMEDBONE_CHILDREN, "CHILDREN", ICON_CHILD, "Children", ""},
+    {SIMEDBONE_CHILDREN_IMMEDIATE, "CHILDREN_IMMEDIATE", ICON_CHILD, "Immediate Children", ""},
+    {SIMEDBONE_SIBLINGS, "SIBLINGS", ICON_SIBLINGS, "Siblings", ""},
+    {SIMEDBONE_LENGTH, "LENGTH", ICON_RULER, "Length", ""},
+    {SIMEDBONE_DIRECTION, "DIRECTION", ICON_SWITCH_DIRECTION, "Direction (Y Axis)", ""},
+    {SIMEDBONE_PREFIX, "PREFIX", ICON_PREFIX, "Prefix", ""},
+    {SIMEDBONE_SUFFIX, "SUFFIX", ICON_SUFFIX, "Suffix", ""},
+    {SIMEDBONE_LAYER, "LAYER", ICON_LAYER, "Layer", ""},
+    {SIMEDBONE_GROUP, "GROUP", ICON_GROUP, "Group", ""},
+    {SIMEDBONE_SHAPE, "SHAPE", ICON_SHAPE, "Shape", ""},
     {0, NULL, 0, NULL, NULL},
 };
 

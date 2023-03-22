@@ -45,7 +45,7 @@ else()
 endif()
 
 if(WITH_BLENDER AND NOT WITH_PYTHON_MODULE)
-  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT blender)
+  set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT bforartists)
 endif()
 
 macro(warn_hardcoded_paths package_name

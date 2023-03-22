@@ -66,20 +66,46 @@ class DATA_PT_display(ArmatureButtonsPanel, Panel):
 
         layout.prop(arm, "display_type", text="Display As")
 
-        col = layout.column(heading="Show")
-        col.prop(arm, "show_names", text="Names")
-        col.prop(arm, "show_bone_custom_shapes", text="Shapes")
-        col.prop(arm, "show_group_colors", text="Group Colors")
+        col = layout.column(align=True)
+        col.label( text = "Show")
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(arm, "show_names", text="Names")
+        row.prop_decorator(arm, "show_names")
+        row = col.row()
+        row.separator()
+        row.prop(arm, "show_bone_custom_shapes", text="Shapes")
+        row.prop_decorator(arm, "show_bone_custom_shapes")
+        row = col.row()
+        row.separator()
+        row.prop(arm, "show_group_colors", text="Group Colors")
+        row.prop_decorator(arm, "show_group_colors")
 
         if ob:
-            col.prop(ob, "show_in_front", text="In Front")
+            row = col.row()
+            row.separator()
+            row.prop(ob, "show_in_front", text="In Front")
+            row.prop_decorator(ob, "show_in_front")
 
-        col = layout.column(align=False, heading="Axes")
-        row = col.row(align=True)
-        row.prop(arm, "show_axes", text="")
-        sub = row.row(align=True)
-        sub.active = arm.show_axes
-        sub.prop(arm, "axes_position", text="Position")
+        split = col.split(factor = 0.38)
+        col = split.column()
+        col.use_property_split = False
+        row = col.row()
+        row.separator()
+        row.prop(arm, "show_axes", text="Axes")
+        col = split.column()
+        if arm.show_axes:
+            row = col.row()
+            row.use_property_split = False
+            row.prop(arm, "axes_position", text="")
+
+        else:
+            row = col.row()
+            row.label(icon='DISCLOSURE_TRI_RIGHT')
+        subrow = row.row()
+        subrow.alignment='RIGHT'
+        subrow.prop_decorator(arm, "show_axes")
 
         sub = col.row(align=True)
         sub.prop(arm, "relation_line_position", text="Relations", expand=True)
@@ -200,15 +226,6 @@ class DATA_PT_iksolver_itasc(ArmatureButtonsPanel, Panel):
             col.prop(itasc, "precision")
             col.prop(itasc, "iterations")
 
-            if simulation:
-                col.prop(itasc, "use_auto_step")
-                sub = layout.column(align=True)
-                if itasc.use_auto_step:
-                    sub.prop(itasc, "step_min", text="Steps Min")
-                    sub.prop(itasc, "step_max", text="Max")
-                else:
-                    sub.prop(itasc, "step_count", text="Steps")
-
             col.prop(itasc, "solver")
             if simulation:
                 col.prop(itasc, "feedback")
@@ -217,6 +234,17 @@ class DATA_PT_iksolver_itasc(ArmatureButtonsPanel, Panel):
                 col.separator()
                 col.prop(itasc, "damping_max", text="Damping Max", slider=True)
                 col.prop(itasc, "damping_epsilon", text="Damping Epsilon", slider=True)
+
+            if simulation:
+                col.use_property_split = False
+                col.prop(itasc, "use_auto_step")
+                col.use_property_split = True
+                sub = layout.column(align=True)
+                if itasc.use_auto_step:
+                    sub.prop(itasc, "step_min", text="Steps Min")
+                    sub.prop(itasc, "step_max", text="Max")
+                else:
+                    sub.prop(itasc, "step_count", text="Steps")
 
 
 class DATA_PT_motion_paths(MotionPathButtonsPanel, Panel):

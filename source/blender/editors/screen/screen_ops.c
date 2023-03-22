@@ -1392,7 +1392,7 @@ static int area_dupli_invoke(bContext *C, wmOperator *op, const wmEvent *event)
 
   /* Create new window. No need to set space_type since it will be copied over. */
   wmWindow *newwin = WM_window_open(C,
-                                    "Blender",
+                                    "Bforartists",
                                     area->totrct.xmin,
                                     area->totrct.ymin,
                                     area->winx,
@@ -3210,14 +3210,25 @@ static int marker_jump_exec(bContext *C, wmOperator *op)
 
   return OPERATOR_FINISHED;
 }
+/*bfa - descriptions*/
+static char *screen_ot_marker_jump_get_description(bContext *UNUSED(C),
+                                                   wmOperatorType *UNUSED(ot),
+                                                   PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "next")) {
+    return BLI_strdup("Jump to next marker");
+  }
+  return NULL;
+}
 
 static void SCREEN_OT_marker_jump(wmOperatorType *ot)
 {
   ot->name = "Jump to Marker";
-  ot->description = "Jump to previous/next marker";
+  ot->description = "Jump to previous marker";
   ot->idname = "SCREEN_OT_marker_jump";
 
   ot->exec = marker_jump_exec;
+  ot->get_description = screen_ot_marker_jump_get_description; /*bfa - descriptions*/
 
   ot->poll = ED_operator_screenactive_norender;
   ot->flag = OPTYPE_UNDO_GROUPED;
@@ -3315,6 +3326,17 @@ static bool screen_maximize_area_poll(bContext *C)
          !WM_window_is_temp_screen(win);
 }
 
+/*bfa - descriptions*/
+static char *screen_ot_screen_full_area_get_description(bContext *UNUSED(C),
+                                                        wmOperatorType *UNUSED(ot),
+                                                        PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "use_hide_panels")) {
+    return BLI_strdup("Toggle display selected area as maximized");
+  }
+  return NULL;
+}
+
 static void SCREEN_OT_screen_full_area(wmOperatorType *ot)
 {
   PropertyRNA *prop;
@@ -3324,6 +3346,7 @@ static void SCREEN_OT_screen_full_area(wmOperatorType *ot)
   ot->idname = "SCREEN_OT_screen_full_area";
 
   ot->exec = screen_maximize_area_exec;
+  ot->get_description = screen_ot_screen_full_area_get_description; /*bfa - descriptions*/
   ot->poll = screen_maximize_area_poll;
   ot->flag = 0;
 
@@ -3616,7 +3639,7 @@ static int screen_area_options_invoke(bContext *C, wmOperator *op, const wmEvent
   uiItemFullO(layout,
               "SCREEN_OT_area_split",
               IFACE_("Vertical Split"),
-              ICON_NONE,
+              ICON_SPLIT_VERTICAL,
               NULL,
               WM_OP_INVOKE_DEFAULT,
               0,
@@ -3629,7 +3652,7 @@ static int screen_area_options_invoke(bContext *C, wmOperator *op, const wmEvent
   uiItemFullO(layout,
               "SCREEN_OT_area_split",
               IFACE_("Horizontal Split"),
-              ICON_NONE,
+              ICON_SPLIT_HORIZONTAL,
               NULL,
               WM_OP_INVOKE_DEFAULT,
               0,
@@ -3647,7 +3670,7 @@ static int screen_area_options_invoke(bContext *C, wmOperator *op, const wmEvent
     uiItemFullO(layout,
                 "SCREEN_OT_area_join",
                 IFACE_("Join Areas"),
-                ICON_NONE,
+                ICON_JOIN_AREAS,
                 NULL,
                 WM_OP_INVOKE_DEFAULT,
                 0,
@@ -3660,7 +3683,7 @@ static int screen_area_options_invoke(bContext *C, wmOperator *op, const wmEvent
     uiItemFullO(layout,
                 "SCREEN_OT_area_swap",
                 IFACE_("Swap Areas"),
-                ICON_NONE,
+                ICON_SWAP_AREAS,
                 NULL,
                 WM_OP_EXEC_DEFAULT,
                 0,
@@ -4214,7 +4237,7 @@ static void screen_area_menu_items(ScrArea *area, uiLayout *layout)
   uiItemFullO(layout,
               "SCREEN_OT_area_split",
               IFACE_("Vertical Split"),
-              ICON_NONE,
+              ICON_SPLIT_VERTICAL,
               NULL,
               WM_OP_INVOKE_DEFAULT,
               0,
@@ -4227,7 +4250,7 @@ static void screen_area_menu_items(ScrArea *area, uiLayout *layout)
   uiItemFullO(layout,
               "SCREEN_OT_area_split",
               IFACE_("Horizontal Split"),
-              ICON_NONE,
+              ICON_SPLIT_HORIZONTAL,
               NULL,
               WM_OP_INVOKE_DEFAULT,
               0,
@@ -4241,14 +4264,14 @@ static void screen_area_menu_items(ScrArea *area, uiLayout *layout)
   if (area->spacetype != SPACE_FILE) {
     uiItemO(layout,
             area->full ? IFACE_("Restore Areas") : IFACE_("Maximize Area"),
-            ICON_NONE,
+            ICON_MAXIMIZE_AREA,
             "SCREEN_OT_screen_full_area");
 
     if (!area->full) {
       uiItemFullO(layout,
                   "SCREEN_OT_screen_full_area",
                   IFACE_("Full Screen Area"),
-                  ICON_NONE,
+                  ICON_FULLSCREEN_ENTER,
                   NULL,
                   WM_OP_INVOKE_DEFAULT,
                   0,
@@ -4257,10 +4280,236 @@ static void screen_area_menu_items(ScrArea *area, uiLayout *layout)
     }
   }
 
-  uiItemO(layout, NULL, ICON_NONE, "SCREEN_OT_area_dupli");
+  uiItemO(layout, NULL, ICON_NEW_WINDOW, "SCREEN_OT_area_dupli");
   uiItemS(layout);
-  uiItemO(layout, NULL, ICON_NONE, "SCREEN_OT_area_close");
+  uiItemO(layout, NULL, ICON_PANEL_CLOSE, "SCREEN_OT_area_close");
 }
+
+// bfa - show hide the editorsmenu
+static int header_toggle_editortypemenu_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_NO_EDITORTYPEMENU;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toggle_editortypemenu(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Hide Editortype menu";
+  ot->idname = "SCREEN_OT_header_toggle_editortypemenu";
+  ot->description = "Shows or hides the Editortype menu to change the editor type";
+
+  /* api callbacks */
+  ot->exec = header_toggle_editortypemenu_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the file toolbar menus
+static int header_toolbar_file_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_FILE;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_file(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar File";
+  ot->idname = "SCREEN_OT_header_toolbar_file";
+  ot->description = "Show or Hide the File toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_file_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the meshedit toolbar menus
+static int header_toolbar_meshedit_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_MESHEDIT;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_meshedit(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Meshedit";
+  ot->idname = "SCREEN_OT_header_toolbar_meshedit";
+  ot->description = "Show or Hide the Meshedit toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_meshedit_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the primitives toolbar menus
+static int header_toolbar_primitives_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_PRIMITIVES;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_primitives(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Primitives";
+  ot->idname = "SCREEN_OT_header_toolbar_primitives";
+  ot->description = "Show or Hide the Primitives toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_primitives_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the image toolbar menus
+static int header_toolbar_image_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_IMAGE;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_image(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Image";
+  ot->idname = "SCREEN_OT_header_toolbar_image";
+  ot->description = "Show or Hide the Image toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_image_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the tools toolbar menus
+static int header_toolbar_tools_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_TOOLS;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_tools(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Tools";
+  ot->idname = "SCREEN_OT_header_toolbar_tools";
+  ot->description = "Show or Hide the Tools toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_tools_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the animation toolbar menus
+static int header_toolbar_animation_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_ANIMATION;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_animation(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Animation";
+  ot->idname = "SCREEN_OT_header_toolbar_animation";
+  ot->description = "Show or Hide the Animation toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_animation_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the edit toolbar menus
+static int header_toolbar_edit_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_EDIT;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_edit(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Edit";
+  ot->idname = "SCREEN_OT_header_toolbar_edit";
+  ot->description = "Show or Hide the Edit toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_edit_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+
+// bfa - show hide the misc toolbar menus
+static int header_toolbar_misc_exec(bContext *C, wmOperator *UNUSED(op))
+{
+  ScrArea *area = CTX_wm_area(C);
+
+  area->flag = area->flag ^ HEADER_TOOLBAR_MISC;
+
+  ED_area_tag_redraw(area);
+  WM_event_add_notifier(C, NC_SCREEN | NA_EDITED, NULL);
+
+  return OPERATOR_FINISHED;
+}
+static void SCREEN_OT_header_toolbar_misc(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Misc";
+  ot->idname = "SCREEN_OT_header_toolbar_misc";
+  ot->description = "Show or Hide the Misc toolbars";
+
+  /* api callbacks */
+  ot->exec = header_toolbar_misc_exec;
+  ot->poll = ED_operator_areaactive;
+  ot->flag = 0;
+}
+/*--------------- bfa end -------------------------------------*/
 
 void ED_screens_header_tools_menu_create(bContext *C, uiLayout *layout, void *UNUSED(arg))
 {
@@ -4295,11 +4544,103 @@ void ED_screens_header_tools_menu_create(bContext *C, uiLayout *layout, void *UN
 
   if (!ELEM(area->spacetype, SPACE_TOPBAR)) {
     uiItemS(layout);
-    uiItemO(layout, but_flip_str, ICON_NONE, "SCREEN_OT_region_flip");
-    uiItemS(layout);
-    screen_area_menu_items(area, layout);
+    uiItemO(layout, but_flip_str, ICON_FLIP, "SCREEN_OT_region_flip");
+    /* bfa - show hide the editortypemenu*/
+    uiItemO(layout,
+            IFACE_("Hide Editortype menu"),
+            (area->flag & HEADER_NO_EDITORTYPEMENU) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+            "SCREEN_OT_header_toggle_editortypemenu");
+    /*bfa - we don't show the area items in the rmb menu*/
+    /*uiItemS(layout);
+     screen_area_menu_items(area, layout);*/
   }
 }
+
+/* ************** bfa - toolbar tools operator ***************************** */
+/* ************** This menu is called in the toolbar editor to choose the toolbar type
+ * ***************************** */
+void ED_screens_toolbar_tools_menu_create(bContext *C, uiLayout *layout, void *UNUSED(arg))
+{
+  ScrArea *area = CTX_wm_area(C);
+  /*ARegion *region = CTX_wm_region(C);*/ /*bfa - commented out, obviously not needed*/
+
+  // bfa - show hide the File toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar File"),
+          (area->flag & HEADER_TOOLBAR_FILE) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_file");
+
+  // bfa - show hide the Meshedit toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Meshedit"),
+          (area->flag & HEADER_TOOLBAR_MESHEDIT) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_meshedit");
+
+  // bfa - show hide the Primitives toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Primitives"),
+          (area->flag & HEADER_TOOLBAR_PRIMITIVES) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_primitives");
+
+  // bfa - show hide the Image toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Image"),
+          (area->flag & HEADER_TOOLBAR_IMAGE) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_image");
+
+  // bfa - show hide the Tools toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Tools"),
+          (area->flag & HEADER_TOOLBAR_TOOLS) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_tools");
+
+  // bfa - show hide the Animation toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Animation"),
+          (area->flag & HEADER_TOOLBAR_ANIMATION) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_animation");
+
+  // bfa - show hide the Edit toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Edit"),
+          (area->flag & HEADER_TOOLBAR_EDIT) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_edit");
+
+  // bfa - show hide the Misc toolbar
+  uiItemO(layout,
+          IFACE_("Toolbar Misc"),
+          (area->flag & HEADER_TOOLBAR_MISC) ? ICON_CHECKBOX_HLT : ICON_CHECKBOX_DEHLT,
+          "SCREEN_OT_header_toolbar_misc");
+}
+/*bfa toolbar*/
+static int toolbar_toolbox_invoke(bContext *C,
+                                  wmOperator *UNUSED(op),
+                                  const wmEvent *UNUSED(event))
+{
+  uiPopupMenu *pup;
+  uiLayout *layout;
+
+  pup = UI_popup_menu_begin(C, IFACE_("Toolbar"), ICON_NONE);
+  layout = UI_popup_menu_layout(pup);
+
+  ED_screens_toolbar_tools_menu_create(C, layout, NULL);
+
+  UI_popup_menu_end(C, pup);
+
+  return OPERATOR_INTERFACE;
+}
+/*bfa toolbar*/
+static void SCREEN_OT_toolbar_toolbox(wmOperatorType *ot)
+{
+  /* identifiers */
+  ot->name = "Toolbar Toolbox";
+  ot->description = "Toolbar Toolbox\nDisplay Toolbar type menu";
+  ot->idname = "SCREEN_OT_toolbar_toolbox";
+
+  /* api callbacks */
+  ot->invoke = toolbar_toolbox_invoke;
+}
+/*----------------------------------------------------*/
 
 void ED_screens_footer_tools_menu_create(bContext *C, uiLayout *layout, void *UNUSED(arg))
 {
@@ -4333,7 +4674,7 @@ void ED_screens_navigation_bar_tools_menu_create(bContext *C, uiLayout *layout, 
   /* default is WM_OP_INVOKE_REGION_WIN, which we don't want here. */
   uiLayoutSetOperatorContext(layout, WM_OP_INVOKE_DEFAULT);
 
-  uiItemO(layout, but_flip_str, ICON_NONE, "SCREEN_OT_region_flip");
+  uiItemO(layout, but_flip_str, ICON_FLIP, "SCREEN_OT_region_flip");
 }
 
 static void ed_screens_statusbar_menu_create(uiLayout *layout, void *UNUSED(arg))
@@ -4346,7 +4687,8 @@ static void ed_screens_statusbar_menu_create(uiLayout *layout, void *UNUSED(arg)
   if (GPU_mem_stats_supported()) {
     uiItemR(layout, &ptr, "show_statusbar_vram", 0, IFACE_("Video Memory"), ICON_NONE);
   }
-  uiItemR(layout, &ptr, "show_statusbar_version", 0, IFACE_("Blender Version"), ICON_NONE);
+  /*bfa - bforartists version, not blender version*/
+  uiItemR(layout, &ptr, "show_statusbar_version", 0, IFACE_("Bforartists Version"), ICON_NONE);
 }
 
 static int screen_context_menu_invoke(bContext *C,
@@ -5061,7 +5403,7 @@ static int userpref_show_exec(bContext *C, wmOperator *op)
 
   /* changes context! */
   if (WM_window_open(C,
-                     IFACE_("Blender Preferences"),
+                     IFACE_("Preferences"), /*bfa - preferences, not blender preferences*/
                      event->xy[0],
                      event->xy[1],
                      sizex,
@@ -5138,7 +5480,7 @@ static int drivers_editor_show_exec(bContext *C, wmOperator *op)
 
   /* changes context! */
   if (WM_window_open(C,
-                     IFACE_("Blender Drivers Editor"),
+                     IFACE_("Bforartists Drivers Editor"),
                      event->xy[0],
                      event->xy[1],
                      sizex,
@@ -5207,7 +5549,7 @@ static int info_log_show_exec(bContext *C, wmOperator *op)
 
   /* changes context! */
   if (WM_window_open(C,
-                     IFACE_("Blender Info Log"),
+                     IFACE_("Bforartists Info Log"),
                      event->xy[0],
                      event->xy[1] + shift_y,
                      sizex,
@@ -5694,6 +6036,23 @@ void ED_operatortypes_screen(void)
   WM_operatortype_append(SCREEN_OT_region_toggle);
   WM_operatortype_append(SCREEN_OT_region_flip);
   WM_operatortype_append(SCREEN_OT_header_toggle_menus);
+  WM_operatortype_append(
+      SCREEN_OT_header_toggle_editortypemenu);            // bfa - show hide the editorsmenu
+  WM_operatortype_append(SCREEN_OT_header_toolbar_file);  // bfa - show hide the file toolbar
+  WM_operatortype_append(
+      SCREEN_OT_header_toolbar_meshedit);  // bfa - show hide the meshedit toolbar
+  WM_operatortype_append(
+      SCREEN_OT_header_toolbar_primitives);  // bfa - show hide the primitives toolbar
+  WM_operatortype_append(
+      SCREEN_OT_header_toolbar_image);  // bfa - show hide the primitives toolbar
+  WM_operatortype_append(
+      SCREEN_OT_header_toolbar_tools);  // bfa - show hide the primitives toolbar
+  WM_operatortype_append(SCREEN_OT_header_toolbar_animation);  // bfa - show hide the primitives
+                                                               // toolbarfSCREEN_OT_header_toolbox
+  WM_operatortype_append(SCREEN_OT_header_toolbar_edit);  // bfa - show hide the primitives toolbar
+  WM_operatortype_append(SCREEN_OT_header_toolbar_misc);  // bfa - show hide the primitives toolbar
+  WM_operatortype_append(
+      SCREEN_OT_toolbar_toolbox);  // bfa - toolbar types menu in the toolbar editor
   WM_operatortype_append(SCREEN_OT_region_context_menu);
   WM_operatortype_append(SCREEN_OT_screen_set);
   WM_operatortype_append(SCREEN_OT_screen_full_area);

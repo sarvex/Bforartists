@@ -2,14 +2,14 @@
 
 string(TIMESTAMP CURRENT_YEAR "%Y")
 
-set(PROJECT_DESCRIPTION  "Blender is the free and open source 3D creation suite software.")
-set(PROJECT_COPYRIGHT    "Copyright (C) 2001-${CURRENT_YEAR} Blender Foundation")
-set(PROJECT_CONTACT      "foundation@blender.org")
-set(PROJECT_VENDOR       "Blender Foundation")
+set(PROJECT_DESCRIPTION  "Bforartists is the free and open source 3D creation suite software.")
+set(PROJECT_COPYRIGHT    "Copyright (C) 2016-${CURRENT_YEAR} Bforartists")
+set(PROJECT_CONTACT      "reiner.prokein@posteo.de")
+set(PROJECT_VENDOR       "Bforartists")
 
-set(MAJOR_VERSION ${BLENDER_VERSION_MAJOR})
-set(MINOR_VERSION ${BLENDER_VERSION_MINOR})
-set(PATCH_VERSION ${BLENDER_VERSION_PATCH})
+set(MAJOR_VERSION ${BFORARTISTS_VERSION_MAJOR})
+set(MINOR_VERSION ${BFORARTISTS_VERSION_MINOR})
+set(PATCH_VERSION ${BFORARTISTS_VERSION_PATCH})
 
 set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME})
 set(CPACK_PACKAGE_DESCRIPTION ${PROJECT_DESCRIPTION})
@@ -55,7 +55,7 @@ endif()
 if(CPACK_OVERRIDE_PACKAGENAME)
   set(CPACK_PACKAGE_FILE_NAME ${CPACK_OVERRIDE_PACKAGENAME}-${PACKAGE_ARCH})
 else()
-  set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME_LOWER}-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-git${CPACK_DATE}.${BUILD_REV}-${PACKAGE_ARCH})
+  #set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME_LOWER}-${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}-git${CPACK_DATE}.${BUILD_REV}-${PACKAGE_ARCH})# bfa - turned off blender string in splash
 endif()
 
 if(CMAKE_SYSTEM_NAME MATCHES "Linux")
@@ -82,8 +82,8 @@ if(APPLE)
 endif()
 
 if(WIN32)
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "Blender Foundation/Blender ${MAJOR_VERSION}.${MINOR_VERSION}")
-  set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "Blender Foundation/Blender ${MAJOR_VERSION}.${MINOR_VERSION}")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "Bforartists/Bforartists ${MAJOR_VERSION}.${MINOR_VERSION}")
+  set(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "Bforartists/Bforartists ${MAJOR_VERSION}.${MINOR_VERSION}")
 
   set(CPACK_NSIS_MUI_ICON ${CMAKE_SOURCE_DIR}/release/windows/icons/winblender.ico)
   set(CPACK_NSIS_COMPRESSOR "/SOLID lzma")
@@ -106,8 +106,8 @@ if(WIN32)
   set(CPACK_WIX_LIGHT_EXTRA_FLAGS -dcl:medium)
 endif()
 
-set(CPACK_PACKAGE_EXECUTABLES "blender-launcher" "Blender ${MAJOR_VERSION}.${MINOR_VERSION}")
-set(CPACK_CREATE_DESKTOP_LINKS "blender-launcher" "Blender ${MAJOR_VERSION}.${MINOR_VERSION}")
+set(CPACK_PACKAGE_EXECUTABLES "bforartists" "Bforartists ${MAJOR_VERSION}.${MINOR_VERSION}")
+set(CPACK_CREATE_DESKTOP_LINKS "bforartists" "Bforartists ${MAJOR_VERSION}.${MINOR_VERSION}")
 
 include(CPack)
 
@@ -129,14 +129,14 @@ endmacro()
 
 if(APPLE)
   add_package_archive(
-    "${PROJECT_NAME}-${BLENDER_VERSION}-${BUILD_REV}-OSX-${CMAKE_OSX_ARCHITECTURES}"
+    "${PROJECT_NAME}-${BFORARTISTS_VERSION}-${BUILD_REV}-OSX-${CMAKE_OSX_ARCHITECTURES}"
     "zip")
 elseif(UNIX)
   # platform name could be tweaked, to include glibc, and ensure processor is correct (i386 vs i686)
   string(TOLOWER ${CMAKE_SYSTEM_NAME} PACKAGE_SYSTEM_NAME)
 
   add_package_archive(
-    "${PROJECT_NAME}-${BLENDER_VERSION}-${BUILD_REV}-${PACKAGE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}"
+    "${PROJECT_NAME}-${BFORARTISTS_VERSION}-${BUILD_REV}-${PACKAGE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}"
     "tar.xz")
 endif()
 

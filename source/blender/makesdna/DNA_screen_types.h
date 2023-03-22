@@ -373,6 +373,15 @@ typedef struct ScrArea {
   /** Rect bound by v1 v2 v3 v4. */
   rcti totrct;
 
+  /* bfa - keep this at the current place */
+  /* bfa - short to int, we need int for our flags */
+  int flag;
+  /**
+   * Index of last used region of 'RGN_TYPE_WINDOW'
+   * runtime variable, updated by executing operators.
+   */
+  int region_active_win; /* bfa - changed short to int */
+
   /**
    * eSpace_Type (SPACE_FOO).
    *
@@ -392,13 +401,8 @@ typedef struct ScrArea {
   char headertype DNA_DEPRECATED;
   /** Private, for spacetype refresh callback. */
   char do_refresh;
-  short flag;
-  /**
-   * Index of last used region of 'RGN_TYPE_WINDOW'
-   * runtime variable, updated by executing operators.
-   */
-  short region_active_win;
-  char _pad[2];
+
+  char temp, _pad[5]; /* bfa - changed to allow int*/
 
   /** Callbacks for this space type. */
   struct SpaceType *type;
@@ -538,8 +542,27 @@ enum {
   AREA_FLAG_STACKED_FULLSCREEN = (1 << 7),
   /** Update action zones (even if the mouse is not intersecting them). */
   AREA_FLAG_ACTIONZONES_UPDATE = (1 << 8),
+  // bfa - show hide the editorsmenu
+  HEADER_NO_EDITORTYPEMENU = (1 << 9),
+  // bfa - show hide the File toolbars
+  HEADER_TOOLBAR_FILE = (1 << 10),
+  // bfa - show hide the View toolbars
+  HEADER_TOOLBAR_MESHEDIT = (1 << 11),
+  // bfa - show hide the Primitives toolbars
+  HEADER_TOOLBAR_PRIMITIVES = (1 << 12),
+  // bfa - show hide the Image toolbars
+  HEADER_TOOLBAR_IMAGE = (1 << 13),
+  // bfa - show hide the Tools toolbars
+  HEADER_TOOLBAR_TOOLS = (1 << 14),
+  // bfa - show hide the Animation toolbars
+  HEADER_TOOLBAR_ANIMATION = (1 << 15),
+  /*Other flags see above in the area->flag enum*/
+  // bfa - show hide the Edit toolbars
+  HEADER_TOOLBAR_EDIT = (1 << 16),
+  // bfa - show hide the Misc toolbars
+  HEADER_TOOLBAR_MISC = (1 << 17),
   /** For off-screen areas. */
-  AREA_FLAG_OFFSCREEN = (1 << 9),
+  AREA_FLAG_OFFSCREEN = (1 << 18),
 };
 
 #define AREAGRID 4
@@ -669,7 +692,8 @@ typedef enum eRegion_Type {
 #define RGN_TYPE_ANY -1
 
 /* Region supports panel tabs (categories). */
-#define RGN_TYPE_HAS_CATEGORY_MASK (1 << RGN_TYPE_UI)
+/* bfa - readd tabs to tools area */
+#define RGN_TYPE_HAS_CATEGORY_MASK ((1 << RGN_TYPE_UI) | (1 << RGN_TYPE_TOOLS))
 
 /* Check for any kind of header region. */
 #define RGN_TYPE_IS_HEADER_ANY(regiontype) \

@@ -18,6 +18,7 @@
 #include "BLI_blenlib.h"
 #include "BLI_dynstr.h"
 #include "BLI_path_util.h"
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 #include "BLI_utildefines.h"
 
 #include "BLT_translation.h"
@@ -323,7 +324,7 @@ static void do_item_rename(ARegion *region,
     BKE_report(reports, RPT_WARNING, "Cannot edit external library data");
   }
   else if (ID_IS_OVERRIDE_LIBRARY(tselem->id)) {
-    BKE_report(reports, RPT_WARNING, "Cannot edit name of an override data-block");
+    BKE_report(reports, RPT_WARNING, "Cannot edit name of an override data");
   }
   else if (outliner_is_collection_tree_element(te)) {
     Collection *collection = outliner_collection_from_tree_element(te);
@@ -479,7 +480,7 @@ static void id_delete_tag(bContext *C, ReportList *reports, TreeElement *te, Tre
   if (ID_REAL_USERS(id) <= 1 && BKE_library_ID_is_indirectly_used(bmain, id)) {
     BKE_reportf(reports,
                 RPT_WARNING,
-                "Cannot delete id '%s', indirectly used data-blocks need at least one user",
+                "Cannot delete id '%s', indirectly used data need at least one user",
                 id->name);
     return;
   }
@@ -574,7 +575,7 @@ static int outliner_id_delete_invoke(bContext *C, wmOperator *op, const wmEvent 
 
 void OUTLINER_OT_id_delete(wmOperatorType *ot)
 {
-  ot->name = "Delete Data-Block";
+  ot->name = "Delete Data";
   ot->idname = "OUTLINER_OT_id_delete";
   ot->description = "Delete the ID under cursor";
 
@@ -805,14 +806,14 @@ static int outliner_id_copy_exec(bContext *C, wmOperator *op)
 
   const int num_ids = outliner_id_copy_tag(space_outliner, &space_outliner->tree);
   if (num_ids == 0) {
-    BKE_report(op->reports, RPT_INFO, "No selected data-blocks to copy");
+    BKE_report(op->reports, RPT_INFO, "No selected data to copy");
     return OPERATOR_CANCELLED;
   }
 
   BLI_path_join(str, sizeof(str), BKE_tempdir_base(), "copybuffer.blend");
   BKE_copybuffer_copy_end(bmain, str, op->reports);
 
-  BKE_reportf(op->reports, RPT_INFO, "Copied %d selected data-block(s)", num_ids);
+  BKE_reportf(op->reports, RPT_INFO, "Copied %d selected data", num_ids);
 
   return OPERATOR_FINISHED;
 }
@@ -822,7 +823,7 @@ void OUTLINER_OT_id_copy(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Outliner ID Data Copy";
   ot->idname = "OUTLINER_OT_id_copy";
-  ot->description = "Selected data-blocks are copied to the clipboard";
+  ot->description = "Selected data are copied to the clipboard";
 
   /* callbacks */
   ot->exec = outliner_id_copy_exec;
@@ -853,7 +854,7 @@ static int outliner_id_paste_exec(bContext *C, wmOperator *op)
 
   WM_event_add_notifier(C, NC_WINDOW, nullptr);
 
-  BKE_reportf(op->reports, RPT_INFO, "%d data-block(s) pasted", num_pasted);
+  BKE_reportf(op->reports, RPT_INFO, "%d data pasted", num_pasted);
 
   return OPERATOR_FINISHED;
 }
@@ -863,7 +864,7 @@ void OUTLINER_OT_id_paste(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Outliner ID Data Paste";
   ot->idname = "OUTLINER_OT_id_paste";
-  ot->description = "Data-blocks from the clipboard are pasted";
+  ot->description = "Data from the clipboard are pasted";
 
   /* callbacks */
   ot->exec = outliner_id_paste_exec;
@@ -1208,6 +1209,26 @@ static int outliner_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *outliner_ot_select_all_get_description(struct bContext * /*C*/,
+                                                    struct wmOperatorType * /*op*/,
+                                                    struct PointerRNA *values)
+{
+  /*Select*/
+  if (RNA_enum_get(values, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(values, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect everything");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(values, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void OUTLINER_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -1217,6 +1238,7 @@ void OUTLINER_OT_select_all(wmOperatorType *ot)
 
   /* callbacks */
   ot->exec = outliner_select_all_exec;
+  ot->get_description = outliner_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_outliner_active;
 
   /* no undo or registry */
@@ -1466,6 +1488,17 @@ static int outliner_one_level_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *outliner_ot_show_one_level_get_description(struct bContext * /*C*/,
+                                                        struct wmOperatorType * /*op*/,
+                                                        struct PointerRNA *values)
+{
+  if (RNA_boolean_get(values, "open")) {
+    return BLI_strdup("Expand all entries by one level");
+  }
+  return NULL;
+}
+
 void OUTLINER_OT_show_one_level(wmOperatorType *ot)
 {
   PropertyRNA *prop;
@@ -1473,10 +1506,11 @@ void OUTLINER_OT_show_one_level(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Show/Hide One Level";
   ot->idname = "OUTLINER_OT_show_one_level";
-  ot->description = "Expand/collapse all entries by one level";
+  ot->description = "Collapse all entries by one level";
 
   /* callbacks */
   ot->exec = outliner_one_level_exec;
+  ot->get_description = outliner_ot_show_one_level_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_outliner_active;
 
   /* no undo or registry, UI option */
@@ -2125,12 +2159,12 @@ static int outliner_orphans_purge_invoke(bContext *C, wmOperator *op, const wmEv
   RNA_int_set(op->ptr, "num_deleted", num_tagged[INDEX_ID_NULL]);
 
   if (num_tagged[INDEX_ID_NULL] == 0) {
-    BKE_report(op->reports, RPT_INFO, "No orphaned data-blocks to purge");
+    BKE_report(op->reports, RPT_INFO, "No orphaned data to purge");
     return OPERATOR_CANCELLED;
   }
 
   DynStr *dyn_str = BLI_dynstr_new();
-  BLI_dynstr_appendf(dyn_str, "Purging %d unused data-blocks (", num_tagged[INDEX_ID_NULL]);
+  BLI_dynstr_appendf(dyn_str, "Purging %d unused data(", num_tagged[INDEX_ID_NULL]);
   bool is_first = true;
   for (int i = 0; i < INDEX_ID_MAX - 2; i++) {
     if (num_tagged[i] != 0) {
@@ -2173,14 +2207,14 @@ static int outliner_orphans_purge_exec(bContext *C, wmOperator *op)
         bmain, LIB_TAG_DOIT, do_local_ids, do_linked_ids, do_recursive_cleanup, num_tagged);
 
     if (num_tagged[INDEX_ID_NULL] == 0) {
-      BKE_report(op->reports, RPT_INFO, "No orphaned data-blocks to purge");
+      BKE_report(op->reports, RPT_INFO, "No orphaned data to purge");
       return OPERATOR_CANCELLED;
     }
   }
 
   BKE_id_multi_tagged_delete(bmain);
 
-  BKE_reportf(op->reports, RPT_INFO, "Deleted %d data-block(s)", num_tagged[INDEX_ID_NULL]);
+  BKE_reportf(op->reports, RPT_INFO, "Deleted %d data", num_tagged[INDEX_ID_NULL]);
 
   /* XXX: tree management normally happens from draw_outliner(), but when
    *      you're clicking to fast on Delete object from context menu in
@@ -2199,16 +2233,58 @@ static int outliner_orphans_purge_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *wm_orphans_purge_get_description(struct bContext * /*C*/,
+                                              struct wmOperatorType * /*op*/,
+                                              struct PointerRNA *values)
+{
+  const bool linked = RNA_boolean_get(values, "do_linked_ids");
+  const bool local = RNA_boolean_get(values, "do_local_ids");
+  const bool recursive = RNA_boolean_get(values, "do_recursive");
+
+  /*Unused data*/
+  if (linked && local && !recursive) {
+    return BLI_strdup("Remove unused data from the scene");
+  }
+  /*Recursive Unused data*/
+  else if (linked && local && recursive) {
+    return BLI_strdup(
+        "Recursively remove unused data from the scene\nChild objects will be removed too");
+  }
+  /*Unused Linked Data*/
+  else if (linked && !local && !recursive) {
+    return BLI_strdup("Remove unused linked Data from the scene\nLocal data will stay intact");
+  }
+  /*Recursive Unused Linked Data*/
+  else if (linked && !local && recursive) {
+    return BLI_strdup(
+        "Recursively remove unused linked Data from the scene\nLocal data will stay intact\nChild "
+        "objects will be removed too");
+  }
+  /*Unused Local Data*/
+  else if (!linked && local && !recursive) {
+    return BLI_strdup("Remove unused local Data from the scene\nLinked data will stay intact");
+  }
+  /*Recursive Unused Local Data*/
+  else if (!linked && local && recursive) {
+    return BLI_strdup(
+        "Recursively remove unused local data from the scene\nLinked data will stay intact\nChild "
+        "objects will be removed too");
+  }
+  return NULL;
+}
+
 void OUTLINER_OT_orphans_purge(wmOperatorType *ot)
 {
   /* identifiers */
   ot->idname = "OUTLINER_OT_orphans_purge";
   ot->name = "Purge All";
-  ot->description = "Clear all orphaned data-blocks without any users from the file";
+  ot->description = "Clear all orphaned data without any users from the file";
 
   /* callbacks */
   ot->invoke = outliner_orphans_purge_invoke;
   ot->exec = outliner_orphans_purge_exec;
+  ot->get_description = wm_orphans_purge_get_description; /*bfa - descriptions*/
   ot->poll = ed_operator_outliner_id_orphans_active;
 
   /* flags */

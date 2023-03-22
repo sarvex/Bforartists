@@ -2183,7 +2183,7 @@ static void node_draw_basis(const bContext &C,
     uiBut *but = uiDefIconBut(&block,
                               UI_BTYPE_BUT_TOGGLE,
                               0,
-                              ICON_MATERIAL,
+                              ICON_TOGGLE_NODE_PREVIEW,
                               iconofs,
                               rct.ymax - NODE_DY,
                               iconbutw,
@@ -2246,6 +2246,27 @@ static void node_draw_basis(const bContext &C,
                  "");
     UI_block_emboss_set(&block, UI_EMBOSS);
   }
+  /* bfa - Add nodes icons to node headers */
+  else if (RNA_struct_ui_icon(node.typeinfo->rna_ext.srna) != ICON_NONE) {
+    iconofs -= iconbutw;
+    UI_block_emboss_set(&block, UI_EMBOSS_NONE);
+    uiDefIconBut(&block,
+                 UI_BTYPE_BUT,
+                 0,
+                 RNA_struct_ui_icon(node.typeinfo->rna_ext.srna),
+                 iconofs,
+                 rct.ymax - NODE_DY,
+                 iconbutw,
+                 UI_UNIT_Y,
+                 nullptr,
+                 0,
+                 0,
+                 0,
+                 0,
+                 "");
+    UI_block_emboss_set(&block, UI_EMBOSS);
+  }
+  /* -------- bfa end ------------------ */
   if (node.type == GEO_NODE_VIEWER) {
     const bool is_active = &node == tree_draw_ctx.active_geometry_nodes_viewer;
     iconofs -= iconbutw;

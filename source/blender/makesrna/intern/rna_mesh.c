@@ -2737,7 +2737,7 @@ static void rna_def_medge(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "MeshEdge", NULL);
   RNA_def_struct_sdna(srna, "MEdge");
-  RNA_def_struct_ui_text(srna, "Mesh Edge", "Edge in a Mesh data-block");
+  RNA_def_struct_ui_text(srna, "Mesh Edge", "Edge in a Mesh data");
   RNA_def_struct_path_func(srna, "rna_MeshEdge_path");
   RNA_def_struct_ui_icon(srna, ICON_EDGESEL);
 
@@ -2805,7 +2805,7 @@ static void rna_def_mlooptri(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "MeshLoopTriangle", NULL);
   RNA_def_struct_sdna(srna, "MLoopTri");
-  RNA_def_struct_ui_text(srna, "Mesh Loop Triangle", "Tessellated triangle in a Mesh data-block");
+  RNA_def_struct_ui_text(srna, "Mesh Loop Triangle", "Tessellated triangle in a Mesh data");
   RNA_def_struct_path_func(srna, "rna_MeshLoopTriangle_path");
   RNA_def_struct_ui_icon(srna, ICON_FACESEL);
 
@@ -2872,7 +2872,7 @@ static void rna_def_mloop(BlenderRNA *brna)
   PropertyRNA *prop;
 
   srna = RNA_def_struct(brna, "MeshLoop", NULL);
-  RNA_def_struct_ui_text(srna, "Mesh Loop", "Loop in a Mesh data-block");
+  RNA_def_struct_ui_text(srna, "Mesh Loop", "Loop in a Mesh data");
   RNA_def_struct_path_func(srna, "rna_MeshLoop_path");
   RNA_def_struct_ui_icon(srna, ICON_EDGESEL);
 
@@ -2942,7 +2942,7 @@ static void rna_def_mpolygon(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "MeshPolygon", NULL);
   RNA_def_struct_sdna(srna, "MPoly");
-  RNA_def_struct_ui_text(srna, "Mesh Polygon", "Polygon in a Mesh data-block");
+  RNA_def_struct_ui_text(srna, "Mesh Polygon", "Polygon in a Mesh data");
   RNA_def_struct_path_func(srna, "rna_MeshPolygon_path");
   RNA_def_struct_ui_icon(srna, ICON_FACESEL);
 
@@ -4119,7 +4119,7 @@ static void rna_def_mesh(BlenderRNA *brna)
   PropertyRNA *prop;
 
   srna = RNA_def_struct(brna, "Mesh", "ID");
-  RNA_def_struct_ui_text(srna, "Mesh", "Mesh data-block defining geometric surfaces");
+  RNA_def_struct_ui_text(srna, "Mesh", "Mesh data defining geometric surfaces");
   RNA_def_struct_ui_icon(srna, ICON_MESH_DATA);
 
   prop = RNA_def_property(srna, "vertices", PROP_COLLECTION, PROP_NONE);
@@ -4529,7 +4529,7 @@ static void rna_def_mesh(BlenderRNA *brna)
   RNA_def_property_ui_text(prop,
                            "Voxel Size",
                            "Size of the voxel in object space used for volume evaluation. Lower "
-                           "values preserve finer details");
+                           "values preserve finer details\nHotkey in the default keymap: Shift R");
   RNA_def_property_update(prop, 0, "rna_Mesh_update_draw");
   RNA_def_property_flag(prop, PROP_NO_DEG_UPDATE);
 
@@ -4619,8 +4619,9 @@ static void rna_def_mesh(BlenderRNA *brna)
   RNA_def_property_ui_text(
       prop,
       "Auto Smooth",
-      "Auto smooth (based on smooth/sharp faces/edges and angle between faces), "
-      "or use custom split normals data if available");
+      "Either smooth edges based on the angle of the adjacent faces, "
+      "\nor use custom split normals data if available"
+      "\nThe shading needs to be set to smooth. Auto smooth will not work with flat shading");
   RNA_def_property_update(prop, 0, "rna_Mesh_update_geom_and_params");
 
   prop = RNA_def_property(srna, "auto_smooth_angle", PROP_FLOAT, PROP_ANGLE);

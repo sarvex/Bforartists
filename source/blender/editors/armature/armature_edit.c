@@ -44,6 +44,8 @@
 
 #include "armature_intern.h"
 
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
 /* -------------------------------------------------------------------- */
 /** \name Object Tools Public API
  * \{ */
@@ -1288,7 +1290,7 @@ void ARMATURE_OT_delete(wmOperatorType *ot)
   ot->description = "Remove selected bones from the armature";
 
   /* api callbacks */
-  ot->invoke = WM_operator_confirm;
+  // ot->invoke = WM_operator_confirm; // bfa - turned off confirm on delete
   ot->exec = armature_delete_selected_exec;
   ot->poll = ED_operator_editarmature;
 
@@ -1520,15 +1522,27 @@ static int armature_hide_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *armature_ot_hide_get_description(bContext *UNUSED(C),
+                                              wmOperatorType *UNUSED(ot),
+                                              PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "unselected")) {
+    return BLI_strdup("Hide unselected bones in Edit Mode");
+  }
+  return NULL;
+}
+
 void ARMATURE_OT_hide(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Hide Selected";
   ot->idname = "ARMATURE_OT_hide";
-  ot->description = "Tag selected bones to not be visible in Edit Mode";
+  ot->description = "Hide selected bones in Edit Mode";
 
   /* api callbacks */
   ot->exec = armature_hide_exec;
+  ot->get_description = armature_ot_hide_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_editarmature;
 
   /* flags */

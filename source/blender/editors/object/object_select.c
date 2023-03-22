@@ -26,6 +26,7 @@
 #include "BLI_math.h"
 #include "BLI_math_bits.h"
 #include "BLI_rand.h"
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 #include "BLI_string_utils.h"
 #include "BLI_utildefines.h"
 
@@ -704,7 +705,7 @@ void OBJECT_OT_select_linked(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Select Linked";
-  ot->description = "Select all visible objects that are linked";
+  ot->description = "Select all visible objects that are linked to";
   ot->idname = "OBJECT_OT_select_linked";
 
   /* api callbacks */
@@ -745,21 +746,21 @@ enum {
 };
 
 static const EnumPropertyItem prop_select_grouped_types[] = {
-    {OBJECT_GRPSEL_CHILDREN_RECURSIVE, "CHILDREN_RECURSIVE", 0, "Children", ""},
-    {OBJECT_GRPSEL_CHILDREN, "CHILDREN", 0, "Immediate Children", ""},
-    {OBJECT_GRPSEL_PARENT, "PARENT", 0, "Parent", ""},
-    {OBJECT_GRPSEL_SIBLINGS, "SIBLINGS", 0, "Siblings", "Shared parent"},
-    {OBJECT_GRPSEL_TYPE, "TYPE", 0, "Type", "Shared object type"},
-    {OBJECT_GRPSEL_COLLECTION, "COLLECTION", 0, "Collection", "Shared collection"},
-    {OBJECT_GRPSEL_HOOK, "HOOK", 0, "Hook", ""},
-    {OBJECT_GRPSEL_PASS, "PASS", 0, "Pass", "Render pass index"},
-    {OBJECT_GRPSEL_COLOR, "COLOR", 0, "Color", "Object color"},
+    {OBJECT_GRPSEL_CHILDREN_RECURSIVE, "CHILDREN_RECURSIVE", ICON_CHILD_RECURSIVE, "Children", ""},
+    {OBJECT_GRPSEL_CHILDREN, "CHILDREN", ICON_CHILD, "Immediate Children", ""},
+    {OBJECT_GRPSEL_PARENT, "PARENT", ICON_PARENT, "Parent", ""},
+    {OBJECT_GRPSEL_SIBLINGS, "SIBLINGS", ICON_SIBLINGS, "Siblings", "Shared parent"},
+    {OBJECT_GRPSEL_TYPE, "TYPE", ICON_TYPE, "Type", "Shared object type"},
+    {OBJECT_GRPSEL_COLLECTION, "COLLECTION", ICON_GROUP, "Collection", "Shared collection"},
+    {OBJECT_GRPSEL_HOOK, "HOOK", ICON_HOOK, "Hook", ""},
+    {OBJECT_GRPSEL_PASS, "PASS", ICON_PASS, "Pass", "Render pass index"},
+    {OBJECT_GRPSEL_COLOR, "COLOR", ICON_COLOR, "Color", "Object color"},
     {OBJECT_GRPSEL_KEYINGSET,
      "KEYINGSET",
-     0,
+     ICON_KEYINGSET,
      "Keying Set",
      "Objects included in active Keying Set"},
-    {OBJECT_GRPSEL_LIGHT_TYPE, "LIGHT_TYPE", 0, "Light Type", "Matching light types"},
+    {OBJECT_GRPSEL_LIGHT_TYPE, "LIGHT_TYPE", ICON_LIGHT, "Light Type", "Matching light types"},
     {0, NULL, 0, NULL, NULL},
 };
 
@@ -1148,6 +1149,26 @@ static int object_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_CANCELLED;
 }
 
+/*bfa - descriptions*/
+static char *object_ot_select_all_get_description(bContext *UNUSED(C),
+                                                  wmOperatorType *UNUSED(ot),
+                                                  PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all visible objects in scene");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all visible objects in scene");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void OBJECT_OT_select_all(wmOperatorType *ot)
 {
 
@@ -1158,6 +1179,7 @@ void OBJECT_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = object_select_all_exec;
+  ot->get_description = object_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = objects_selectable_poll;
 
   /* flags */

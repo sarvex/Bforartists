@@ -43,28 +43,29 @@ class WORLD_PT_context_world(WorldButtonsPanel, Panel):
             layout.template_ID(space, "pin_id")
 
 
-class EEVEE_WORLD_PT_mist(WorldButtonsPanel, Panel):
-    bl_label = "Mist Pass"
-    bl_options = {'DEFAULT_CLOSED'}
-    COMPAT_ENGINES = {'BLENDER_EEVEE', 'BLENDER_EEVEE_NEXT'}
+# bfa - move mist panel to view layers
+# class EEVEE_WORLD_PT_mist(WorldButtonsPanel, Panel):
+#     bl_label = "Mist Pass"
+#     bl_options = {'DEFAULT_CLOSED'}
+#     COMPAT_ENGINES = {'BLENDER_EEVEE', 'BLENDER_EEVEE_NEXT'}
 
-    @classmethod
-    def poll(cls, context):
-        engine = context.engine
-        return context.world and (engine in cls.COMPAT_ENGINES)
+#     @classmethod
+#     def poll(cls, context):
+#         engine = context.engine
+#         return context.world and (engine in cls.COMPAT_ENGINES)
 
-    def draw(self, context):
-        layout = self.layout
-        layout.use_property_split = True
+#     def draw(self, context):
+#         layout = self.layout
+#         layout.use_property_split = True
 
-        world = context.world
+#         world = context.world
 
-        col = layout.column(align=True)
-        col.prop(world.mist_settings, "start")
-        col.prop(world.mist_settings, "depth")
+#         col = layout.column(align=True)
+#         col.prop(world.mist_settings, "start")
+#         col.prop(world.mist_settings, "depth")
 
-        col = layout.column()
-        col.prop(world.mist_settings, "falloff")
+#         col = layout.column()
+#         col.prop(world.mist_settings, "falloff")
 
 
 class WORLD_PT_custom_props(WorldButtonsPanel, PropertyPanel, Panel):
@@ -163,7 +164,7 @@ classes = (
     WORLD_PT_context_world,
     EEVEE_WORLD_PT_surface,
     EEVEE_WORLD_PT_volume,
-    EEVEE_WORLD_PT_mist,
+    #EEVEE_WORLD_PT_mist, # bfa - move mist panel to view layers
     WORLD_PT_viewport_display,
     WORLD_PT_custom_props,
 )

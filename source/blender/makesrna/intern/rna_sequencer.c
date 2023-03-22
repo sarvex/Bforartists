@@ -62,13 +62,13 @@ typedef struct EffectInfo {
 } EffectInfo;
 
 const EnumPropertyItem rna_enum_sequence_modifier_type_items[] = {
-    {seqModifierType_BrightContrast, "BRIGHT_CONTRAST", ICON_NONE, "Bright/Contrast", ""},
-    {seqModifierType_ColorBalance, "COLOR_BALANCE", ICON_NONE, "Color Balance", ""},
-    {seqModifierType_Curves, "CURVES", ICON_NONE, "Curves", ""},
-    {seqModifierType_HueCorrect, "HUE_CORRECT", ICON_NONE, "Hue Correct", ""},
-    {seqModifierType_Mask, "MASK", ICON_NONE, "Mask", ""},
-    {seqModifierType_Tonemap, "TONEMAP", ICON_NONE, "Tone Map", ""},
-    {seqModifierType_WhiteBalance, "WHITE_BALANCE", ICON_NONE, "White Balance", ""},
+    {seqModifierType_ColorBalance, "COLOR_BALANCE", ICON_NODE_COLORBALANCE, "Color Balance", ""},
+    {seqModifierType_Curves, "CURVES", ICON_OUTLINER_DATA_CURVE, "Curves", ""},
+    {seqModifierType_HueCorrect, "HUE_CORRECT", ICON_HUECORRECT, "Hue Correct", ""},
+    {seqModifierType_BrightContrast, "BRIGHT_CONTRAST", ICON_BRIGHTNESS_CONTRAST, "Bright/Contrast", ""},
+    {seqModifierType_Mask, "MASK", ICON_MOD_MASK, "Mask", ""},
+    {seqModifierType_WhiteBalance, "WHITE_BALANCE", ICON_WHITE_BALANCE, "White Balance", ""},
+    {seqModifierType_Tonemap, "TONEMAP", ICON_NODE_TONEMAP, "Tone Map", ""},
     {0, NULL, 0, NULL, NULL},
 };
 
@@ -2313,7 +2313,7 @@ static void rna_def_editor(BlenderRNA *brna)
       {0, NULL, 0, NULL, NULL},
   };
   srna = RNA_def_struct(brna, "SequenceEditor", NULL);
-  RNA_def_struct_ui_text(srna, "Sequence Editor", "Sequence editing data for a Scene data-block");
+  RNA_def_struct_ui_text(srna, "Sequence Editor", "Sequence editing data for a Scene");
   RNA_def_struct_ui_icon(srna, ICON_SEQUENCE);
   RNA_def_struct_sdna(srna, "Editing");
 
@@ -2358,8 +2358,10 @@ static void rna_def_editor(BlenderRNA *brna)
 
   prop = RNA_def_property(srna, "show_overlay_frame", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "overlay_frame_flag", SEQ_EDIT_OVERLAY_FRAME_SHOW);
-  RNA_def_property_ui_text(
-      prop, "Show Overlay", "Partial overlay on top of the sequencer with a frame offset");
+  RNA_def_property_ui_text(prop,
+                           "Show Overlay",
+                           "Partial overlay on top of the sequencer with a frame offset\nHotkey "
+                           "in the default keymap: Shift o");
   RNA_def_property_update(prop, NC_SPACE | ND_SPACE_SEQUENCER, NULL);
 
   prop = RNA_def_property(srna, "use_overlay_frame_lock", PROP_BOOLEAN, PROP_NONE);
@@ -2939,7 +2941,7 @@ static void rna_def_sound(BlenderRNA *brna)
   prop = RNA_def_property(srna, "sound", PROP_POINTER, PROP_NONE);
   RNA_def_property_flag(prop, PROP_EDITABLE);
   RNA_def_property_struct_type(prop, "Sound");
-  RNA_def_property_ui_text(prop, "Sound", "Sound data-block used by this sequence");
+  RNA_def_property_ui_text(prop, "Sound", "Sound data used by this sequence");
   RNA_def_property_update(prop, NC_SCENE | ND_SEQUENCER, "rna_Sequence_sound_update");
 
   prop = RNA_def_property(srna, "volume", PROP_FLOAT, PROP_NONE);

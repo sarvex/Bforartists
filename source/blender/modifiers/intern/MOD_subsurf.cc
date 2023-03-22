@@ -419,7 +419,17 @@ static void panel_draw(const bContext *C, Panel *panel)
     uiItemR(col, ptr, "render_levels", 0, IFACE_("Render"), ICON_NONE);
   }
 
-  uiItemR(layout, ptr, "show_only_control_edges", 0, nullptr, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "show_only_control_edges", 0, nullptr, ICON_NONE);
+
+  uiLayout *row, *col;
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "show_only_control_edges", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "show_only_control_edges", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   Depsgraph *depsgraph = CTX_data_depsgraph_pointer(C);
   SubsurfModifierData *smd = static_cast<SubsurfModifierData *>(ptr->data);
@@ -447,7 +457,7 @@ static void panel_draw(const bContext *C, Panel *panel)
 
 static void advanced_panel_draw(const bContext *C, Panel *panel)
 {
-  uiLayout *layout = panel->layout;
+  uiLayout *layout = panel->layout, *row, *col; /*bfa, added *row and *col*/
 
   PointerRNA ob_ptr;
   PointerRNA *ptr = modifier_panel_get_property_pointers(panel, &ob_ptr);
@@ -470,16 +480,43 @@ static void advanced_panel_draw(const bContext *C, Panel *panel)
   uiLayoutSetPropSep(layout, true);
 
   uiLayoutSetActive(layout, !(show_adaptive_options && ob_use_adaptive_subdivision));
-  uiItemR(layout, ptr, "use_limit_surface", 0, nullptr, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_limit_surface", 0, nullptr, ICON_NONE);
 
-  uiLayout *col = uiLayoutColumn(layout, true);
-  uiLayoutSetActive(col, RNA_boolean_get(ptr, "use_limit_surface"));
-  uiItemR(col, ptr, "quality", 0, nullptr, ICON_NONE);
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_limit_surface", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_limit_surface", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
+
+  // uiLayout *col = uiLayoutColumn(layout, true); /*bfa - layout defined at the top*/
+  /* bfa - hide UI based on condition instead of deactivating */
+  if (RNA_boolean_get(ptr, "use_limit_surface")) {
+    col = uiLayoutColumn(layout, true);
+    row = uiLayoutRow(col, true);
+    uiItemS(row); /*bfa - indent*/
+    uiItemR(row, ptr, "quality", 0, nullptr, ICON_NONE);
+  }
 
   uiItemR(layout, ptr, "uv_smooth", 0, nullptr, ICON_NONE);
   uiItemR(layout, ptr, "boundary_smooth", 0, nullptr, ICON_NONE);
-  uiItemR(layout, ptr, "use_creases", 0, nullptr, ICON_NONE);
-  uiItemR(layout, ptr, "use_custom_normals", 0, nullptr, ICON_NONE);
+
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_creases", 0, nullptr, ICON_NONE);
+  // uiItemR(layout, ptr, "use_custom_normals", 0, nullptr, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_creases", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_creases", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_custom_normals", 0, nullptr, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_custom_normals", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void panelRegister(ARegionType *region_type)

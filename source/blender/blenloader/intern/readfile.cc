@@ -2626,6 +2626,7 @@ static void lib_link_workspace_layout_restore(IDNameLib_Map *id_map,
           case SPACE_TOPBAR:
           case SPACE_STATUSBAR:
           case SPACE_EMPTY:
+          case SPACE_TOOLBAR:
             /* Nothing to do here. */
             break;
         }

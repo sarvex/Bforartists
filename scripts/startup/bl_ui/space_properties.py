@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
-from bpy.types import Header, Panel
+from bpy.types import Header, Panel, Menu
 
 
 class PROPERTIES_HT_header(Header):
@@ -11,7 +11,11 @@ class PROPERTIES_HT_header(Header):
         region = context.region
         ui_scale = context.preferences.system.ui_scale
 
-        layout.template_header()
+        ALL_MT_editormenu.draw_hidden(context, layout)  # bfa - show hide the editormenu
+
+        # bfa - The tab to switch to outliner
+        row = layout.row(align=True)
+        row.operator("screen.space_type_set_or_cycle", text="", icon='OOPS').space_type = 'OUTLINER'
 
         layout.separator_spacer()
 
@@ -69,10 +73,25 @@ class PROPERTIES_PT_options(Panel):
         col.row().prop(space, "outliner_sync", expand=True)
 
 
+# bfa - show hide the editormenu
+class ALL_MT_editormenu(Menu):
+    bl_label = ""
+
+    def draw(self, context):
+        self.draw_menus(self.layout, context)
+
+    @staticmethod
+    def draw_menus(layout, context):
+
+        row = layout.row(align=True)
+        row.template_header()  # editor type menus
+
+
 classes = (
     PROPERTIES_HT_header,
     PROPERTIES_PT_navigation_bar,
     PROPERTIES_PT_options,
+    ALL_MT_editormenu,
 )
 
 if __name__ == "__main__":  # only for live edit.

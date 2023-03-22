@@ -74,6 +74,8 @@
 
 #include "particle_edit_utildefines.h"
 
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
+
 /* -------------------------------------------------------------------- */
 /** \name Public Utilities
  * \{ */
@@ -1800,6 +1802,26 @@ static int pe_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *particle_ot_select_all_get_description(bContext *UNUSED(C),
+                                                    wmOperatorType *UNUSED(ot),
+                                                    PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all particles keys");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all particles keys");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void PARTICLE_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -1809,6 +1831,7 @@ void PARTICLE_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = pe_select_all_exec;
+  ot->get_description = particle_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = PE_poll;
 
   /* flags */
@@ -2522,6 +2545,17 @@ static int hide_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *particle_ot_hide_get_description(bContext *UNUSED(C),
+                                              wmOperatorType *UNUSED(ot),
+                                              PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "unselected")) {
+    return BLI_strdup("Hide unselected particles");
+  }
+  return NULL;
+}
+
 void PARTICLE_OT_hide(wmOperatorType *ot)
 {
   /* identifiers */
@@ -2531,6 +2565,7 @@ void PARTICLE_OT_hide(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = hide_exec;
+  ot->get_description = particle_ot_hide_get_description; /*bfa - descriptions*/
   ot->poll = PE_poll;
 
   /* flags */

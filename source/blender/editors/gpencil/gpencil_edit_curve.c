@@ -35,6 +35,9 @@
 
 #include "gpencil_intern.h"
 
+#include "UI_interface.h" /*bfa - for the icons*/
+#include "UI_resources.h" /*bfa - for the icons*/
+
 /* -------------------------------------------------------------------- */
 /** \name Enter Edit-Mode
  * \{ */
@@ -178,10 +181,10 @@ static int gpencil_editcurve_set_handle_type_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_stroke_editcurve_set_handle_type(wmOperatorType *ot)
 {
   static const EnumPropertyItem editcurve_handle_type_items[] = {
-      {HD_FREE, "FREE", 0, "Free", ""},
-      {HD_AUTO, "AUTOMATIC", 0, "Automatic", ""},
-      {HD_VECT, "VECTOR", 0, "Vector", ""},
-      {HD_ALIGN, "ALIGNED", 0, "Aligned", ""},
+      {HD_FREE, "FREE", ICON_HANDLE_FREE, "Free", ""},
+      {HD_AUTO, "AUTOMATIC", ICON_HANDLE_AUTO, "Automatic", ""},
+      {HD_VECT, "VECTOR", ICON_HANDLE_VECTOR, "Vector", ""},
+      {HD_ALIGN, "ALIGNED", ICON_HANDLE_ALIGNED, "Aligned", ""},
       {0, NULL, 0, NULL, NULL},
   };
 

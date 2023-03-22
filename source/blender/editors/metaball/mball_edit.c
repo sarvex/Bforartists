@@ -14,6 +14,7 @@
 #include "BLI_kdtree.h"
 #include "BLI_math.h"
 #include "BLI_rand.h"
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 #include "BLI_utildefines.h"
 
 #include "DNA_defs.h"
@@ -179,6 +180,26 @@ static int mball_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *mball_ot_select_all_get_description(bContext *UNUSED(C),
+                                                 wmOperatorType *UNUSED(ot),
+                                                 PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all metaball elements");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all metaball elements");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void MBALL_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -188,6 +209,7 @@ void MBALL_OT_select_all(wmOperatorType *ot)
 
   /* callback functions */
   ot->exec = mball_select_all_exec;
+  ot->get_description = mball_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_editmball;
 
   /* flags */
@@ -670,15 +692,27 @@ static int hide_metaelems_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *mball_ot_hide_metaelems_get_description(bContext *UNUSED(C),
+                                                     wmOperatorType *UNUSED(ot),
+                                                     PointerRNA *ptr)
+{
+  if (RNA_boolean_get(ptr, "unselected")) {
+    return BLI_strdup("Hide unselected metaball element(s)");
+  }
+  return NULL;
+}
+
 void MBALL_OT_hide_metaelems(wmOperatorType *ot)
 {
   /* identifiers */
   ot->name = "Hide Selected";
-  ot->description = "Hide (un)selected metaball element(s)";
+  ot->description = "Hide selected metaball element(s)";
   ot->idname = "MBALL_OT_hide_metaelems";
 
   /* callback functions */
   ot->exec = hide_metaelems_exec;
+  ot->get_description = mball_ot_hide_metaelems_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_editmball;
 
   /* flags */

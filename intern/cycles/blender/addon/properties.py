@@ -423,7 +423,9 @@ class CyclesRenderSettings(bpy.types.PropertyGroup):
         default=1.0,
         min=0.0,
         soft_max=1.0,
-        description="Reduce randomization between pixels to improve GPU rendering performance, at the cost of possible rendering artifacts if set too low",
+        description="Speeds up rendering at the GPU by scrambling pixels that are farer away"
+        "\nLower values renders faster, with less noise"
+        "\nBut too low values can lead to artifacts"
     )
     preview_scrambling_distance: BoolProperty(
         name="Scrambling Distance viewport",
@@ -797,7 +799,7 @@ class CyclesRenderSettings(bpy.types.PropertyGroup):
     )
     debug_use_hair_bvh: BoolProperty(
         name="Use Curves BVH",
-        description="Use special type BVH optimized for curves (uses more ram but renders faster)",
+        description="Use special type BVH optimized for hair (uses more ram but renders faster)\nActivates with device type GPU Compute",
         default=True,
     )
     debug_use_compact_bvh: BoolProperty(
@@ -807,9 +809,10 @@ class CyclesRenderSettings(bpy.types.PropertyGroup):
     )
     debug_bvh_time_steps: IntProperty(
         name="BVH Time Steps",
-        description="Split BVH primitives by this number of time steps to speed up render time in cost of memory",
+        description="Split BVH primitives by this number of time steps to speed up render time in cost of memory\nDeactivates with Use Spatial Splits active",
         default=0,
-        min=0, max=16,
+        min=0,
+        max=16,
     )
 
     bake_type: EnumProperty(
@@ -1225,9 +1228,13 @@ class CyclesWorldSettings(bpy.types.PropertyGroup):
     volume_step_size: FloatProperty(
         name="Step Size",
         description="Distance between volume shader samples when rendering the volume "
-                    "(lower values give more accurate and detailed results, but also increased render time)",
+        "(lower values give more accurate and detailed results, but also increased render time)\nDeactivates when Homogenous is on",
         default=1.0,
-        min=0.0000001, max=100000.0, soft_min=0.1, soft_max=100.0, precision=4
+        min=0.0000001,
+        max=100000.0,
+        soft_min=0.1,
+        soft_max=100.0,
+        precision=4,
     )
 
     @classmethod
@@ -1379,7 +1386,7 @@ class CyclesObjectSettings(bpy.types.PropertyGroup):
 
     ao_distance: FloatProperty(
         name="AO Distance",
-        description="AO distance used for approximate global illumination (0 means use world setting)",
+        description="AO distance used for approximate global illumination (0 means use world setting)\nFast GI Approximation needs to be active\nIt is in the render settings in the Light Paths panel",
         min=0.0,
         default=0.0,
         subtype='DISTANCE',
@@ -1432,7 +1439,7 @@ class CyclesCurveRenderSettings(bpy.types.PropertyGroup):
     def register(cls):
         bpy.types.Scene.cycles_curves = PointerProperty(
             name="Cycles Curves Rendering Settings",
-            description="Cycles curves rendering settings",
+            description="Cycles Curves rendering settings",
             type=cls,
         )
 

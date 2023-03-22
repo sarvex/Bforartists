@@ -43,7 +43,7 @@ class GreasePencilSculptAdvancedPanel:
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         tool_settings = context.scene.tool_settings
@@ -182,15 +182,15 @@ class GPENCIL_MT_snap(Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("gpencil.snap_to_grid", text="Selection to Grid")
-        layout.operator("gpencil.snap_to_cursor", text="Selection to Cursor").use_offset = False
-        layout.operator("gpencil.snap_to_cursor", text="Selection to Cursor (Keep Offset)").use_offset = True
+        layout.operator("gpencil.snap_to_grid", text="Selection to Grid", icon = "SELECTIONTOGRID")
+        layout.operator("gpencil.snap_to_cursor", text="Selection to Cursor", icon = "SELECTIONTOCURSOR").use_offset = False
+        layout.operator("gpencil.snap_to_cursor", text="Selection to Cursor (Keep Offset)", icon = "SELECTIONTOCURSOROFFSET").use_offset = True
 
         layout.separator()
 
-        layout.operator("gpencil.snap_cursor_to_selected", text="Cursor to Selected")
-        layout.operator("view3d.snap_cursor_to_center", text="Cursor to World Origin")
-        layout.operator("view3d.snap_cursor_to_grid", text="Cursor to Grid")
+        layout.operator("gpencil.snap_cursor_to_selected", text="Cursor to Selected", icon = "CURSORTOSELECTION")
+        layout.operator("view3d.snap_cursor_to_center", text="Cursor to World Origin", icon = "CURSORTOCENTER")
+        layout.operator("view3d.snap_cursor_to_grid", text="Cursor to Grid", icon = "CURSORTOGRID")
 
 
 class GPENCIL_MT_snap_pie(Menu):
@@ -301,8 +301,8 @@ class GPENCIL_MT_gpencil_draw_delete(Menu):
 
         layout.operator_context = 'INVOKE_REGION_WIN'
 
-        layout.operator("gpencil.delete", text="Delete Active Keyframe (Active Layer)").type = 'FRAME'
-        layout.operator("gpencil.active_frames_delete_all", text="Delete Active Keyframes (All Layers)")
+        layout.operator("gpencil.delete", text="Delete Active Keyframe (Active Layer)", icon = "DELETE").type = 'FRAME'
+        layout.operator("gpencil.active_frames_delete_all", text="Delete Active Keyframes (All Layers)", icon = "DELETE")
 
 
 class GPENCIL_MT_cleanup(Menu):
@@ -314,22 +314,22 @@ class GPENCIL_MT_cleanup(Menu):
 
         layout = self.layout
 
-        layout.operator("gpencil.frame_clean_fill", text="Boundary Strokes").mode = 'ACTIVE'
-        layout.operator("gpencil.frame_clean_fill", text="Boundary Strokes all Frames").mode = 'ALL'
+        layout.operator("gpencil.frame_clean_fill", text="Boundary Strokes", icon = "CLEAN_CHANNELS").mode = 'ACTIVE'
+        layout.operator("gpencil.frame_clean_fill", text="Boundary Strokes all Frames", icon = "CLEAN_CHANNELS_FRAMES").mode = 'ALL'
 
         layout.separator()
 
-        layout.operator("gpencil.frame_clean_loose", text="Delete Loose Points")
+        layout.operator("gpencil.frame_clean_loose", text="Delete Loose Points", icon = "DELETE_LOOSE")
 
         if ob.mode != 'PAINT_GPENCIL':
-            layout.operator("gpencil.stroke_merge_by_distance", text="Merge by Distance")
+            layout.operator("gpencil.stroke_merge_by_distance", text="Merge by Distance", icon = "MERGE")
 
         layout.separator()
 
-        layout.operator("gpencil.frame_clean_duplicate", text="Delete Duplicate Frames")
-        layout.operator("gpencil.recalc_geometry", text="Recalculate Geometry")
+        layout.operator("gpencil.frame_clean_duplicate", text="Delete Duplicated Frames", icon = "DELETE_DUPLICATE")
+        layout.operator("gpencil.recalc_geometry", text="Recalculate Geometry", icon = "FILE_REFRESH")
         if ob.mode != 'PAINT_GPENCIL':
-            layout.operator("gpencil.reproject")
+            layout.operator("gpencil.reproject", icon = "REPROJECT")
 
 
 class GPENCIL_UL_annotation_layer(UIList):
@@ -532,7 +532,7 @@ class GreasePencilMaterialsPanel:
                 col.separator()
 
                 sub = col.column(align=True)
-                sub.operator("gpencil.material_isolate", icon='RESTRICT_VIEW_ON', text="").affect_visibility = True
+                sub.operator("gpencil.material_isolate", icon='HIDE_ON', text="").affect_visibility = True
                 sub.operator("gpencil.material_isolate", icon='LOCKED', text="").affect_visibility = False
 
             if show_full_ui:
@@ -632,7 +632,7 @@ class GPENCIL_UL_layer(UIList):
 
             row = layout.row(align=True)
 
-            icon_mask = 'MOD_MASK' if gpl.use_mask_layer else 'LAYER_ACTIVE'
+            icon_mask = 'MOD_MASK' if gpl.use_mask_layer else 'MOD_MASK_OFF'
 
             row.prop(gpl, "use_mask_layer", text="", icon=icon_mask, emboss=False)
 
@@ -662,7 +662,7 @@ class GreasePencilSimplifyPanel:
 
     def draw(self, context):
         layout = self.layout
-        layout.use_property_split = True
+        layout.use_property_split = False
         layout.use_property_decorate = False
 
         rd = context.scene.render
@@ -818,8 +818,11 @@ class GreasePencilLayerRelationsPanel:
 
         col = layout.row(align=True)
         # Only enable this property when a view layer is selected.
-        col.enabled = bool(gpl.viewlayer_render)
-        col.prop(gpl, "use_viewlayer_masks")
+        if bool(gpl.viewlayer_render):
+            row = col.row()
+            row.use_property_split = False
+            row.separator()
+            row.prop(gpl, "use_viewlayer_masks")
 
 
 class GreasePencilLayerDisplayPanel:
@@ -842,7 +845,8 @@ class GreasePencilLayerDisplayPanel:
         if not use_colors:
             col.label(text="Channel Colors are disabled in Animation preferences")
 
-        row = layout.row(align=True)
+        row = layout.row()
+        row.use_property_split = False
         row.prop(gpl, "use_solo_mode", text="Show Only on Keyframed")
 
 

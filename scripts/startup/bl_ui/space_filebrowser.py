@@ -23,18 +23,15 @@ class FILEBROWSER_HT_header(Header):
         layout.separator_spacer()
 
         if params.asset_library_ref not in {'LOCAL', 'ESSENTIALS'}:
-            layout.prop(params, "import_type", text="")
+            row = layout.row(align=True) #BFA - change to make row of buttons
+            row.prop(params, "import_type", text="", expand=True, icon_only=True,) #BFA - change to make row of buttons
 
-        layout.separator_spacer()
+        #layout.separator_spacer() #BFA
 
         # Uses prop_with_popover() as popover() only adds the triangle icon in headers.
-        layout.prop_with_popover(
-            params,
-            "display_type",
-            panel="ASSETBROWSER_PT_display",
-            text="",
-            icon_only=True,
-        )
+        row = layout.row(align=True)
+        row.prop(params, "display_type", expand=True, icon_only=True)
+        row.prop_with_popover(params, "display_type", panel="ASSETBROWSER_PT_display", text="", icon_only=True,)
 
         sub = layout.row()
         sub.ui_units_x = 8
@@ -61,7 +58,8 @@ class FILEBROWSER_HT_header(Header):
         space_data = context.space_data
 
         if space_data.active_operator is None:
-            layout.template_header()
+            # layout.template_header()
+            ALL_MT_editormenu.draw_hidden(context, layout)  # bfa - show hide the editormenu
 
         if SpaceAssetInfo.is_asset_browser(space_data):
             ASSETBROWSER_MT_editor_menus.draw_collapsible(context, layout)
@@ -73,6 +71,20 @@ class FILEBROWSER_HT_header(Header):
 
         if not context.screen.show_statusbar:
             layout.template_running_jobs()
+
+
+# bfa - show hide the editormenu
+class ALL_MT_editormenu(Menu):
+    bl_label = ""
+
+    def draw(self, context):
+        self.draw_menus(self.layout, context)
+
+    @staticmethod
+    def draw_menus(layout, context):
+
+        row = layout.row(align=True)
+        row.template_header()  # editor type menus
 
 
 class FileBrowserPanel:
@@ -106,17 +118,27 @@ class FILEBROWSER_PT_display(FileBrowserPanel, Panel):
         if params.display_type == 'THUMBNAIL':
             layout.prop(params, "display_size", text="Size")
         else:
-            col = layout.column(heading="Columns", align=True)
-            col.prop(params, "show_details_size", text="Size")
-            col.prop(params, "show_details_datetime", text="Date")
+
+            col = layout.column(align=True)
+            col.label(text="Columns")
+            row = col.row()
+            row.use_property_split = False
+            row.separator()
+            row.prop(params, "show_details_size", text="Size")
+            row = col.row()
+            row.use_property_split = False
+            row.separator()
+            row.prop(params, "show_details_datetime", text="Date")
 
         layout.prop(params, "recursion_level", text="Recursions")
 
         layout.column().prop(params, "sort_method", text="Sort By", expand=True)
+        layout.use_property_split = False
         layout.prop(params, "use_sort_invert")
 
 
 class FILEBROWSER_PT_filter(FileBrowserPanel, Panel):
+    bl_space_type = 'FILE_BROWSER'
     bl_region_type = 'HEADER'
     bl_label = "Filter Settings"  # Shows as tooltip in popover
     bl_ui_units_x = 10
@@ -354,7 +376,7 @@ class FILEBROWSER_PT_bookmarks_recents(Panel):
 
 class FILEBROWSER_PT_advanced_filter(Panel):
     bl_space_type = 'FILE_BROWSER'
-    bl_region_type = 'TOOLS'
+    bl_region_type = 'TOOL_PROPS'
     bl_category = "Filter"
     bl_label = "Advanced Filter"
 
@@ -499,16 +521,14 @@ class FILEBROWSER_MT_view(FileBrowserMenu, Menu):
 
         layout.prop(st, "show_region_toolbar", text="Source List")
         layout.prop(st, "show_region_ui", text="File Path")
-        layout.operator("file.view_selected")
-
-        layout.separator()
-
-        layout.prop_menu_enum(params, "display_size")
-        layout.prop_menu_enum(params, "recursion_level")
+        layout.operator("file.view_selected", icon="VIEW_SELECTED")
 
         layout.separator()
 
         layout.menu("INFO_MT_area")
+
+        layout.menu("FILEBROWSER_MT_view_pie_menus")
+
 
 
 class FILEBROWSER_MT_select(FileBrowserMenu, Menu):
@@ -517,13 +537,13 @@ class FILEBROWSER_MT_select(FileBrowserMenu, Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("file.select_all", text="All").action = 'SELECT'
-        layout.operator("file.select_all", text="None").action = 'DESELECT'
-        layout.operator("file.select_all", text="Inverse").action = 'INVERT'
+        layout.operator("file.select_all", text="All", icon='SELECT_ALL').action = 'SELECT'
+        layout.operator("file.select_all", text="None", icon='SELECT_NONE').action = 'DESELECT'
+        layout.operator("file.select_all", text="Inverse", icon='INVERSE').action = 'INVERT'
 
         layout.separator()
 
-        layout.operator("file.select_box")
+        layout.operator("file.select_box", icon="BORDER_RECT")
 
 
 class FILEBROWSER_MT_context_menu(FileBrowserMenu, Menu):
@@ -534,31 +554,29 @@ class FILEBROWSER_MT_context_menu(FileBrowserMenu, Menu):
         st = context.space_data
         params = st.params
 
-        layout.operator("file.previous", text="Back")
-        layout.operator("file.next", text="Forward")
-        layout.operator("file.parent", text="Go to Parent")
-        layout.operator("file.refresh", text="Refresh")
+        layout.operator("file.previous", text="Back", icon='BACK')
+        layout.operator("file.next", text="Forward", icon='FORWARD')
+        layout.operator("file.parent", text="Go to Parent", icon='FILE_PARENT')
+        layout.operator("file.refresh", text="Refresh", icon='FILE_REFRESH')
 
         layout.separator()
 
-        layout.operator("file.filenum", text="Increase Number",
-                        icon='ADD').increment = 1
-        layout.operator("file.filenum", text="Decrease Number",
-                        icon='REMOVE').increment = -1
+        layout.operator("file.filenum", text="Increase Number", icon='ADD').increment = 1
+        layout.operator("file.filenum", text="Decrease Number", icon='REMOVE').increment = -1
 
         layout.separator()
 
-        layout.operator("file.rename", text="Rename")
+        layout.operator("file.rename", text="Rename", icon='RENAME')
         sub = layout.row()
         sub.operator_context = 'EXEC_DEFAULT'
-        sub.operator("file.delete", text="Delete")
+        sub.operator("file.delete", text="Delete", icon='DELETE')
 
         layout.separator()
 
         sub = layout.row()
         sub.operator_context = 'EXEC_DEFAULT'
-        sub.operator("file.directory_new", text="New Folder")
-        layout.operator("file.bookmark_add", text="Add Bookmark")
+        sub.operator("file.directory_new", text="New Folder", icon='FILE_FOLDER')
+        layout.operator("file.bookmark_add", text="Add Bookmark", icon='BOOKMARKS')
 
         layout.separator()
 
@@ -660,7 +678,7 @@ class ASSETBROWSER_MT_view(AssetBrowserMenu, Menu):
 
         layout.prop(st, "show_region_toolbar", text="Source List")
         layout.prop(st, "show_region_tool_props", text="Asset Details")
-        layout.operator("file.view_selected")
+        layout.operator("file.view_selected", icon="VIEW_SELECTED")
 
         layout.separator()
 
@@ -671,19 +689,28 @@ class ASSETBROWSER_MT_view(AssetBrowserMenu, Menu):
         layout.menu("INFO_MT_area")
 
 
+class FILEBROWSER_MT_view_pie_menus(Menu):
+    bl_label = "Pie menus"
+
+    def draw(self, _context):
+        layout = self.layout
+
+        layout.operator("wm.call_menu_pie", text="View", icon="MENU_PANEL").name = 'FILEBROWSER_MT_view_pie'
+
+
 class ASSETBROWSER_MT_select(AssetBrowserMenu, Menu):
     bl_label = "Select"
 
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("file.select_all", text="All").action = 'SELECT'
-        layout.operator("file.select_all", text="None").action = 'DESELECT'
-        layout.operator("file.select_all", text="Inverse").action = 'INVERT'
+        layout.operator("file.select_all", text="All", icon='SELECT_ALL').action = 'SELECT'
+        layout.operator("file.select_all", text="None", icon='SELECT_NONE').action = 'DESELECT'
+        layout.operator("file.select_all", text="Inverse", icon='INVERSE').action = 'INVERT'
 
         layout.separator()
 
-        layout.operator("file.select_box")
+        layout.operator("file.select_box", icon="BORDER_RECT")
 
 
 class ASSETBROWSER_MT_catalog(AssetBrowserMenu, Menu):
@@ -692,12 +719,16 @@ class ASSETBROWSER_MT_catalog(AssetBrowserMenu, Menu):
     def draw(self, _context):
         layout = self.layout
 
-        layout.operator("asset.catalog_undo", text="Undo")
-        layout.operator("asset.catalog_redo", text="Redo")
+        layout.operator("asset.catalog_undo", text="Undo", icon="UNDO")
+        layout.operator("asset.catalog_redo", text="Redo", icon="REDO")
 
         layout.separator()
-        layout.operator("asset.catalogs_save")
-        layout.operator("asset.catalog_new").parent_path = ""
+
+        layout.operator("preferences.filepaths_show", emboss=False, text="Asset Library Paths", icon='PREFERENCES')
+
+        layout.separator()
+        layout.operator("asset.catalogs_save", icon = 'FILE_TICK')
+        layout.operator("asset.catalog_new", icon = 'ADD').parent_path = ""
 
 
 class ASSETBROWSER_PT_metadata(asset_utils.AssetBrowserPanel, Panel):
@@ -740,9 +771,49 @@ class ASSETBROWSER_PT_metadata(asset_utils.AssetBrowserPanel, Panel):
                 col.prop(asset_file_handle.asset_data, "catalog_id", text="UUID")
                 col.prop(asset_file_handle.asset_data, "catalog_simple_name", text="Simple Name")
 
+
+class ASSETBROWSER_PT_metadata_info(asset_utils.AssetMetaDataPanel, Panel):
+    bl_label = "Info"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    def draw(self, context):
+        layout = self.layout
+        wm = context.window_manager
+        asset_file_handle = context.asset_file_handle
+
+        if asset_file_handle is None:
+            layout.label(text="No active asset", icon='INFO')
+            return
+
+        prefs = context.preferences
+        show_asset_debug_info = prefs.view.show_developer_ui and prefs.experimental.show_asset_debug_info
+        is_local_asset = bool(asset_file_handle.local_id)
+
+        layout.use_property_split = True
+        layout.use_property_decorate = False  # No animation.
+
+        if is_local_asset:
+            # If the active file is an ID, use its name directly so renaming is possible from right here.
+            layout.prop(asset_file_handle.local_id, "name")
+
+            if show_asset_debug_info:
+                col = layout.column(align=True)
+                col.label(text="Asset Catalog:")
+                col.prop(asset_file_handle.local_id.asset_data, "catalog_id", text="UUID")
+                col.prop(asset_file_handle.local_id.asset_data, "catalog_simple_name", text="Simple Name")
+        else:
+            layout.prop(asset_file_handle, "name")
+
+            if show_asset_debug_info:
+                col = layout.column(align=True)
+                col.enabled = False
+                col.label(text="Asset Catalog:")
+                col.prop(asset_file_handle.asset_data, "catalog_id", text="UUID")
+                col.prop(asset_file_handle.asset_data, "catalog_simple_name", text="Simple Name")
+
         row = layout.row(align=True)
         row.prop(wm, "asset_path_dummy", text="Source", icon='CURRENT_FILE' if is_local_asset else 'NONE')
-        row.operator("asset.open_containing_blend_file", text="", icon='TOOL_SETTINGS')
+        row.operator("asset.open_containing_blend_file", text="", icon='FILE_BLEND')
 
         layout.prop(asset_file_handle.asset_data, "description")
         layout.prop(asset_file_handle.asset_data, "license")
@@ -812,18 +883,18 @@ class ASSETBROWSER_MT_context_menu(AssetBrowserMenu, Menu):
         st = context.space_data
         params = st.params
 
-        layout.operator("asset.library_refresh")
+        layout.operator("asset.library_refresh", icon="FILE_REFRESH")
 
         layout.separator()
 
         sub = layout.column()
         sub.operator_context = 'EXEC_DEFAULT'
-        sub.operator("asset.clear", text="Clear Asset").set_fake_user = False
-        sub.operator("asset.clear", text="Clear Asset (Set Fake User)").set_fake_user = True
+        sub.operator("asset.clear", text="Clear Asset", icon="CLEAR").set_fake_user = False
+        sub.operator("asset.clear", text="Clear Asset (Set Fake User)", icon="CLEAR").set_fake_user = True
 
         layout.separator()
 
-        layout.operator("asset.open_containing_blend_file")
+        layout.operator("asset.open_containing_blend_file", icon="FILE_FOLDER")
 
         layout.separator()
 
@@ -832,6 +903,7 @@ class ASSETBROWSER_MT_context_menu(AssetBrowserMenu, Menu):
 
 
 classes = (
+    ALL_MT_editormenu,
     FILEBROWSER_HT_header,
     FILEBROWSER_PT_display,
     FILEBROWSER_PT_filter,
@@ -845,6 +917,7 @@ classes = (
     FILEBROWSER_PT_directory_path,
     FILEBROWSER_MT_editor_menus,
     FILEBROWSER_MT_view,
+    FILEBROWSER_MT_view_pie_menus,
     FILEBROWSER_MT_select,
     FILEBROWSER_MT_context_menu,
     FILEBROWSER_MT_view_pie,
@@ -856,6 +929,7 @@ classes = (
     ASSETBROWSER_MT_catalog,
     ASSETBROWSER_MT_metadata_preview_menu,
     ASSETBROWSER_PT_metadata,
+    ASSETBROWSER_PT_metadata_info,
     ASSETBROWSER_PT_metadata_preview,
     ASSETBROWSER_PT_metadata_tags,
     ASSETBROWSER_UL_metadata_tags,

@@ -643,9 +643,28 @@ static void solver_options_panel_draw(const bContext * /*C*/, Panel *panel)
     uiItemR(col, ptr, "material_mode", 0, IFACE_("Materials"), ICON_NONE);
     /* When operand is collection, we always use_self. */
     if (RNA_enum_get(ptr, "operand_type") == eBooleanModifierFlag_Object) {
-      uiItemR(col, ptr, "use_self", 0, nullptr, ICON_NONE);
+
+      /*------------------- bfa - original prop */
+      // uiItemR(col, ptr, "use_self", 0, nullptr, ICON_NONE);
+
+      uiLayout *row;
+      col = uiLayoutColumn(layout, true);
+      row = uiLayoutRow(col, true);
+      uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+      uiItemR(row, ptr, "use_self", 0, nullptr, ICON_NONE);
+      uiItemDecoratorR(row, ptr, "use_self", 0); /*bfa - decorator*/
+      /* ------------ end bfa */
     }
-    uiItemR(col, ptr, "use_hole_tolerant", 0, nullptr, ICON_NONE);
+    /*------------------- bfa - original prop */
+    // uiItemR(col, ptr, "use_hole_tolerant", 0, nullptr, ICON_NONE);
+
+    uiLayout *row;
+    col = uiLayoutColumn(layout, true);
+    row = uiLayoutRow(col, true);
+    uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+    uiItemR(row, ptr, "use_hole_tolerant", 0, nullptr, ICON_NONE);
+    uiItemDecoratorR(row, ptr, "use_hole_tolerant", 0); /*bfa - decorator*/
+                                                        /* ------------ end bfa */
   }
   else {
     uiItemR(col, ptr, "double_threshold", 0, nullptr, ICON_NONE);

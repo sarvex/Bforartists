@@ -1098,7 +1098,9 @@ static void panel_draw_aligned_widgets(const uiStyle *style,
     GPU_blend(GPU_BLEND_ALPHA);
     UI_icon_draw_ex(widget_rect.xmin + size_y * 0.2f,
                     widget_rect.ymin + size_y * 0.2f,
-                    UI_panel_is_closed(panel) ? ICON_RIGHTARROW : ICON_DOWNARROW_HLT,
+                    /*bfa - tri buttons, not right and down arrows*/
+                    UI_panel_is_closed(panel) ? ICON_DISCLOSURE_TRI_RIGHT :
+                                                ICON_DISCLOSURE_TRI_DOWN,
                     aspect * UI_INV_SCALE_FAC,
                     0.7f,
                     0.0f,
@@ -1165,6 +1167,8 @@ static void panel_draw_aligned_backdrop(const Panel *panel,
 {
   const bool is_subpanel = panel->type->parent != nullptr;
   const bool is_open = !UI_panel_is_closed(panel);
+  /*bfa - transparent background for the tool shelf panels*/
+  const float hide_bg = panel->type->flag & PANEL_HIDE_BG;
 
   if (is_subpanel && !is_open) {
     return;
@@ -1181,7 +1185,13 @@ static void panel_draw_aligned_backdrop(const Panel *panel,
   if (is_open || panel->type->flag & PANEL_TYPE_NO_HEADER) {
     float panel_backcolor[4];
     UI_draw_roundbox_corner_set(is_open ? UI_CNR_BOTTOM_RIGHT | UI_CNR_BOTTOM_LEFT : UI_CNR_ALL);
-    UI_GetThemeColor4fv((is_subpanel ? TH_PANEL_SUB_BACK : TH_PANEL_BACK), panel_backcolor);
+    /*bfa - transparent background */
+    if (hide_bg) {
+      immUniformThemeColorAlpha(is_subpanel ? TH_PANEL_SUB_BACK : TH_PANEL_BACK, 0.f);
+    }
+    else {
+      UI_GetThemeColor4fv((is_subpanel ? TH_PANEL_SUB_BACK : TH_PANEL_BACK), panel_backcolor);
+    }
 
     rctf box_rect;
     box_rect.xmin = rect->xmin;

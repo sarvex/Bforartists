@@ -313,10 +313,10 @@ endif
 # Allow passing in own BLENDER_BIN so developers who don't
 # use the default build path can still use utility helpers.
 ifeq ($(OS), Darwin)
-	BLENDER_BIN?="$(BUILD_DIR)/bin/Blender.app/Contents/MacOS/Blender"
-	BLENDER_BIN_DIR?="$(BUILD_DIR)/bin/Blender.app/Contents/MacOS/Blender"
+	BLENDER_BIN?="$(BUILD_DIR)/bin/Bforartists.app/Contents/MacOS/Bforartists"
+	BLENDER_BIN_DIR?="$(BUILD_DIR)/bin/Bforartists.app/Contents/MacOS/Bforartists"
 else
-	BLENDER_BIN?="$(BUILD_DIR)/bin/blender"
+	BLENDER_BIN?="$(BUILD_DIR)/bin/bforartists"
 	BLENDER_BIN_DIR?="$(BUILD_DIR)/bin"
 endif
 
@@ -361,7 +361,7 @@ endif
 # Build Blender
 all: .FORCE
 	@echo
-	@echo Configuring Blender in \"$(BUILD_DIR)\" ...
+	@echo Configuring Bforartists in \"$(BUILD_DIR)\" ...
 
 #	# if test ! -f $(BUILD_DIR)/CMakeCache.txt ; then \
 #	# 	$(CMAKE_CONFIG); \
@@ -371,14 +371,14 @@ all: .FORCE
 	@$(CMAKE_CONFIG)
 
 	@echo
-	@echo Building Blender ...
+	@echo Building Bforartists ...
 	$(BUILD_COMMAND) -C "$(BUILD_DIR)" -j $(NPROCS) install
 	@echo
 	@echo Edit build configuration with: \"$(BUILD_DIR)/CMakeCache.txt\" run make again to rebuild.
 	@if test -z "$(BLENDER_IS_PYTHON_MODULE)"; then \
-		echo Blender successfully built, run from: $(BLENDER_BIN); \
+		echo Bforartists successfully built, run from: $(BLENDER_BIN); \
 	else \
-		echo Blender successfully built as a Python module, \"bpy\" can be imported from: $(BLENDER_BIN_DIR); \
+		echo Bforartists successfully built as a Python module, \"bpy\" can be imported from: $(BLENDER_BIN_DIR); \
 	fi
 	@echo
 

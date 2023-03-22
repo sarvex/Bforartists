@@ -298,7 +298,7 @@ static void rna_def_curves_curve(BlenderRNA *brna)
   PropertyRNA *prop;
 
   srna = RNA_def_struct(brna, "CurveSlice", NULL);
-  RNA_def_struct_ui_text(srna, "Curve Slice", "A single curve from a curves data-block");
+  RNA_def_struct_ui_text(srna, "Curve Slice", "A single curve from a curves data");
   RNA_def_struct_path_func(srna, "rna_CurveSlice_path");
 
   prop = RNA_def_property(srna, "points", PROP_COLLECTION, PROP_NONE);
@@ -337,15 +337,15 @@ static void rna_def_curves(BlenderRNA *brna)
   PropertyRNA *prop;
 
   srna = RNA_def_struct(brna, "Curves", "ID");
-  RNA_def_struct_ui_text(srna, "Hair Curves", "Hair data-block for hair curves");
-  RNA_def_struct_ui_icon(srna, ICON_CURVES_DATA);
+  RNA_def_struct_ui_text(srna, "Hair Curves", "Hair data for hair curves");
+  RNA_def_struct_ui_icon(srna, ICON_HAIR_DATA);
 
   /* Point and Curve RNA API helpers. */
 
   prop = RNA_def_property(srna, "curves", PROP_COLLECTION, PROP_NONE);
   RNA_def_property_collection_sdna(prop, NULL, "geometry.curve_offsets", "geometry.curve_num");
   RNA_def_property_struct_type(prop, "CurveSlice");
-  RNA_def_property_ui_text(prop, "Curves", "All curves in the data-block");
+  RNA_def_property_ui_text(prop, "Curves", "All curves in the data");
 
   prop = RNA_def_property(srna, "points", PROP_COLLECTION, PROP_NONE);
   RNA_def_property_struct_type(prop, "CurvePoint");

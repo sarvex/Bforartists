@@ -23,6 +23,13 @@ extern "C" {
 /** Blender release cycle stage: alpha/beta/rc/release. */
 #define BLENDER_VERSION_CYCLE alpha
 
+/* Bforartists major and minor version. */
+#define BFORARTISTS_VERSION 34
+/* Bforartists patch version for bugfix releases. */
+#define BFORARTISTS_VERSION_PATCH 1
+/** Bforartists release cycle stage: alpha/beta/rc/release. */
+#define BFORARTISTS_VERSION_CYCLE release
+
 /* Blender file format version. */
 #define BLENDER_FILE_VERSION BLENDER_VERSION
 #define BLENDER_FILE_SUBVERSION 4
@@ -35,6 +42,8 @@ extern "C" {
 
 /** User readable version string. */
 const char *BKE_blender_version_string(void);
+/** bfa - User readable version string. */
+const char *BKE_bforartists_version_string(void);
 
 /* Returns true when version cycle is alpha, otherwise (beta, rc) returns false. */
 bool BKE_blender_version_is_alpha(void);

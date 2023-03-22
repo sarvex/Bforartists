@@ -1870,8 +1870,8 @@ void WM_main_playanim(int argc, const char **argv)
 
     AUD_initOnce();
 
-    if (!(audio_device = AUD_init(NULL, specs, 1024, "Blender"))) {
-      audio_device = AUD_init("None", specs, 0, "Blender");
+    if (!(audio_device = AUD_init(NULL, specs, 1024, "Bforartists"))) {
+      audio_device = AUD_init("None", specs, 0, "Bforartists");
     }
   }
 #endif

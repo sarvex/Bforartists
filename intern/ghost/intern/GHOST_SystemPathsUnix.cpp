@@ -38,7 +38,7 @@ const char *GHOST_SystemPathsUnix::getSystemDir(int /*version*/, const char *ver
 {
   /* no prefix assumes a portable build which only uses bundled scripts */
   if (static_path) {
-    static string system_path = string(static_path) + "/blender/" + versionstr;
+    static string system_path = string(static_path) + "/bforartists/" + versionstr;
     return system_path.c_str();
   }
 
@@ -59,7 +59,7 @@ const char *GHOST_SystemPathsUnix::getUserDir(int version, const char *versionst
       last_version = version;
 
       if (home) {
-        user_path = string(home) + "/.blender/" + versionstr;
+        user_path = string(home) + "/.bforartists/" + versionstr;
       }
       else {
         return nullptr;
@@ -73,14 +73,14 @@ const char *GHOST_SystemPathsUnix::getUserDir(int version, const char *versionst
     last_version = version;
 
     if (home) {
-      user_path = string(home) + "/blender/" + versionstr;
+      user_path = string(home) + "/bforartists/" + versionstr;
     }
     else {
       home = getenv("HOME");
       if (home == nullptr) {
         home = getpwuid(getuid())->pw_dir;
       }
-      user_path = string(home) + "/.config/blender/" + versionstr;
+      user_path = string(home) + "/.config/bforartists/" + versionstr;
     }
   }
 

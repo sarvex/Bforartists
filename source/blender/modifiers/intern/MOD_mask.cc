@@ -771,7 +771,7 @@ static bool isDisabled(const struct Scene * /*scene*/, ModifierData *md, bool /*
 
 static void panel_draw(const bContext * /*C*/, Panel *panel)
 {
-  uiLayout *sub, *row;
+  uiLayout *sub, *row, *col; /*bfa, added *col*/
   uiLayout *layout = panel->layout;
 
   PointerRNA ob_ptr;
@@ -792,7 +792,17 @@ static void panel_draw(const bContext * /*C*/, Panel *panel)
   }
   else if (mode == MOD_MASK_MODE_VGROUP) {
     modifier_vgroup_ui(layout, ptr, &ob_ptr, "vertex_group", "invert_vertex_group", nullptr);
-    uiItemR(layout, ptr, "use_smooth", 0, nullptr, ICON_NONE);
+
+    /*------------------- bfa - original props */
+    // uiItemR(layout, ptr, "use_smooth", 0, nullptr, ICON_NONE);
+
+    col = uiLayoutColumn(layout, true);
+    row = uiLayoutRow(col, true);
+    uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+    uiItemR(row, ptr, "use_smooth", 0, nullptr, ICON_NONE);
+    uiItemDecoratorR(row, ptr, "use_smooth", 0); /*bfa - decorator*/
+
+    /* ------------ end bfa */
   }
 
   uiItemR(layout, ptr, "threshold", 0, nullptr, ICON_NONE);

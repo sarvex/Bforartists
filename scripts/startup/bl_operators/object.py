@@ -206,7 +206,7 @@ class SelectHierarchy(Operator):
 
 
 class SubdivisionSet(Operator):
-    """Sets a Subdivision Surface level (1 to 5)"""
+    """Subdivision Set\nSets a Subdivision Surface Level (1 to 5)"""
 
     bl_idname = "object.subdivision_set"
     bl_label = "Subdivision Set"
@@ -650,7 +650,7 @@ class MakeDupliFace(Operator):
 
 
 class IsolateTypeRender(Operator):
-    """Hide unselected render objects of same type as active """ \
+    """Render just the selected Item, disables rendering for all others\nHave a look in the outliner """ \
         """by setting the hide render flag"""
     bl_idname = "object.isolate_type_render"
     bl_label = "Restrict Render Unselected"
@@ -671,7 +671,7 @@ class IsolateTypeRender(Operator):
 
 
 class ClearAllRestrictRender(Operator):
-    """Reveal all render objects by setting the hide render flag"""
+    """Render all Objects in the scene\nHave a look in the outliner"""
     bl_idname = "object.hide_render_clear_all"
     bl_label = "Clear All Restrict Render"
     bl_options = {'REGISTER', 'UNDO'}
@@ -705,6 +705,16 @@ class TransformsToDeltas(Operator):
         description=("Clear transform values after transferring to deltas"),
         default=True,
     )
+
+    # bfa - description for the delta transforms
+    arg: bpy.props.StringProperty()
+
+    @classmethod
+    def description(cls, context, properties):
+        #return "arg is: " + properties.arg
+        return properties.arg
+
+    # bfa - description end
 
     @classmethod
     def poll(cls, context):

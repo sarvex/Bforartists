@@ -126,7 +126,7 @@ void GPENCIL_OT_annotation_add(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Annotation Add New";
   ot->idname = "GPENCIL_OT_annotation_add";
-  ot->description = "Add new Annotation data-block";
+  ot->description = "Add new Annotation data";
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
   /* callbacks */
@@ -176,9 +176,10 @@ static int gpencil_data_unlink_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_data_unlink(wmOperatorType *ot)
 {
   /* identifiers */
-  ot->name = "Annotation Unlink";
+/*bfa -  we call remove remove*/
+  ot->name = "Remove Annotation";
   ot->idname = "GPENCIL_OT_data_unlink";
-  ot->description = "Unlink active Annotation data-block";
+  ot->description = "Remove the active Annotation";
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
   /* callbacks */
@@ -265,7 +266,7 @@ void GPENCIL_OT_layer_add(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Add New Layer";
   ot->idname = "GPENCIL_OT_layer_add";
-  ot->description = "Add new layer or note for the active data-block";
+  ot->description = "Add new layer or note for the active data";
 
   /* callbacks */
   ot->exec = gpencil_layer_add_exec;
@@ -292,7 +293,7 @@ void GPENCIL_OT_layer_annotation_add(wmOperatorType *ot)
   /* identifiers */
   ot->name = "Add New Annotation Layer";
   ot->idname = "GPENCIL_OT_layer_annotation_add";
-  ot->description = "Add new Annotation layer or note for the active data-block";
+  ot->description = "Add new Annotation layer or note for the active data";
 
   ot->flag = OPTYPE_REGISTER | OPTYPE_UNDO;
 
@@ -1742,10 +1743,10 @@ static int gpencil_stroke_arrange_exec(bContext *C, wmOperator *op)
 void GPENCIL_OT_stroke_arrange(wmOperatorType *ot)
 {
   static const EnumPropertyItem slot_move[] = {
-      {GP_STROKE_MOVE_TOP, "TOP", 0, "Bring to Front", ""},
-      {GP_STROKE_MOVE_UP, "UP", 0, "Bring Forward", ""},
-      {GP_STROKE_MOVE_DOWN, "DOWN", 0, "Send Backward", ""},
-      {GP_STROKE_MOVE_BOTTOM, "BOTTOM", 0, "Send to Back", ""},
+      {GP_STROKE_MOVE_TOP, "TOP", ICON_MOVE_UP, "Bring to Front", ""},
+      {GP_STROKE_MOVE_UP, "UP", ICON_MOVE_DOWN, "Bring Forward", ""},
+      {GP_STROKE_MOVE_DOWN, "DOWN", ICON_MOVE_TO_TOP, "Send Backward", ""},
+      {GP_STROKE_MOVE_BOTTOM, "BOTTOM", ICON_MOVE_TO_BOTTOM, "Send to Back", ""},
       {0, NULL, 0, NULL, NULL}};
 
   /* identifiers */

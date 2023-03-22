@@ -10,14 +10,14 @@
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
   if(NOT DEFINED WITH_IN_SOURCE_BUILD)
     message(FATAL_ERROR
-      "CMake generation for blender is not allowed within the source directory!"
+      "CMake generation for Bforartists is not allowed within the source directory!"
       "\n Remove \"${CMAKE_SOURCE_DIR}/CMakeCache.txt\" and try again from another folder, e.g.:"
       "\n "
       "\n rm -rf CMakeCache.txt CMakeFiles"
       "\n cd .."
       "\n mkdir cmake-make"
       "\n cd cmake-make"
-      "\n cmake ../blender"
+      "\n cmake ../Bforartists"
       "\n "
       "\n Alternately define WITH_IN_SOURCE_BUILD to force this option (not recommended!)"
     )
@@ -104,7 +104,7 @@ include(build_files/cmake/macros.cmake)
 
 blender_project_hack_pre()
 
-project(Blender)
+project(Bforartists)
 
 blender_project_hack_post()
 
@@ -164,7 +164,7 @@ get_blender_version()
 # Declare Options
 
 # Blender internal features
-option(WITH_BLENDER "Build blender (disable to build only the blender player)" ON)
+option(WITH_BLENDER "Build bforartists (disable to build only the blender player)" ON)
 mark_as_advanced(WITH_BLENDER)
 
 if(WIN32)
@@ -259,7 +259,7 @@ option(WITH_HARU          "Enable features relying on Libharu (Grease pencil PDF
 option(WITH_GHOST_DEBUG   "Enable debugging output for the GHOST library" OFF)
 mark_as_advanced(WITH_GHOST_DEBUG)
 
-option(WITH_GHOST_SDL    "Enable building Blender against SDL for windowing rather than the native APIs" OFF)
+option(WITH_GHOST_SDL    "Enable building Bforartists against SDL for windowing rather than the native APIs" OFF)
 mark_as_advanced(WITH_GHOST_SDL)
 
 if(UNIX AND NOT (APPLE OR HAIKU))
@@ -297,7 +297,7 @@ mark_as_advanced(WITH_HEADLESS)
 
 option(WITH_QUADRIFLOW    "Build with quadriflow remesher support" ON)
 
-option(WITH_AUDASPACE    "Build with blenders audio library (only disable if you know what you're doing!)" ON)
+option(WITH_AUDASPACE    "Build with Bforartists audio library (only disable if you know what you're doing!)" ON)
 option(WITH_SYSTEM_AUDASPACE "Build with external audaspace library installed on the system (only enable if you know what you're doing!)" OFF)
 mark_as_advanced(WITH_AUDASPACE)
 mark_as_advanced(WITH_SYSTEM_AUDASPACE)
@@ -340,7 +340,7 @@ option(WITH_IMAGE_HDR           "Enable HDR Image Support" ON)
 option(WITH_IMAGE_WEBP          "Enable WebP Image Support" ON)
 
 # Audio/Video format support
-option(WITH_CODEC_AVI           "Enable Blenders own AVI file support (raw/jpeg)" ON)
+option(WITH_CODEC_AVI           "Enable Bforartists own AVI file support (raw/jpeg)" ON)
 option(WITH_CODEC_FFMPEG        "Enable FFMPeg Support (http://ffmpeg.org)" ON)
 option(WITH_CODEC_SNDFILE       "Enable libsndfile Support (http://www.mega-nerd.com/libsndfile)" ON)
 
@@ -446,7 +446,7 @@ if(UNIX AND NOT APPLE)
   option(WITH_INSTALL_PORTABLE "Install redistributable runtime, otherwise install into CMAKE_INSTALL_PREFIX" ON)
 endif()
 
-option(WITH_PYTHON_INSTALL       "Copy system python into the blender install folder" ON)
+option(WITH_PYTHON_INSTALL       "Copy system python into the bforartists install folder" ON)
 
 if((WITH_AUDASPACE AND NOT WITH_SYSTEM_AUDASPACE) OR WITH_MOD_FLUID)
   option(WITH_PYTHON_NUMPY "Include NumPy in Blender (used by Audaspace and Mantaflow)"  ON)
@@ -461,10 +461,10 @@ elseif(WITH_PYTHON_INSTALL OR WITH_PYTHON_NUMPY)
   mark_as_advanced(PYTHON_NUMPY_INCLUDE_DIRS)
 endif()
 if(WITH_PYTHON_INSTALL)
-  option(WITH_PYTHON_INSTALL_NUMPY "Copy system NumPy into the blender install folder"  ON)
+  option(WITH_PYTHON_INSTALL_NUMPY "Copy system NumPy into the bforartists install folder"  ON)
 
   if(UNIX AND NOT APPLE)
-    option(WITH_PYTHON_INSTALL_REQUESTS "Copy system requests into the blender install folder" ON)
+    option(WITH_PYTHON_INSTALL_REQUESTS "Copy system requests into the bforartists install folder" ON)
     set(PYTHON_REQUESTS_PATH "" CACHE PATH "Path to python site-packages or dist-packages containing 'requests' module")
     mark_as_advanced(PYTHON_REQUESTS_PATH)
   endif()
@@ -1841,7 +1841,7 @@ include(build_files/cmake/packaging.cmake)
 # Use Dynamic Loading for OpenMP
 
 if(WITH_BLENDER)
-  openmp_delayload(blender)
+  openmp_delayload(bforartists)
 endif()
 
 
@@ -1850,7 +1850,7 @@ endif()
 
 if(FIRST_RUN)
 
-  set(_config_msg "\nBlender Configuration\n=====================")
+  set(_config_msg "\nBforartists Configuration\n=====================")
 
   function(info_cfg_option
     _setting

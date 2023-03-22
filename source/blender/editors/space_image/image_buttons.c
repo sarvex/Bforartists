@@ -864,7 +864,9 @@ void uiTemplateImage(uiLayout *layout,
     uiItemR(sub, &imaptr, "generated_width", 0, "X", ICON_NONE);
     uiItemR(sub, &imaptr, "generated_height", 0, "Y", ICON_NONE);
 
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, &imaptr, "use_generated_float", 0, NULL, ICON_NONE);
+    uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
 
     uiItemS(col);
 
@@ -899,11 +901,15 @@ void uiTemplateImage(uiLayout *layout,
     uiItemR(sub, userptr, "frame_start", 0, IFACE_("Start"), ICON_NONE);
     uiItemR(sub, userptr, "frame_offset", 0, NULL, ICON_NONE);
 
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, userptr, "use_cyclic", 0, NULL, ICON_NONE);
     uiItemR(col, userptr, "use_auto_refresh", 0, NULL, ICON_NONE);
+    uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
 
     if (ima->source == IMA_SRC_MOVIE && compact == 0) {
+      uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
       uiItemR(col, &imaptr, "use_deinterlace", 0, IFACE_("Deinterlace"), ICON_NONE);
+      uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
     }
   }
 
@@ -945,14 +951,17 @@ void uiTemplateImage(uiLayout *layout,
           ImBuf *ibuf = BKE_image_acquire_ibuf(ima, iuser, &lock);
 
           if (ibuf && ibuf->rect_float && (ibuf->flags & IB_halffloat) == 0) {
+            uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
             uiItemR(col, &imaptr, "use_half_precision", 0, NULL, ICON_NONE);
+            uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
           }
           BKE_image_release_ibuf(ima, ibuf, lock);
         }
       }
-
+      uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
       uiItemR(col, &imaptr, "use_view_as_render", 0, NULL, ICON_NONE);
       uiItemR(col, &imaptr, "seam_margin", 0, NULL, ICON_NONE);
+      uiLayoutSetPropSep(col, true); /* bfa - use_property_split = True */
     }
   }
 
@@ -1011,24 +1020,31 @@ void uiTemplateImageSettings(uiLayout *layout, PointerRNA *imfptr, bool color_ma
   }
 
   if (BKE_imtype_supports_zbuf(imf->imtype)) {
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, imfptr, "use_zbuffer", 0, NULL, ICON_NONE);
   }
 
   if (is_render_out && ELEM(imf->imtype, R_IMF_IMTYPE_OPENEXR, R_IMF_IMTYPE_MULTILAYER)) {
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, imfptr, "use_preview", 0, NULL, ICON_NONE);
+    uiLayoutSetPropSep(col, true); /* bfa - use_property_split = False */
   }
 
   if (imf->imtype == R_IMF_IMTYPE_JP2) {
     uiItemR(col, imfptr, "jpeg2k_codec", 0, NULL, ICON_NONE);
 
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, imfptr, "use_jpeg2k_cinema_preset", 0, NULL, ICON_NONE);
     uiItemR(col, imfptr, "use_jpeg2k_cinema_48", 0, NULL, ICON_NONE);
 
     uiItemR(col, imfptr, "use_jpeg2k_ycc", 0, NULL, ICON_NONE);
+    uiLayoutSetPropSep(col, true); /* bfa - use_property_split = False */
   }
 
   if (imf->imtype == R_IMF_IMTYPE_DPX) {
+    uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
     uiItemR(col, imfptr, "use_cineon_log", 0, NULL, ICON_NONE);
+    uiLayoutSetPropSep(col, true); /* bfa - use_property_split = False */
   }
 
   if (imf->imtype == R_IMF_IMTYPE_CINEON) {

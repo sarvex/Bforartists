@@ -31,21 +31,25 @@
 #include "WM_types.h"
 
 const EnumPropertyItem rna_enum_object_shaderfx_type_items[] = {
-    {eShaderFxType_Blur, "FX_BLUR", ICON_SHADERFX, "Blur", "Apply Gaussian Blur to object"},
+    {eShaderFxType_Blur, "FX_BLUR", ICON_NODE_BLUR, "Blur", "Apply Gaussian Blur to object"},
     {eShaderFxType_Colorize,
      "FX_COLORIZE",
-     ICON_SHADERFX,
+     ICON_COLOR,
      "Colorize",
      "Apply different tint effects"},
-    {eShaderFxType_Flip, "FX_FLIP", ICON_SHADERFX, "Flip", "Flip image"},
-    {eShaderFxType_Glow, "FX_GLOW", ICON_SHADERFX, "Glow", "Create a glow effect"},
-    {eShaderFxType_Pixel, "FX_PIXEL", ICON_SHADERFX, "Pixelate", "Pixelate image"},
-    {eShaderFxType_Rim, "FX_RIM", ICON_SHADERFX, "Rim", "Add a rim to the image"},
-    {eShaderFxType_Shadow, "FX_SHADOW", ICON_SHADERFX, "Shadow", "Create a shadow effect"},
-    {eShaderFxType_Swirl, "FX_SWIRL", ICON_SHADERFX, "Swirl", "Create a rotation distortion"},
+    {eShaderFxType_Flip, "FX_FLIP", ICON_FLIP, "Flip", "Flip image"},
+    {eShaderFxType_Glow, "FX_GLOW", ICON_LIGHT, "Glow", "Create a glow effect"},
+    {eShaderFxType_Pixel, "FX_PIXEL", ICON_NODE_PIXELATED, "Pixelate", "Pixelate image"},
+    {eShaderFxType_Rim, "FX_RIM", ICON_RIMLIGHT, "Rim", "Add a rim to the image"},
+    {eShaderFxType_Shadow,
+     "FX_SHADOW",
+     ICON_NODE_AMBIENT_OCCLUSION,
+     "Shadow",
+     "Create a shadow effect"},
+    {eShaderFxType_Swirl, "FX_SWIRL", ICON_SWIRL, "Swirl", "Create a rotation distortion"},
     {eShaderFxType_Wave,
      "FX_WAVE",
-     ICON_SHADERFX,
+     ICON_MOD_WAVE,
      "Wave Distortion",
      "Apply sinusoidal deformation"},
     {0, NULL, 0, NULL, NULL},
@@ -200,7 +204,7 @@ static void rna_def_shader_fx_blur(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxBlur", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Gaussian Blur Effect", "Gaussian Blur effect");
   RNA_def_struct_sdna(srna, "BlurShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_NODE_BLUR);
 
   RNA_define_lib_overridable(true);
 
@@ -240,7 +244,7 @@ static void rna_def_shader_fx_colorize(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxColorize", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Colorize Effect", "Colorize effect");
   RNA_def_struct_sdna(srna, "ColorizeShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_COLOR);
 
   RNA_define_lib_overridable(true);
 
@@ -286,7 +290,7 @@ static void rna_def_shader_fx_wave(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxWave", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Wave Deformation Effect", "Wave Deformation effect");
   RNA_def_struct_sdna(srna, "WaveShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_MOD_WAVE);
 
   RNA_define_lib_overridable(true);
 
@@ -325,7 +329,7 @@ static void rna_def_shader_fx_pixel(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxPixel", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Pixelate Effect", "Pixelate effect");
   RNA_def_struct_sdna(srna, "PixelShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_NODE_PIXELATED);
 
   RNA_define_lib_overridable(true);
 
@@ -352,7 +356,7 @@ static void rna_def_shader_fx_rim(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxRim", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Rim Effect", "Rim effect");
   RNA_def_struct_sdna(srna, "RimShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_RIMLIGHT);
 
   RNA_define_lib_overridable(true);
 
@@ -413,7 +417,7 @@ static void rna_def_shader_fx_shadow(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxShadow", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Shadow Effect", "Shadow effect");
   RNA_def_struct_sdna(srna, "ShadowShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_NODE_AMBIENT_OCCLUSION);
 
   RNA_define_lib_overridable(true);
 
@@ -509,7 +513,7 @@ static void rna_def_shader_fx_glow(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxGlow", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Glow Effect", "Glow effect");
   RNA_def_struct_sdna(srna, "GlowShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_LIGHT);
 
   RNA_define_lib_overridable(true);
 
@@ -591,7 +595,7 @@ static void rna_def_shader_fx_swirl(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxSwirl", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Swirl Effect", "Swirl effect");
   RNA_def_struct_sdna(srna, "SwirlShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_SWIRL);
 
   RNA_define_lib_overridable(true);
 
@@ -630,7 +634,7 @@ static void rna_def_shader_fx_flip(BlenderRNA *brna)
   srna = RNA_def_struct(brna, "ShaderFxFlip", "ShaderFx");
   RNA_def_struct_ui_text(srna, "Flip Effect", "Flip effect");
   RNA_def_struct_sdna(srna, "FlipShaderFxData");
-  RNA_def_struct_ui_icon(srna, ICON_SHADERFX);
+  RNA_def_struct_ui_icon(srna, ICON_FLIP);
 
   RNA_define_lib_overridable(true);
 

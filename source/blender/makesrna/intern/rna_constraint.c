@@ -133,7 +133,7 @@ const EnumPropertyItem rna_enum_constraint_type_items[] = {
     RNA_ENUM_ITEM_HEADING(N_("Relationship"), NULL),
     {CONSTRAINT_TYPE_ACTION,
      "ACTION",
-     ICON_ACTION,
+     ICON_CON_ACTION,
      "Action",
      "Use transform property of target to look up pose for owner from an Action"},
     {CONSTRAINT_TYPE_ARMATURE,

@@ -56,23 +56,24 @@ static void wm_block_close(bContext *C, void *arg_block, void *UNUSED(arg))
   UI_popup_block_close(C, win, arg_block);
 }
 
-static void wm_block_splash_add_label(uiBlock *block, const char *label, int x, int y)
-{
-  if (!(label && label[0])) {
-    return;
-  }
+/* Not used by BFA */
+// static void wm_block_splash_add_label(uiBlock *block, const char *label, int x, int y)
+// {
+//   if (!(label && label[0])) {
+//     return;
+//   }
 
-  UI_block_emboss_set(block, UI_EMBOSS_NONE);
+//   UI_block_emboss_set(block, UI_EMBOSS_NONE);
 
-  uiBut *but = uiDefBut(
-      block, UI_BTYPE_LABEL, 0, label, 0, y, x, UI_UNIT_Y, NULL, 0, 0, 0, 0, NULL);
-  UI_but_drawflag_disable(but, UI_BUT_TEXT_LEFT);
-  UI_but_drawflag_enable(but, UI_BUT_TEXT_RIGHT);
+//   uiBut *but = uiDefBut(
+//       block, UI_BTYPE_LABEL, 0, label, 0, y, x, UI_UNIT_Y, NULL, 0, 0, 0, 0, NULL);
+//   UI_but_drawflag_disable(but, UI_BUT_TEXT_LEFT);
+//   UI_but_drawflag_enable(but, UI_BUT_TEXT_RIGHT);
 
-  /* 1 = UI_SELECT, internal flag to draw in white. */
-  UI_but_flag_enable(but, 1);
-  UI_block_emboss_set(block, UI_EMBOSS);
-}
+//   /* 1 = UI_SELECT, internal flag to draw in white. */
+//   UI_but_flag_enable(but, 1);
+//   UI_block_emboss_set(block, UI_EMBOSS);
+// }
 
 #ifndef WITH_HEADLESS
 static void wm_block_splash_image_roundcorners_add(ImBuf *ibuf)
@@ -197,10 +198,11 @@ static uiBlock *wm_block_create_splash(bContext *C, ARegion *region, void *UNUSE
 
   UI_but_func_set(but, wm_block_close, block, NULL);
 
-  wm_block_splash_add_label(block,
+  /*bfa -  We don't need Blender hashes or Blender version numbers in Bforartists*/
+  /*    wm_block_splash_add_label(block,
                             BKE_blender_version_string(),
                             splash_width - 8.0 * UI_SCALE_FAC,
-                            splash_height - 13.0 * UI_SCALE_FAC);
+                            splash_height - 13.0 * UI_SCALE_FAC);;*/
 
   const int layout_margin_x = UI_SCALE_FAC * 26;
   uiLayout *layout = UI_block_layout(block,

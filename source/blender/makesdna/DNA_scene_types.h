@@ -2707,6 +2707,8 @@ enum {
   SCE_EEVEE_DOF_HQ_SLIGHT_FOCUS = (1 << 22),
   SCE_EEVEE_DOF_JITTER = (1 << 23),
   SCE_EEVEE_SHADOW_ENABLED = (1 << 24),
+  // bfa - volumetric blending patch from lordloki
+  SCE_EEVEE_VOLUMETRIC_BLENDING = (1 << 25),
 };
 
 /** #SceneEEVEE.shadow_method */

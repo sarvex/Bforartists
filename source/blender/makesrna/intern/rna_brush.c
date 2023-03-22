@@ -1151,13 +1151,16 @@ static void rna_def_brush_texture_slot(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "BrushTextureSlot", "TextureSlot");
   RNA_def_struct_sdna(srna, "MTex");
-  RNA_def_struct_ui_text(
-      srna, "Brush Texture Slot", "Texture slot for textures in a Brush data-block");
+  RNA_def_struct_ui_text(srna, "Brush Texture Slot", "Texture slot for textures in a Brush data");
 
   prop = RNA_def_property(srna, "angle", PROP_FLOAT, PROP_ANGLE);
   RNA_def_property_float_sdna(prop, NULL, "rot");
   RNA_def_property_range(prop, 0, M_PI * 2);
-  RNA_def_property_ui_text(prop, "Angle", "Brush texture rotation");
+  RNA_def_property_ui_text(
+      prop,
+      "Angle",
+      "Brush texture rotation\nTexture angle Hotkey in the default keymap: C\nTexture Mask "
+      "angle Hotkey in the default keymap: V");
   RNA_def_property_flag(prop, PROP_CONTEXT_UPDATE);
   RNA_def_property_update(prop, 0, "rna_TextureSlot_brush_angle_update");
 
@@ -1369,8 +1372,10 @@ static void rna_def_gpencil_options(BlenderRNA *brna)
   RNA_def_property_float_sdna(prop, NULL, "draw_strength");
   RNA_def_property_range(prop, 0.0f, 1.0f);
   RNA_def_property_ui_range(prop, 0.0f, 1.0f, 0.001, 3);
-  RNA_def_property_ui_text(
-      prop, "Strength", "Color strength for new strokes (affect alpha factor of color)");
+  RNA_def_property_ui_text(prop,
+                           "Strength",
+                           "Color strength for new strokes (affect alpha factor of color)\nHotkey "
+                           "in the default keymap: C");
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
   RNA_def_property_update(prop, NC_GPENCIL | ND_DATA, NULL);
 
@@ -1887,7 +1892,7 @@ static void rna_def_gpencil_options(BlenderRNA *brna)
   prop = RNA_def_property(srna, "use_settings_outline", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "flag", GP_BRUSH_OUTLINE_STROKE);
   RNA_def_property_boolean_default(prop, false);
-  RNA_def_property_ui_text(prop, "Outline", "Convert stroke to perimeter");
+  RNA_def_property_ui_text(prop, "Outline", "Requires a active camera in the scene\nConvert stroke to perimeter");
   RNA_def_property_clear_flag(prop, PROP_ANIMATABLE);
 
   prop = RNA_def_property(srna, "direction", PROP_ENUM, PROP_NONE);
@@ -2456,7 +2461,7 @@ static void rna_def_brush(BlenderRNA *brna)
 
   srna = RNA_def_struct(brna, "Brush", "ID");
   RNA_def_struct_ui_text(
-      srna, "Brush", "Brush data-block for storing brush settings for painting and sculpting");
+      srna, "Brush", "Brush data for storing brush settings for painting and sculpting");
   RNA_def_struct_ui_icon(srna, ICON_BRUSH_DATA);
 
   /* enums */
@@ -2650,7 +2655,8 @@ static void rna_def_brush(BlenderRNA *brna)
   RNA_def_property_int_funcs(prop, NULL, "rna_Brush_set_size", NULL);
   RNA_def_property_range(prop, 1, MAX_BRUSH_PIXEL_RADIUS * 10);
   RNA_def_property_ui_range(prop, 1, MAX_BRUSH_PIXEL_RADIUS, 1, -1);
-  RNA_def_property_ui_text(prop, "Radius", "Radius of the brush in pixels");
+  RNA_def_property_ui_text(
+      prop, "Radius", "Radius of the brush in pixels\nHotkey in the default keymap: X");
   RNA_def_property_update(prop, 0, "rna_Brush_size_update");
 
   prop = RNA_def_property(srna, "unprojected_radius", PROP_FLOAT, PROP_DISTANCE);
@@ -2732,8 +2738,10 @@ static void rna_def_brush(BlenderRNA *brna)
   RNA_def_property_float_sdna(prop, NULL, "alpha");
   RNA_def_property_range(prop, 0.0f, 10.0f);
   RNA_def_property_ui_range(prop, 0.0f, 1.0f, 0.001, 3);
-  RNA_def_property_ui_text(
-      prop, "Strength", "How powerful the effect of the brush is when applied");
+  RNA_def_property_ui_text(prop,
+                           "Strength",
+                           "How powerful the effect of the brush is when applied\nHotkey in the "
+                           "default keymap: C");
   RNA_def_property_update(prop, 0, "rna_Brush_update");
 
   prop = RNA_def_property(srna, "flow", PROP_FLOAT, PROP_FACTOR);
@@ -3430,7 +3438,9 @@ static void rna_def_brush(BlenderRNA *brna)
   prop = RNA_def_property(srna, "use_frontface", PROP_BOOLEAN, PROP_NONE);
   RNA_def_property_boolean_sdna(prop, NULL, "flag", BRUSH_FRONTFACE);
   RNA_def_property_ui_text(
-      prop, "Use Front-Face", "Brush only affects vertices that face the viewer");
+      prop,
+      "Use Front-Face",
+      "Brush only affects vertices that face the viewer. Projected falloff only");
   RNA_def_property_update(prop, 0, "rna_Brush_update");
 
   prop = RNA_def_property(srna, "use_frontface_falloff", PROP_BOOLEAN, PROP_NONE);

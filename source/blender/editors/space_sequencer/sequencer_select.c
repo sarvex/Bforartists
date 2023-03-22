@@ -40,11 +40,15 @@
 #include "ED_screen.h"
 #include "ED_select_utils.h"
 #include "ED_sequencer.h"
+#include "UI_interface.h" /*bfa - needed for the icons*/
+#include "UI_resources.h" /*bfa - needed for the icons*/
 
 #include "UI_view2d.h"
 
 /* Own include. */
 #include "sequencer_intern.h"
+
+#include "BLI_string.h" /*bfa - needed for BLI_strdup */
 
 /* -------------------------------------------------------------------- */
 /** \name Selection Utilities
@@ -488,6 +492,26 @@ static int sequencer_de_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *sequencer_ot_select_all_get_description(bContext *UNUSED(C),
+                                                     wmOperatorType *UNUSED(ot),
+                                                     PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all strips");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all strips");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void SEQUENCER_OT_select_all(struct wmOperatorType *ot)
 {
   /* Identifiers. */
@@ -497,6 +521,7 @@ void SEQUENCER_OT_select_all(struct wmOperatorType *ot)
 
   /* Api callbacks. */
   ot->exec = sequencer_de_select_all_exec;
+  ot->get_description = sequencer_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = sequencer_edit_poll;
 
   /* Flags. */
@@ -1475,9 +1500,13 @@ static int sequencer_select_side_of_frame_exec(bContext *C, wmOperator *op)
 void SEQUENCER_OT_select_side_of_frame(wmOperatorType *ot)
 {
   static const EnumPropertyItem sequencer_select_left_right_types[] = {
-      {-1, "LEFT", 0, "Left", "Select to the left of the current frame"},
-      {1, "RIGHT", 0, "Right", "Select to the right of the current frame"},
-      {2, "CURRENT", 0, "Current Frame", "Select intersecting with the current frame"},
+      {-1, "LEFT", ICON_RESTRICT_SELECT_OFF, "Left", "Select to the left of the current frame"},
+      {1, "RIGHT", ICON_RESTRICT_SELECT_OFF, "Right", "Select to the right of the current frame"},
+      {2,
+       "CURRENT",
+       ICON_RESTRICT_SELECT_OFF,
+       "Current Frame",
+       "Select intersecting with the current frame"},
       {0, NULL, 0, NULL, NULL},
   };
 
@@ -1794,27 +1823,26 @@ enum {
 };
 
 static const EnumPropertyItem sequencer_prop_select_grouped_types[] = {
-    {SEQ_SELECT_GROUP_TYPE, "TYPE", 0, "Type", "Shared strip type"},
+    {SEQ_SELECT_GROUP_TYPE, "TYPE", ICON_TYPE, "Type", "Shared strip type"},
     {SEQ_SELECT_GROUP_TYPE_BASIC,
      "TYPE_BASIC",
-     0,
+     ICON_TYPE,
      "Global Type",
      "All strips of same basic type (graphical or sound)"},
     {SEQ_SELECT_GROUP_TYPE_EFFECT,
      "TYPE_EFFECT",
-     0,
+     ICON_TYPE,
      "Effect Type",
      "Shared strip effect type (if active strip is not an effect one, select all non-effect "
      "strips)"},
-    {SEQ_SELECT_GROUP_DATA, "DATA", 0, "Data", "Shared data (scene, image, sound, etc.)"},
-    {SEQ_SELECT_GROUP_EFFECT, "EFFECT", 0, "Effect", "Shared effects"},
+    {SEQ_SELECT_GROUP_DATA, "DATA", ICON_TEXT, "Data", "Shared data (scene, image, sound, etc.)"},
+    {SEQ_SELECT_GROUP_EFFECT, "EFFECT", ICON_PHYSICS, "Effect", "Shared effects"},
     {SEQ_SELECT_GROUP_EFFECT_LINK,
      "EFFECT_LINK",
-     0,
+     ICON_LINKED,
      "Effect/Linked",
-     "Other strips affected by the active one (sharing some time, and below or "
-     "effect-assigned)"},
-    {SEQ_SELECT_GROUP_OVERLAP, "OVERLAP", 0, "Overlap", "Overlapping time"},
+     "Other strips affected by the active one (sharing some time, and below or effect-assigned)"},
+    {SEQ_SELECT_GROUP_OVERLAP, "OVERLAP", ICON_LAYER, "Overlap", "Overlapping time"},
     {0, NULL, 0, NULL, NULL},
 };
 

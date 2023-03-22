@@ -47,6 +47,9 @@
 
 #include "armature_intern.h"
 
+#include "UI_interface.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+#include "UI_resources.h" /*bfa - include UI stuff to get the icons in the grouped enum displayed*/
+
 /* utility macros for storing a temp int in the bone (selection flag) */
 #define PBONE_PREV_FLAG_GET(pchan) ((void)0, (POINTER_AS_INT((pchan)->temp)))
 #define PBONE_PREV_FLAG_SET(pchan, val) ((pchan)->temp = POINTER_FROM_INT(val))
@@ -615,6 +618,26 @@ static int pose_de_select_all_exec(bContext *C, wmOperator *op)
   return OPERATOR_FINISHED;
 }
 
+/*bfa - descriptions*/
+static char *pose_ot_select_all_get_description(bContext *UNUSED(C),
+                                                wmOperatorType *UNUSED(ot),
+                                                PointerRNA *ptr)
+{
+  /*Select*/
+  if (RNA_enum_get(ptr, "action") == SEL_SELECT) {
+    return BLI_strdup("Select all bones");
+  }
+  /*Deselect*/
+  else if (RNA_enum_get(ptr, "action") == SEL_DESELECT) {
+    return BLI_strdup("Deselect all bones");
+  }
+  /*Invert*/
+  else if (RNA_enum_get(ptr, "action") == SEL_INVERT) {
+    return BLI_strdup("Inverts the current selection");
+  }
+  return NULL;
+}
+
 void POSE_OT_select_all(wmOperatorType *ot)
 {
   /* identifiers */
@@ -624,6 +647,7 @@ void POSE_OT_select_all(wmOperatorType *ot)
 
   /* api callbacks */
   ot->exec = pose_de_select_all_exec;
+  ot->get_description = pose_ot_select_all_get_description; /*bfa - descriptions*/
   ot->poll = ED_operator_posemode;
 
   /* flags */
@@ -1169,12 +1193,13 @@ static int pose_select_grouped_exec(bContext *C, wmOperator *op)
 
 void POSE_OT_select_grouped(wmOperatorType *ot)
 {
+  /*bfa - added icons. see header, includes. UI_interface.h and UI_resources.h*/
   static const EnumPropertyItem prop_select_grouped_types[] = {
-      {POSE_SEL_SAME_LAYER, "LAYER", 0, "Layer", "Shared layers"},
-      {POSE_SEL_SAME_GROUP, "GROUP", 0, "Group", "Shared group"},
+      {POSE_SEL_SAME_LAYER, "LAYER", ICON_LAYER, "Layer", "Shared layers"},
+      {POSE_SEL_SAME_GROUP, "GROUP", ICON_GROUP, "Group", "Shared group"},
       {POSE_SEL_SAME_KEYINGSET,
        "KEYINGSET",
-       0,
+       ICON_KEYINGSET,
        "Keying Set",
        "All bones affected by active Keying Set"},
       {0, NULL, 0, NULL, NULL},

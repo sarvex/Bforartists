@@ -437,7 +437,7 @@ void CONSOLE_OT_insert(wmOperatorType *ot)
 
   /* properties */
   prop = RNA_def_string(
-      ot->srna, "text", NULL, 0, "Text", "Text to insert at the cursor position");
+      ot->srna, "text", NULL, 0, "Text", "Text\nText to insert at the cursor position");
   RNA_def_property_flag(prop, PROP_SKIP_SAVE);
 }
 
@@ -689,7 +689,7 @@ void CONSOLE_OT_delete(wmOperatorType *ot)
                console_delete_type_items,
                DEL_NEXT_CHAR,
                "Type",
-               "Which part of the text to delete");
+               "Type\nWhich part of the text to delete");
 }
 
 static int console_clear_line_exec(bContext *C, wmOperator *UNUSED(op))
@@ -954,7 +954,7 @@ void CONSOLE_OT_scrollback_append(wmOperatorType *ot)
   ot->poll = ED_operator_console_active;
 
   /* properties */
-  RNA_def_string(ot->srna, "text", NULL, 0, "Text", "Text to insert at the cursor position");
+  RNA_def_string(ot->srna, "text", NULL, 0, "Text", "Text\nText to insert at the cursor position");
   RNA_def_enum(ot->srna,
                "type",
                console_line_type_items,

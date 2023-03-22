@@ -337,6 +337,7 @@ static void panel_draw(const bContext *UNUSED(C), Panel *panel)
 static void edge_types_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *col, *row*/
   PointerRNA ob_ptr;
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
@@ -353,7 +354,9 @@ static void edge_types_panel_draw(const bContext *UNUSED(C), Panel *panel)
   uiLayoutSetActive(sub, has_light);
   uiItemR(sub, ptr, "shadow_region_filtering", 0, IFACE_("Illumination Filtering"), ICON_NONE);
 
-  uiLayout *col = uiLayoutColumn(layout, true);
+  /*bfa - original prop*/
+  //uiLayout *col = uiLayoutColumn(layout, true);
+  col = uiLayoutColumn(layout, true);
 
   sub = uiLayoutRowWithHeading(col, false, IFACE_("Create"));
   uiItemR(sub, ptr, "use_contour", 0, "", ICON_NONE);
@@ -381,11 +384,38 @@ static void edge_types_panel_draw(const bContext *UNUSED(C), Panel *panel)
             ICON_NONE);
   }
 
-  uiItemR(col, ptr, "use_intersection", 0, IFACE_("Intersections"), ICON_NONE);
-  uiItemR(col, ptr, "use_material", 0, IFACE_("Material Borders"), ICON_NONE);
-  uiItemR(col, ptr, "use_edge_mark", 0, IFACE_("Edge Marks"), ICON_NONE);
-  uiItemR(col, ptr, "use_loose", 0, IFACE_("Loose"), ICON_NONE);
+  /*------------------- bfa - original props */
+  //uiItemR(col, ptr, "use_intersection", 0, IFACE_("Intersections"), ICON_NONE);
+  //uiItemR(col, ptr, "use_material", 0, IFACE_("Material Borders"), ICON_NONE);
+  //uiItemR(col, ptr, "use_edge_mark", 0, IFACE_("Edge Marks"), ICON_NONE);
+  //uiItemR(col, ptr, "use_loose", 0, IFACE_("Loose"), ICON_NONE);
 
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemS(row);
+  uiItemR(row, ptr, "use_material", 0, IFACE_("Material Borders"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_material", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemS(row);
+  uiItemR(row, ptr, "use_intersection", 0, IFACE_("Intersections"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_intersection", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemS(row);
+  uiItemR(row, ptr, "use_edge_mark", 0, IFACE_("Edge Marks"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_edge_mark", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemS(row);
+  uiItemR(row, ptr, "use_loose", 0, IFACE_("Loose"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_loose", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
+
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
   entry = uiLayoutColumn(col, false);
   uiLayoutSetActive(entry, has_light);
 
@@ -399,19 +429,32 @@ static void edge_types_panel_draw(const bContext *UNUSED(C), Panel *panel)
           CTX_IFACE_(BLT_I18NCONTEXT_ID_GPENCIL, "Cast Shadow"),
           ICON_NONE);
 
-  uiItemL(layout, IFACE_("Options"), ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemL(layout, IFACE_("Options"), ICON_NONE);
+  col = uiLayoutColumn(layout, true);
+  uiItemL(col, TIP_("Options"), ICON_NONE);
+  /* ------------ end bfa */
 
   sub = uiLayoutColumn(layout, false);
   if (use_cache && !is_first) {
-    uiItemL(sub, IFACE_("Type overlapping cached"), ICON_INFO);
+    /*------------------- bfa - original props */
+    //uiItemL(sub, IFACE_("Type overlapping cached"), ICON_INFO);
+    row = uiLayoutRow(col, true);
+    uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+    uiItemS(row);
+    uiItemL(row, IFACE_("Type overlapping cached"), ICON_INFO);
+    /* ------------ end bfa */
   }
   else {
-    uiItemR(sub,
-            ptr,
-            "use_overlap_edge_type_support",
-            0,
-            IFACE_("Allow Overlapping Types"),
-            ICON_NONE);
+
+    /*------------------- bfa - original props */
+    //uiItemR(sub, ptr, "use_overlap_edge_type_support", 0, IFACE_("Allow Overlapping Types"), ICON_NONE);
+    row = uiLayoutRow(col, true);
+    uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+    uiItemS(row);
+    uiItemR(row, ptr, "use_overlap_edge_type_support", 0, IFACE_("Allow Overlapping Types"), ICON_NONE);
+    uiItemDecoratorR(row, ptr, "use_overlap_edge_type_support", 0); /*bfa - decorator*/
+    /* ------------ end bfa */
   }
 }
 
@@ -449,6 +492,7 @@ static void options_light_reference_draw(const bContext *UNUSED(C), Panel *panel
 static void options_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *row, *col*/
   PointerRNA ob_ptr;
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
@@ -464,26 +508,72 @@ static void options_panel_draw(const bContext *UNUSED(C), Panel *panel)
     return;
   }
 
-  uiLayout *row = uiLayoutRowWithHeading(layout, false, IFACE_("Custom Camera"));
-  uiItemR(row, ptr, "use_custom_camera", 0, "", 0);
+  /*------------------- bfa - original props */
+  // uiLayout *row = uiLayoutRowWithHeading(layout, false, IFACE_("Custom Camera"));
+  // uiItemR(row, ptr, "use_custom_camera", 0, "", 0);
+  // uiLayout *subrow = uiLayoutRow(row, true);
+  // uiLayoutSetActive(subrow, RNA_boolean_get(ptr, "use_custom_camera"));
+  // uiLayoutSetPropSep(subrow, true);
+  // uiItemR(subrow, ptr, "source_camera", 0, "", ICON_OBJECT_DATA);
+
+  row = uiLayoutRow(layout, false);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_custom_camera", 0, "Custom Camera", 0);
   uiLayout *subrow = uiLayoutRow(row, true);
   uiLayoutSetActive(subrow, RNA_boolean_get(ptr, "use_custom_camera"));
-  uiLayoutSetPropSep(subrow, true);
+  uiLayoutSetPropSep(subrow, false);
   uiItemR(subrow, ptr, "source_camera", 0, "", ICON_OBJECT_DATA);
+  uiItemDecoratorR(row, ptr, "use_custom_camera", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
-  uiLayout *col = uiLayoutColumn(layout, true);
+  /*------------------- bfa - original props */
+  // uiLayout *col = uiLayoutColumn(layout, true); /*bfa - original prop*/
 
-  uiItemR(col, ptr, "use_edge_overlap", 0, IFACE_("Overlapping Edges As Contour"), ICON_NONE);
-  uiItemR(col, ptr, "use_object_instances", 0, NULL, ICON_NONE);
-  uiItemR(col, ptr, "use_clip_plane_boundaries", 0, NULL, ICON_NONE);
-  uiItemR(col, ptr, "use_crease_on_smooth", 0, IFACE_("Crease On Smooth"), ICON_NONE);
-  uiItemR(col, ptr, "use_crease_on_sharp", 0, IFACE_("Crease On Sharp"), ICON_NONE);
-  uiItemR(col, ptr, "use_back_face_culling", 0, IFACE_("Force Backface Culling"), ICON_NONE);
+  // uiItemR(col, ptr, "use_edge_overlap", 0, IFACE_("Overlapping Edges As Contour"), ICON_NONE);
+  // uiItemR(col, ptr, "use_object_instances", 0, NULL, ICON_NONE);
+  // uiItemR(col, ptr, "use_clip_plane_boundaries", 0, NULL, ICON_NONE);
+  // uiItemR(col, ptr, "use_crease_on_smooth", 0, IFACE_("Crease On Smooth"), ICON_NONE);
+  // uiItemR(col, ptr, "use_crease_on_sharp", 0, IFACE_("Crease On Sharp"), ICON_NONE);
+  // uiItemR(col, ptr, "use_back_face_culling", 0, NULL, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_edge_overlap", 0, IFACE_("Overlapping Edges As Contour"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_edge_overlap", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_object_instances", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_object_instances", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_clip_plane_boundaries", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_clip_plane_boundaries", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_crease_on_smooth", 0, IFACE_("Crease On Smooth"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_crease_on_smooth", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_crease_on_sharp", 0, IFACE_("Crease On Sharp"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_crease_on_sharp", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_back_face_culling", 0, IFACE_("Force Backface Culling"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_back_face_culling", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void occlusion_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *row, *col*/
   PointerRNA ob_ptr;
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
@@ -502,10 +592,18 @@ static void occlusion_panel_draw(const bContext *UNUSED(C), Panel *panel)
   layout = uiLayoutColumn(layout, false);
   uiLayoutSetActive(layout, show_in_front);
 
-  uiItemR(layout, ptr, "use_multiple_levels", 0, IFACE_("Range"), ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_multiple_levels", 0, IFACE_("Range"), ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_multiple_levels", 0, IFACE_("Range"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_multiple_levels", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   if (use_multiple_levels) {
-    uiLayout *col = uiLayoutColumn(layout, true);
+    col = uiLayoutColumn(layout, true);
     uiItemR(col, ptr, "level_start", 0, NULL, ICON_NONE);
     uiItemR(col, ptr, "level_end", 0, IFACE_("End"), ICON_NONE);
   }
@@ -543,6 +641,7 @@ static void material_mask_panel_draw_header(const bContext *UNUSED(C), Panel *pa
 static void material_mask_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *sub, *row, *col; /*bfa, added *row, *col*/
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, NULL);
 
   const bool is_baked = RNA_boolean_get(ptr, "is_baked");
@@ -553,8 +652,12 @@ static void material_mask_panel_draw(const bContext *UNUSED(C), Panel *panel)
 
   uiLayoutSetEnabled(layout, RNA_boolean_get(ptr, "use_material_mask"));
 
-  uiLayout *col = uiLayoutColumn(layout, true);
-  uiLayout *sub = uiLayoutRowWithHeading(col, true, IFACE_("Masks"));
+  /*------------------- bfa - original props */
+  // uiLayout *col = uiLayoutColumn(layout, true); /*bfa original props*/
+  // uiLayout *sub = uiLayoutRowWithHeading(col, true, IFACE_("Masks"));/*bfa original props*/
+  col = uiLayoutColumn(layout, true);
+  sub = uiLayoutRowWithHeading(col, true, IFACE_("Masks"));
+  /* ------------ end bfa */
 
   PropertyRNA *prop = RNA_struct_find_property(ptr, "use_material_mask_bits");
   for (int i = 0; i < 8; i++) {
@@ -564,12 +667,21 @@ static void material_mask_panel_draw(const bContext *UNUSED(C), Panel *panel)
     }
   }
 
-  uiItemR(layout, ptr, "use_material_mask_match", 0, IFACE_("Exact Match"), ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_material_mask_match", 0, IFACE_("Exact Match"), ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_material_mask_match", 0, IFACE_("Exact Match"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_material_mask_match", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void intersection_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *sub, *row, *col; /*bfa, added *sub, *row, *col*/
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, NULL);
 
   const bool is_baked = RNA_boolean_get(ptr, "is_baked");
@@ -579,8 +691,12 @@ static void intersection_panel_draw(const bContext *UNUSED(C), Panel *panel)
 
   uiLayoutSetActive(layout, RNA_boolean_get(ptr, "use_intersection"));
 
-  uiLayout *col = uiLayoutColumn(layout, true);
-  uiLayout *sub = uiLayoutRowWithHeading(col, true, IFACE_("Collection Masks"));
+  /* bfa - original props */
+  // uiLayout *col = uiLayoutColumn(layout, true);/* bfa - original props */
+  // uiLayout *sub = uiLayoutRowWithHeading(col, true, IFACE_("Collection Masks"));
+  col = uiLayoutColumn(layout, true);
+  sub = uiLayoutRowWithHeading(col, true, IFACE_("Collection Masks"));
+  /* ------------ end bfa */
 
   PropertyRNA *prop = RNA_struct_find_property(ptr, "use_intersection_mask");
   for (int i = 0; i < 8; i++) {
@@ -590,7 +706,15 @@ static void intersection_panel_draw(const bContext *UNUSED(C), Panel *panel)
     }
   }
 
-  uiItemR(layout, ptr, "use_intersection_match", 0, IFACE_("Exact Match"), ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_intersection_match", 0, IFACE_("Exact Match"), ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_intersection_match", 0, IFACE_("Exact Match"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_intersection_match", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void face_mark_panel_draw_header(const bContext *UNUSED(C), Panel *panel)
@@ -615,6 +739,7 @@ static void face_mark_panel_draw_header(const bContext *UNUSED(C), Panel *panel)
 static void face_mark_panel_draw(const bContext *UNUSED(C), Panel *panel)
 {
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *row, *col*/
   PointerRNA ob_ptr;
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
@@ -630,13 +755,29 @@ static void face_mark_panel_draw(const bContext *UNUSED(C), Panel *panel)
     return;
   }
 
-  uiLayoutSetPropSep(layout, true);
+  // uiLayoutSetPropSep(layout, true);/* bfa - original props */
+  uiLayoutSetPropSep(layout, false);
 
   uiLayoutSetActive(layout, use_mark);
 
-  uiItemR(layout, ptr, "use_face_mark_invert", 0, NULL, ICON_NONE);
-  uiItemR(layout, ptr, "use_face_mark_boundaries", 0, NULL, ICON_NONE);
-  uiItemR(layout, ptr, "use_face_mark_keep_contour", 0, NULL, ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiItemR(layout, ptr, "use_face_mark_invert", 0, NULL, ICON_NONE);
+  // uiItemR(layout, ptr, "use_face_mark_boundaries", 0, NULL, ICON_NONE);
+  // uiItemR(layout, ptr, "use_face_mark_keep_contour", 0, NULL, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiItemR(row, ptr, "use_face_mark_invert", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_face_mark_invert", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemR(row, ptr, "use_face_mark_boundaries", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_face_mark_boundaries", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemR(row, ptr, "use_face_mark_keep_contour", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_face_mark_keep_contour", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void chaining_panel_draw(const bContext *UNUSED(C), Panel *panel)
@@ -645,6 +786,7 @@ static void chaining_panel_draw(const bContext *UNUSED(C), Panel *panel)
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *row, *col*/
 
   const bool is_baked = RNA_boolean_get(ptr, "is_baked");
   const bool use_cache = RNA_boolean_get(ptr, "use_cache");
@@ -659,13 +801,49 @@ static void chaining_panel_draw(const bContext *UNUSED(C), Panel *panel)
     return;
   }
 
-  uiLayout *col = uiLayoutColumnWithHeading(layout, true, IFACE_("Chain"));
-  uiItemR(col, ptr, "use_fuzzy_intersections", 0, NULL, ICON_NONE);
-  uiItemR(col, ptr, "use_fuzzy_all", 0, NULL, ICON_NONE);
-  uiItemR(col, ptr, "use_loose_edge_chain", 0, IFACE_("Loose Edges"), ICON_NONE);
-  uiItemR(col, ptr, "use_loose_as_contour", 0, IFACE_("Loose Edges As Contour"), ICON_NONE);
-  uiItemR(col, ptr, "use_detail_preserve", 0, NULL, ICON_NONE);
-  uiItemR(col, ptr, "use_geometry_space_chain", 0, IFACE_("Geometry Space"), ICON_NONE);
+  /*------------------- bfa - original props */
+  // uiLayout *col = uiLayoutColumnWithHeading(layout, true, IFACE_("Chain"));
+  // uiItemR(col, ptr, "use_fuzzy_intersections", 0, NULL, ICON_NONE);
+  // uiItemR(col, ptr, "use_fuzzy_all", 0, NULL, ICON_NONE);
+  // uiItemR(col, ptr, "use_loose_edge_chain", 0, IFACE_("Loose Edges"), ICON_NONE);
+  // uiItemR(col, ptr, "use_loose_as_contour", 0, IFACE_("Loose Edges As Contour"), ICON_NONE);
+  // uiItemR(col, ptr, "use_detail_preserve", 0, NULL, ICON_NONE);
+  // uiItemR(col, ptr, "use_geometry_space_chain", 0, IFACE_("Geometry Space"), ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  uiItemL(col, TIP_("Chain"), ICON_NONE);
+  uiLayoutSetPropSep(col, false); /* bfa - use_property_split = False */
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_fuzzy_intersections", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_fuzzy_intersections", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_fuzzy_all", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_fuzzy_all", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_loose_edge_chain", 0, IFACE_("Loose Edges"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_loose_edge_chain", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_loose_as_contour", 0, IFACE_("Loose Edges As Contour"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_loose_as_contour", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_detail_preserve", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_detail_preserve", 0); /*bfa - decorator*/
+
+  row = uiLayoutRow(col, true);
+  uiItemS(row);
+  uiItemR(row, ptr, "use_geometry_space_chain", 0, IFACE_("Geometry Space"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_geometry_space_chain", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   uiItemR(layout,
           ptr,
@@ -704,7 +882,14 @@ static void vgroup_panel_draw(const bContext *UNUSED(C), Panel *panel)
   uiItemR(row, ptr, "source_vertex_group", 0, IFACE_("Filter Source"), ICON_GROUP_VERTEX);
   uiItemR(row, ptr, "invert_source_vertex_group", UI_ITEM_R_TOGGLE, "", ICON_ARROW_LEFTRIGHT);
 
-  uiItemR(col, ptr, "use_output_vertex_group_match_by_name", 0, NULL, ICON_NONE);
+  /*------------------- bfa - original props */
+  //uiItemR(col, ptr, "use_output_vertex_group_match_by_name", 0, NULL, ICON_NONE);
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_output_vertex_group_match_by_name", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_output_vertex_group_match_by_name", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   const bool match_output = RNA_boolean_get(ptr, "use_output_vertex_group_match_by_name");
   if (!match_output) {
@@ -747,24 +932,41 @@ static void composition_panel_draw(const bContext *UNUSED(C), Panel *panel)
   PointerRNA *ptr = gpencil_modifier_panel_get_property_pointers(panel, &ob_ptr);
 
   uiLayout *layout = panel->layout;
+  uiLayout *row, *col; /*bfa, added *row, *col*/
 
   const bool show_in_front = RNA_boolean_get(&ob_ptr, "show_in_front");
 
   uiLayoutSetPropSep(layout, true);
 
   uiItemR(layout, ptr, "overscan", 0, NULL, ICON_NONE);
-  uiItemR(layout, ptr, "use_image_boundary_trimming", 0, NULL, ICON_NONE);
+  /*------------------- bfa - original props */
+  //uiItemR(layout, ptr, "use_image_boundary_trimming", 0, NULL, ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
+  uiItemR(row, ptr, "use_image_boundary_trimming", 0, NULL, ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_image_boundary_trimming", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 
   if (show_in_front) {
     uiItemL(layout, TIP_("Object is shown in front"), ICON_ERROR);
   }
 
-  uiLayout *col = uiLayoutColumn(layout, false);
+  col = uiLayoutColumn(layout, false);
   uiLayoutSetActive(col, !show_in_front);
 
   uiItemR(col, ptr, "stroke_depth_offset", UI_ITEM_R_SLIDER, IFACE_("Depth Offset"), ICON_NONE);
+  /*------------------- bfa - original props */
+  //uiItemR(col, ptr, "use_offset_towards_custom_camera", 0, IFACE_("Towards Custom Camera"), ICON_NONE);
+
+  col = uiLayoutColumn(layout, true);
+  row = uiLayoutRow(col, true);
+  uiLayoutSetPropSep(row, false); /* bfa - use_property_split = False */
   uiItemR(
-      col, ptr, "use_offset_towards_custom_camera", 0, IFACE_("Towards Custom Camera"), ICON_NONE);
+      row, ptr, "use_offset_towards_custom_camera", 0, IFACE_("Towards Custom Camera"), ICON_NONE);
+  uiItemDecoratorR(row, ptr, "use_offset_towards_custom_camera", 0); /*bfa - decorator*/
+  /* ------------ end bfa */
 }
 
 static void panelRegister(ARegionType *region_type)
